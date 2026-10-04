@@ -241,6 +241,21 @@ def group_key(brand, title):
 
 # ---------- size assumption ----------
 
+def infer_sizes_by_price(listings):
+    """A listing with no size takes the size another store lists for the same fragrance at exactly
+    the same price (designer RRPs usually match across stores). Marked ms='m'."""
+    known = {}
+    for li in listings:
+        if li.get("ml") and li.get("ms") in ("l", "d") and li.get("kd") == "p":
+            known.setdefault((li["k"], li["p"]), set()).add(li["ml"])
+    for li in listings:
+        if not li.get("ml") and li.get("kd") == "p":
+            sizes = known.get((li["k"], li["p"]))
+            if sizes and len(sizes) == 1:
+                li["ml"], li["ms"] = next(iter(sizes)), "m"
+    return listings
+
+
 def apply_size_assumptions(listings):
     """For perfume listings with no size anywhere: the most expensive listing of the same
     fragrance at the same store is assumed to be the 100ml. A lone listing is also assumed 100ml.

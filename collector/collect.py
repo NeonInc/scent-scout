@@ -9,6 +9,7 @@ If one store fails, the others still update and that store keeps its last good p
 """
 import datetime as dt
 import json
+import re
 import sys
 import time
 import traceback
@@ -64,11 +65,18 @@ def money(v):
 
 
 def with_width(src, w=300):
+    """Shopify CDN image at a small width, without the cache-buster query."""
     if not src:
         return ""
-    if src.startswith("//"):
-        src = "https:" + src
-    return src + ("&" if "?" in src else "?") + f"width={w}"
+    return re.sub(r"^https?:", "", src.split("?")[0]) + f"?width={w}"
+
+
+def small_img(src):
+    """Any other store image: drop the query string; VTEX images get resized to 300px."""
+    if not src:
+        return ""
+    src = re.sub(r"^https?:", "", src.split("?")[0])
+    return re.sub(r"(/arquivos/ids/\d+)/", r"\1-300-300/", src)
 
 
 def make_listing(store, *, pid, title, brand_raw, price, was, stock, url, img,
@@ -97,8 +105,8 @@ def make_listing(store, *, pid, title, brand_raw, price, was, stock, url, img,
         "g": N.gender_of(title, tags_text),
         "p": price,
         "w": was if was and price and was > price + 0.5 else None,
-        "st": bool(stock),
-        "u": url,
+        "st": 1 if stock else 0,
+        "u": url[len(store["url"]):] if url.startswith(store["url"]) else url,
         "i": img,
     }
     ib = N.inspired_by(title, desc_text)
@@ -106,7 +114,7 @@ def make_listing(store, *, pid, title, brand_raw, price, was, stock, url, img,
         li["ib"] = ib
     if deal:
         li["dl"] = deal
-    return li
+    return {k: v for k, v in li.items() if v not in (None, "") or k in ("p", "st")}
 
 
 # ---------- Shopify (Panda, Rio, Edgars) ----------
@@ -217,7 +225,7 @@ def collect_woocommerce(store):
                 regular = woo_price(prices, "regular_price")
                 out.append(make_listing(
                     store, pid=vid, title=title, brand_raw=brand_raw, price=price, was=regular,
-                    stock=stock, url=p.get("permalink", store["url"]), img=img,
+                    stock=stock, url=p.get("permalink", store["url"]), img=small_img(img),
                     variant_text=vt, desc_text=desc, tags_text=cat_text,
                 ))
         log(f"  {store['id']} page {page}: {len(products)} products")
@@ -256,7 +264,10 @@ def collect_vtex(store):
                     price = money(offer.get("Price"))
                     if not price:
                         continue
-                    vt = " ".join(str(x) for x in (it.get("name"), it.get("nameComplete")) if x)
+                    # Bash puts the bottle size in its own "Size" field; fall back to the item name.
+                    vt = " ".join(str(x) for x in (it.get("Size") or []))
+                    if not N.sizes_in(vt):
+                        vt = " ".join(str(x) for x in (it.get("name"), it.get("nameComplete")) if x)
                     sizes = N.sizes_in(vt)
                     if sizes and len(set(sizes)) == 1:
                         vt = f"{sizes[0]}ml"
@@ -268,7 +279,7 @@ def collect_vtex(store):
                         price=price, was=money(offer.get("ListPrice")),
                         stock=offer.get("IsAvailable", (offer.get("AvailableQuantity") or 0) > 0),
                         url=p.get("link", store["url"]) + (f"?skuId={it['itemId']}" if len(p.get("items", [])) > 1 else ""),
-                        img=imgs[0].get("imageUrl", "") if imgs else "",
+                        img=small_img(imgs[0].get("imageUrl", "")) if imgs else "",
                         variant_text=vt, desc_text=desc, tags_text=cats,
                     ))
             log(f"  {store['id']} {path} from {start}: {len(products)} products")
@@ -302,7 +313,12 @@ def update_history(listings, today):
         h = hist.get(li["id"])
         if not h:
             continue
-        li["lo"], li["lod"], li["since"] = h["low"], h["lowd"], h.get("first", today)
+        for f in ("lo", "lod", "ls", "pv"):
+            li.pop(f, None)
+        if h["low"] < li["p"] - 0.5:
+            li["lo"], li["lod"] = h["low"], h["lowd"]
+        elif (dt.date.fromisoformat(today) - dt.date.fromisoformat(h.get("first", today))).days > 7:
+            li["ls"] = 1  # at the lowest price we've recorded, and we've watched it over a week
         if h.get("prev") and h.get("chg") and h["prev"] > li["p"]:
             days = (dt.date.fromisoformat(today) - dt.date.fromisoformat(h["chg"])).days
             if days <= 14:
@@ -337,7 +353,6 @@ def main(only=None):
             items = COLLECTORS[store["platform"]](store)
             if not items:
                 raise RuntimeError("no products found")
-            items = N.apply_size_assumptions(items)
             info.update(status="ok", count=len(items), updated=now.isoformat())
             all_listings += items
             log(f"  -> {len(items)} listings")
@@ -352,6 +367,9 @@ def main(only=None):
             log(f"  !! {store['name']} failed: {e} (kept {len(old)} old listings)")
         stores_out.append(info)
 
+    fresh = [li for li in all_listings if not li.get("stale")]
+    N.infer_sizes_by_price(fresh)
+    N.apply_size_assumptions(fresh)
     update_history(all_listings, today)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({"generated": now.isoformat(), "stores": stores_out, "listings": all_listings},

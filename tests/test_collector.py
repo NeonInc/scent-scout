@@ -53,6 +53,11 @@ def test_keys():
     check(N.group_key("Rasasi", "Hawas for Him") != N.group_key("Rasasi", "Hawas for Her"), "Hawas Him/Her stay separate")
     check(N.name_key("Le Parfum Edp 30ml", "Elie Saab") == "le parfum", "Elie Saab Le Parfum keeps its name")
     check(N.sizes_in("Hawas 3.4 oz") == [100], "3.4oz -> 100ml")
+    ls = [{"s": "bash", "k": "hugo boss|bottled absolu", "kd": "p", "p": 3465.0},
+          {"s": "edgars", "k": "hugo boss|bottled absolu", "kd": "p", "p": 3465.0, "ml": 200, "ms": "l"}]
+    N.infer_sizes_by_price(ls)
+    check(ls[0]["ml"] == 200 and ls[0]["ms"] == "m", "unsized listing borrows size from same-price listing elsewhere")
+    check(N.kind_of("Azzaro Forever Wanted Absolu 100ml", "", "50ML") == "p", "variant size + title size is not a set")
     check(N.kind_of("Siyate The Nostalgia Collection Set EDP 6x 15ml") == "set", "6x15ml is a set")
     check(N.kind_of("Women's Secret Intimate Daydream 100ml & Body Lotion Gift Set") == "set", "gift set detected")
     check(N.kind_of("Sol de Janeiro Cheirosa 62 Perfume Mist") == "mist", "mist detected")
@@ -90,7 +95,7 @@ def test_collect(tmp):
 
     asad_big, asad_small = L["dpc-31"], L["dpc-32"]
     check(asad_big["ml"] == 100 and asad_big["ms"] == "a", "DPC: dearer of two unsized listings assumed 100ml")
-    check(asad_small["ml"] is None, "DPC: cheaper unsized listing left as unknown size")
+    check(asad_small.get("ml") is None, "DPC: cheaper unsized listing left as unknown size")
     check(L["dpc-9001"]["ml"] == 50 and L["dpc-9002"]["ml"] == 100, "DPC variable product sizes from variations")
     check("dpc-33" not in L, "DPC bakhoor category excluded")
     check(L["dpc-34"]["p"] == 850 and L["dpc-34"]["w"] == 1200, "DPC sale price in rand")
@@ -98,7 +103,8 @@ def test_collect(tmp):
     cdni = [li for li in data["listings"] if li["s"] == "bash" and "Club" in li["t"]]
     check(sorted(li["ml"] for li in cdni) == [105, 200], "Bash CDNI two sizes")
     check(cdni[0]["k"] == L["dpc-34"]["k"], "Bash CDNI groups with DPC CDNI")
-    check(all("lo" in li for li in data["listings"]), "history fields attached")
+    check(all("since" not in li for li in data["listings"]), "compact history fields")
+    check(L["rio-11"]["u"].startswith("/products/"), "store URLs stored relative")
     size = C.OUT.stat().st_size
     print(f"fixture output: {len(L)} listings, {size} bytes")
 

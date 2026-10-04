@@ -18,7 +18,8 @@ Finds the cheapest price for a fragrance across South African stores, with deliv
 
 - The same fragrance from different stores is grouped by brand plus a cleaned-up name. Size, concentration words, "for men" and "inspired by …" tails are stripped first. Brand spellings are mapped in `collector/brands.json`.
 - Size comes from the variant or title, then from the top of the description.
-- If no size is listed anywhere, the dearer of a store's unsized listings for that fragrance is assumed to be the 100 ml. A single unsized listing is also assumed to be 100 ml. These show a **Size guessed** badge.
+- If there's still no size, but another store lists the same fragrance at exactly the same price, that size is used. These show a **Size matched by price** badge.
+- If no size can be found, the dearer of a store's unsized listings for that fragrance is assumed to be the 100 ml. A single unsized listing is also assumed to be 100 ml. These show a **Size guessed** badge.
 - `data/history.json` keeps each listing's lowest price, which powers the "Was R… on …" and "Lowest we've seen" badges.
 
 ## Delivery fees

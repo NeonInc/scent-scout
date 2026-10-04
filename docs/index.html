@@ -319,6 +319,9 @@ details.more[open] summary { margin-bottom: 8px; }
     d.stores.forEach(function (s) { stores[s.id] = s; state.stores[s.id] = true; });
     listings = d.listings.filter(function (li) { return li.p > 0; });
     listings.forEach(function (li) {
+      var st = stores[li.s] || {};
+      if (li.u && li.u.charAt(0) === "/") li.u = (st.url || "") + li.u;
+      if (li.i && li.i.indexOf("//") === 0) li.i = "https:" + li.i;
       li._t = toks([li.b, li.t, li.n, CONC_WORDS[li.c] || "", li.ml ? li.ml + "ml" : ""].join(" "));
       li._ib = li.ib ? toks(li.ib) : [];
     });
@@ -401,9 +404,10 @@ details.more[open] summary { margin-bottom: 8px; }
     if (li.w) b.push('<span class="pill deal">Special −' + Math.round((li.w - li.p) / li.w * 100) + "%</span>");
     if (li.pv) b.push('<span class="pill deal">Dropped from ' + R(li.pv) + "</span>");
     if (li.lo && li.lo < li.p - 0.5) b.push('<span class="pill" title="Lowest price recorded on ' + esc(li.lod) + '">Was ' + R(li.lo) + " on " + esc((li.lod || "").slice(5)) + "</span>");
-    else if (li.since && (Date.now() - new Date(li.since).getTime()) > 7 * 864e5 && li.lo && li.p <= li.lo) b.push('<span class="pill deal">Lowest we’ve seen</span>');
+    else if (li.ls) b.push('<span class="pill deal">Lowest we’ve seen</span>');
     if (li.ms === "a") b.push('<span class="pill warn" title="The store doesn’t list the size. This is the dearer of its listings, so it’s assumed to be the 100 ml.">Size guessed</span>');
     if (li.ms === "d") b.push('<span class="pill" title="Size taken from the product description">Size from description</span>');
+    if (li.ms === "m") b.push('<span class="pill" title="The store doesn\u2019t list the size. Another store sells this fragrance at exactly this price in this size.">Size matched by price</span>');
     if (li.kd === "set") b.push('<span class="pill acc">Gift set</span>');
     if (li.ib) b.push('<span class="pill acc">Inspired by ' + esc(li.ib) + "</span>");
     if (li.dl) b.push('<span class="pill acc">' + esc(li.dl) + "</span>");
@@ -488,7 +492,7 @@ details.more[open] summary { margin-bottom: 8px; }
       "</tbody></table></div><p style=\"margin-top:8px\">“Delivered” prices assume you buy just that one item. Buying several from one store can get you over its free-delivery amount. * = estimate.</p>" + notes + "</div>" +
       "<div><h2>How prices are matched</h2>" +
       "<p>Each store’s catalogue is read twice a day and the same fragrance from different stores is grouped together, then split by bottle size.</p>" +
-      "<p><b>Size guessed:</b> some stores don’t list the size. If a store has two listings of the same fragrance with no size, the dearer one is taken to be the 100 ml. A single unsized listing is also treated as 100 ml. Turn on “Hide guessed sizes” under More filters to leave these out.</p>" +
+      "<p><b>Missing sizes:</b> some stores don’t list the bottle size. First the description is checked. Then, if another store sells the same fragrance at exactly the same price, that store’s size is used (“Size matched by price”). Otherwise the dearer of a store’s unsized listings is taken to be the 100 ml (“Size guessed”). Turn on “Hide guessed sizes” under More filters to leave guesses out.</p>" +
       "<p><b>Inspired by:</b> clone fragrances only show up when you search their own name, unless you include “inspired by” alternatives.</p>" +
       "<p>Prices last checked " + esc(new Date(data.generated).toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short" })) + ". Always confirm the price on the store’s page before buying.</p></div>";
   }
