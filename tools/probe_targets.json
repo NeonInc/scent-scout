@@ -1,0 +1,10 @@
+{
+  "superbalist_men": "https://superbalist.com/browse/men/grooming/fragrances",
+  "clicks_men": "https://clicks.co.za/beauty/fragrances/men/c/OH300032",
+  "clicks_luxury_edp": "https://clicks.co.za/luxury-beauty/fragrances/men/eau-de-parfum/c/OH400216",
+  "dischem_graphql": "https://www.dischem.co.za/graphql?query=%7Bproducts(search%3A%22azzaro%22%2CpageSize%3A3)%7Btotal_count%20items%7Bname%20sku%20url_key%20price_range%7Bminimum_price%7Bfinal_price%7Bvalue%7D%20regular_price%7Bvalue%7D%7D%7D%7D%7D%7D",
+  "dischem_sale": "https://www.dischem.co.za/fragrance-sale",
+  "woolworths_frag": "https://www.woolworths.co.za/cat/Beauty/Fragrance/_/N-1z13s1d",
+  "fragrancefind_shopify": "https://fragrancefind.co.za/products.json?limit=3",
+  "truworths": "https://www.truworths.co.za/"
+}
