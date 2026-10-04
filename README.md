@@ -2,7 +2,7 @@
 
 Finds the cheapest price for a fragrance across South African stores, with delivery included.
 
-**Stores:** Panda Perfumes, Rio Perfumes, Dubai Perfume Café, Edgars and Bash.
+**Stores:** Panda Perfumes, Rio Perfumes, Dubai Perfume Café, Edgars and Bash. Only authorised retailers and specialist perfume shops, no marketplaces.
 
 ## How it works
 
@@ -41,8 +41,19 @@ These are set in `collector/stores.json`. They were checked on 2026-10-04:
 - **Change a delivery fee:** edit `collector/stores.json`.
 - **Run tests locally:** `python tests/test_collector.py` (offline, no network needed).
 
+## Stores that can't be added automatically
+
+These were checked from GitHub Actions on 2026-10-04:
+
+- **Superbalist and Dis-Chem** show a Cloudflare "checking your browser" page to automated visitors. They block on purpose, so they aren't collected. Each fragrance on the site links to their search instead (*Also check*).
+- **Clicks** loads its product list through a third-party search service (Algolia) rather than in the page. It could be added by querying that service; it's left out for now.
+- **Truworths** blocks automated requests.
+- **Woolworths** loads products through its own API after the page loads. Not investigated further yet.
+- Marketplaces (Takealot, Amazon, Makro) are left out on purpose: third-party sellers make fakes too likely.
+
+To check a new store, add its URL to `tools/probe_targets.json` and run **Actions → Probe stores**. The raw responses land on the `probe` branch.
+
 ## Notes
 
 - The collector waits about a second between requests and identifies itself in its User-Agent.
-- Truworths blocks automated requests, so it isn't included. Superbalist has no product feed; it's the next store to add.
 - GitHub pauses scheduled workflows in repos with no activity for 60 days. The price commits normally count as activity.
