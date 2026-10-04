@@ -5,48 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scent Scout</title>
 <meta name="description" content="Find the cheapest price for a fragrance across trusted South African stores, delivery included.">
-<meta name="theme-color" content="#8a2f5e">
+<meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#07080f" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
 /* Layout: one narrow column built for a phone. Sticky search with suggestions on top; below it a list of
    fragrances, each a single tappable line with its best price that drops down into the store prices. */
 :root {
-  --bg: #f5f3f4;
+  --bg: #f6f7f9;
   --surface: #ffffff;
-  --sunk: #efebee;
-  --ink: #1d1a1f;
-  --muted: #696170;
-  --line: #e3dde1;
-  --accent: #8a2f5e;
+  --sunk: #eef0f4;
+  --ink: #0e1116;
+  --muted: #5d6471;
+  --line: #e4e7ed;
+  --accent: #d1145a;
   --accent-ink: #ffffff;
-  --accent-soft: #f4e6ee;
-  --deal: #1b7347;
-  --deal-soft: #e2f2e9;
-  --warn: #8f5a00;
-  --warn-soft: #faefd9;
-  --bad: #a3322b;
-  --scrim: rgba(29, 26, 31, .45);
-  --shadow: 0 10px 30px rgba(29, 26, 31, .12);
+  --accent-soft: #fde8f0;
+  --deal: #0e7a4a;
+  --deal-soft: #e2f5eb;
+  --warn: #8a5a00;
+  --warn-soft: #fbf1dc;
+  --bad: #b42318;
+  --scrim: rgba(14, 17, 22, .45);
+  --shadow: 0 12px 32px rgba(14, 17, 22, .12);
+  --card: 0 1px 2px rgba(14, 17, 22, .05), 0 2px 8px rgba(14, 17, 22, .04);
+  --glow: none;
   --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --radius: 16px;
+  --radius: 18px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #141116; --surface: #1d1920; --sunk: #262029; --ink: #f1ecf0; --muted: #a9a1ac; --line: #342d38;
-    --accent: #e48fba; --accent-ink: #1d1220; --accent-soft: #3a2231; --deal: #73d3a0; --deal-soft: #183224;
-    --warn: #e8b85e; --warn-soft: #382c14; --bad: #f08a80; --scrim: rgba(0, 0, 0, .6); --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    --bg: #07080f; --surface: #10121b; --sunk: #181b27; --ink: #eef0f6; --muted: #99a0b1; --line: #232838;
+    --accent: #ff4f9a; --accent-ink: #16060d; --accent-soft: #2d1121; --deal: #4ee6a0; --deal-soft: #0e2a1e;
+    --warn: #f5c25b; --warn-soft: #2e2410; --bad: #ff7a6e; --scrim: rgba(0, 0, 0, .65); --shadow: 0 12px 32px rgba(0, 0, 0, .55);
+    --card: 0 0 0 rgba(0, 0, 0, 0); --glow: 0 0 18px rgba(255, 79, 154, .35);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #141116; --surface: #1d1920; --sunk: #262029; --ink: #f1ecf0; --muted: #a9a1ac; --line: #342d38;
-  --accent: #e48fba; --accent-ink: #1d1220; --accent-soft: #3a2231; --deal: #73d3a0; --deal-soft: #183224;
-  --warn: #e8b85e; --warn-soft: #382c14; --bad: #f08a80; --scrim: rgba(0, 0, 0, .6); --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  --bg: #07080f; --surface: #10121b; --sunk: #181b27; --ink: #eef0f6; --muted: #99a0b1; --line: #232838;
+    --accent: #ff4f9a; --accent-ink: #16060d; --accent-soft: #2d1121; --deal: #4ee6a0; --deal-soft: #0e2a1e;
+    --warn: #f5c25b; --warn-soft: #2e2410; --bad: #ff7a6e; --scrim: rgba(0, 0, 0, .65); --shadow: 0 12px 32px rgba(0, 0, 0, .55);
+    --card: 0 0 0 rgba(0, 0, 0, 0); --glow: 0 0 18px rgba(255, 79, 154, .35);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -65,7 +70,7 @@ button { cursor: pointer; }
 .top .wrap { display: grid; gap: 10px; padding-block: 12px; }
 .brandline { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .logo { font: 800 24px/1 var(--font-display); letter-spacing: -0.02em; margin: 0; }
-.logo span { color: var(--accent); }
+.logo span { color: var(--accent); text-shadow: var(--glow); }
 .updated { font-size: 12.5px; color: var(--muted); text-align: right; }
 .searchrow { display: flex; gap: 8px; }
 .search { flex: 1; min-width: 0; position: relative; }
@@ -106,8 +111,8 @@ button { cursor: pointer; }
 select.sort { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
 .list { display: grid; gap: 10px; padding-block: 2px 28px; }
 
-.item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-.item.open { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--card); }
+.item.open { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset, var(--glow); }
 .ihead { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 12px 14px; min-height: 76px; }
 .thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--sunk); object-fit: contain; display: block; }
 .thumb.noimg { opacity: 0; }
@@ -147,8 +152,8 @@ select.sort { border: 1px solid var(--line); background: var(--surface); border-
 .offer .tot b { color: var(--ink); font: 500 13px var(--font-data); }
 .offer .title { grid-column: 1 / -1; font-size: 13px; color: var(--muted); min-width: 0; }
 .offer .foot { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-.go { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; }
-.offer:not(.best) .go { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.go { box-shadow: var(--glow); display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.offer:not(.best) .go { background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
 .moreoffers { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 6px; }
 .note { font-size: 12.5px; color: var(--muted); }
 .also { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; font-size: 14px; }
@@ -191,6 +196,9 @@ select.sort { border: 1px solid var(--line); background: var(--surface); border-
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--deal); margin-right: 6px; }
 .status-dot.err { background: var(--bad); }
 
+footer.foot { border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; letter-spacing: .02em; }
+footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
+
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 </style>
 </head>
@@ -230,6 +238,9 @@ select.sort { border: 1px solid var(--line); background: var(--surface); border-
   <div class="list" id="results"></div>
   <section class="info" id="info"></section>
 </main>
+<footer class="foot">
+  <div class="wrap">SCENT SCOUT · NEON INC™ © 2026 · All rights reserved. Prices belong to the stores shown; always confirm on their site before buying.</div>
+</footer>
 
 <div class="scrim" id="scrim" hidden></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheettitle" hidden>

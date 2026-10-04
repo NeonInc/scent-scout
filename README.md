@@ -57,3 +57,7 @@ To check a new store, add its URL to `tools/probe_targets.json` and run **Action
 
 - The collector waits about a second between requests and identifies itself in its User-Agent.
 - GitHub pauses scheduled workflows in repos with no activity for 60 days. The price commits normally count as activity.
+
+---
+
+Scent Scout · NEON INC™ © 2026. All rights reserved.
