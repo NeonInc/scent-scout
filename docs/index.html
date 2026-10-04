@@ -235,7 +235,7 @@ details.more[open] summary { margin-bottom: 8px; }
 
   var $ = function (id) { return document.getElementById(id); };
   var state = { q: "", size: "any", kinds: { p: true }, stores: {}, specials: false, inStock: true, dupes: false, noAssumed: false, sort: "total", limit: PAGE, open: {} };
-  var data = null, stores = {}, listings = [];
+  var data = null, stores = {}, listings = [], concsByKey = {};
 
   // ---------- storage (watchlist), best-effort ----------
   function loadWatch() {
@@ -322,7 +322,9 @@ details.more[open] summary { margin-bottom: 8px; }
       var st = stores[li.s] || {};
       if (li.u && li.u.charAt(0) === "/") li.u = (st.url || "") + li.u;
       if (li.i && li.i.indexOf("//") === 0) li.i = "https:" + li.i;
-      li._t = toks([li.b, li.t, li.n, CONC_WORDS[li.c] || "", li.ml ? li.ml + "ml" : ""].join(" "));
+      var bare = (li.t || "").split(/\(?\s*(?:inspired\s+by|insp\.?\s+by|inpired\s+by)/i)[0];
+      li._t = toks([li.b, bare, li.n, CONC_WORDS[li.c] || "", li.ml ? li.ml + "ml" : ""].join(" "));
+      (concsByKey[li.k] = concsByKey[li.k] || {})[li.c || ""] = 1;
       li._ib = li.ib ? toks(li.ib) : [];
     });
   }
@@ -346,9 +348,17 @@ details.more[open] summary { margin-bottom: 8px; }
     return out;
   }
 
+  // One card per fragrance AND concentration (Most Wanted EDT and Parfum are different bottles).
+  // A listing with no concentration joins the fragrance's only known concentration, if there is just one.
+  function groupKey(li) {
+    if (li.c) return li.k + "|" + li.c;
+    var known = Object.keys(concsByKey[li.k] || {}).filter(Boolean);
+    return li.k + "|" + (known.length === 1 ? known[0] : "");
+  }
+
   function groupUp(rows) {
     var map = {};
-    rows.forEach(function (li) { (map[li.k] = map[li.k] || []).push(li); });
+    rows.forEach(function (li) { var gk = groupKey(li); (map[gk] = map[gk] || []).push(li); });
     var groups = Object.keys(map).map(function (k) {
       var items = map[k].sort(function (a, b) { return metric(a) - metric(b); });
       var best = items[0];
@@ -435,7 +445,11 @@ details.more[open] summary { margin-bottom: 8px; }
     var b = g.best, f = fee(b), open = state.open[g.k];
     var bySize = {};
     g.items.forEach(function (li) { var key = li.ml ? String(li.ml) : "?"; (bySize[key] = bySize[key] || []).push(li); });
-    var keys = Object.keys(bySize).sort(function (a, c) { return (c === "?" ? -1 : +c) - (a === "?" ? -1 : +a); });
+    var head = b.ml ? String(b.ml) : "?";
+    var keys = Object.keys(bySize).sort(function (a, c) {
+      if (a === head) return -1; if (c === head) return 1;
+      return (c === "?" ? -1 : +c) - (a === "?" ? -1 : +a);
+    });
     var concs = {}, img = "";
     g.items.forEach(function (li) { if (li.c) concs[li.c] = 1; if (!img && li.i) img = li.i; });
     var storesIn = {}; g.items.forEach(function (li) { storesIn[li.s] = 1; });

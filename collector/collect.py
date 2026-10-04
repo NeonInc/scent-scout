@@ -198,8 +198,9 @@ def collect_woocommerce(store):
                 continue
             brands = p.get("brands") or []
             brand_raw = brands[0]["name"] if brands else ""
-            if not brand_raw and " by " in title.lower():
-                brand_raw = title.lower().split(" by ")[-1].split("(")[0].strip()
+            base = N._remove_inspired(title)
+            if not brand_raw and " by " in base.lower():
+                brand_raw = base.lower().split(" by ")[-1].split("(")[0].strip(" -–")
             cat_text = " ".join(c.get("name", "") for c in cats)
             desc = N.strip_html((p.get("short_description") or "") + " " + (p.get("description") or ""))
             img = (p.get("images") or [{}])[0].get("thumbnail") or (p.get("images") or [{}])[0].get("src", "")

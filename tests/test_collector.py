@@ -57,6 +57,7 @@ def test_keys():
           {"s": "edgars", "k": "hugo boss|bottled absolu", "kd": "p", "p": 3465.0, "ml": 200, "ms": "l"}]
     N.infer_sizes_by_price(ls)
     check(ls[0]["ml"] == 200 and ls[0]["ms"] == "m", "unsized listing borrows size from same-price listing elsewhere")
+    check(N.norm_brand("", "Monarc by CEVI (Inspired by CREED AVENTUS)") != "Creed", "brand never taken from the inspired-by text")
     check(N.kind_of("Azzaro Forever Wanted Absolu 100ml", "", "50ML") == "p", "variant size + title size is not a set")
     check(N.kind_of("Siyate The Nostalgia Collection Set EDP 6x 15ml") == "set", "6x15ml is a set")
     check(N.kind_of("Women's Secret Intimate Daydream 100ml & Body Lotion Gift Set") == "set", "gift set detected")
@@ -66,6 +67,7 @@ def test_keys():
     check(N.concentration("Bottled Absolu Parfum") == "Parfum", "Parfum concentration")
     check(N.concentration("La Vie Est Belle Eau De Parfum") == "EDP", "EDP before Parfum")
     check(N.inspired_by("Asad by Lattafa (Inspired by Sauvage Elixir Dior)") == "Sauvage Elixir Dior", "inspired-by from title")
+    check(N.inspired_by("Siyate Set", "Black tea and spices inspired by the familiar ritual of chai") == "", "marketing 'inspired by' ignored")
     check(N.inspired_by("Al Absar Mina EDP 100ml", "INPIRED BY CHANEL - Chance Eau Spendide EDP") .startswith("CHANEL"), "inspired-by from description")
 
 

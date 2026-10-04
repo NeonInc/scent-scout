@@ -40,7 +40,7 @@ def norm_brand(raw, title=""):
     for alias, name in _ALIASES:
         if b and (b.startswith(alias + " ") or b == alias):
             return name
-    t = fold(title)
+    t = fold(_remove_inspired(title))  # never take the brand from "(Inspired by Creed Aventus)"
     for alias, name in _ALIASES:
         if len(alias) > 3 and re.search(r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])", t):
             return name
@@ -173,9 +173,16 @@ _INSPIRED = re.compile(
 )
 
 
+_INSPIRED_HEADING = re.compile(
+    r"(?:INSPIRED\s+BY|INSPIRED\s+B\b|INPIRED\s+BY|INSP\.?\s+BY|[Ii]nspired [Bb]y\s*:)\s*[:\-–]?\s*([^)\n]{2,70})"
+)
+
+
 def inspired_by(title, desc_text=""):
-    for text in (title, (desc_text or "")[:600]):
-        m = _INSPIRED.search(text or "")
+    """From the title (any case), or from a description heading like "INSPIRED BY" / "Inspired by:".
+    Plain "inspired by ..." in description prose is usually marketing copy, so it's ignored."""
+    for text, rx in ((title, _INSPIRED), ((desc_text or "")[:600], _INSPIRED_HEADING)):
+        m = rx.search(text or "")
         if m:
             v = re.split(r"\s{2,}|\. |\(|\bTop notes?\b|\bNotes?:", m.group(1))[0]
             v = v.strip(" -–:.,)")
