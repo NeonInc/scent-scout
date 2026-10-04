@@ -42,7 +42,7 @@ def get(url, params=None, as_json=True):
         try:
             r = session.get(url, params=params, timeout=40)
             time.sleep(DELAY)
-            if r.status_code == 200:
+            if r.status_code in (200, 206):
                 return r.json() if as_json else r.text
             last = f"HTTP {r.status_code}"
             if r.status_code in (429, 500, 502, 503, 504):
@@ -75,7 +75,7 @@ def make_listing(store, *, pid, title, brand_raw, price, was, stock, url, img,
                  variant_text="", desc_text="", tags_text="", deal=""):
     brand = N.norm_brand(brand_raw, title)
     full = f"{title} {variant_text}".strip()
-    kind = N.kind_of(full, tags_text)
+    kind = N.kind_of(title, tags_text, variant_text)
     # Size: the variant/title first ("listed"), then the description ("description").
     sizes = N.sizes_in(variant_text) or N.sizes_in(title)
     ml, ms = (sizes[0], "l") if sizes else (None, None)

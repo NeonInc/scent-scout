@@ -97,7 +97,7 @@ _EXCLUDE = re.compile(
     r"\b(candle|diffus+er|reed|bakh?oo?r|bakhour|incense|burner|gift ?card|voucher|blind ?box|figure|plush|"
     r"keychain|key ?ring|lotion|shower|body wash|body butter|body cream|hand cream|balm|soap|shampoo|conditioner|"
     r"gummies|organi[sz]er|pouch|cosmetic bag|deo(?:dorant)?|anti-?perspirant|aftershave balm|after ?shave lotion|"
-    r"hand wash|car freshener|air freshener|room spray|mug|tumbler|lipstick|lip balm|mascara|serum)\b",
+    r"hand wash|car freshener|air freshener|room spray|mug|tumbler|lipstick|lip balm|mascara|serum|merch|water bottle)\b",
     re.I,
 )
 _FRAGRANCE_HINT = re.compile(
@@ -117,9 +117,10 @@ def looks_like_fragrance(text):
     return bool(_FRAGRANCE_HINT.search(text or "")) and not is_excluded(text)
 
 
-def kind_of(title, extra=""):
-    """p = perfume, set = gift set, mist = body mist, oil = perfume oil."""
-    t = f"{title} {extra}"
+def kind_of(title, extra="", variant=""):
+    """p = perfume, set = gift set, mist = body mist, oil = perfume oil.
+    The size-count check looks at the product title only: a variant size plus the title size isn't a set."""
+    t = f"{title} {variant} {extra}"
     if _SET.search(title or "") or _MULTI.search(title or "") or len(set(sizes_in(title))) > 1:
         return "set"
     if _MIST.search(t):
@@ -223,6 +224,7 @@ def name_key(title, brand):
     t = _OZ.sub(" ", t)
     t = _CONC_PHRASES.sub(" ", t)
     t = t.replace("mont blanc", "montblanc")
+    t = re.sub(r"\bperfume(?=[a-z]{3})", "", t)  # "PerfumeLynked Freedom" -> "Lynked Freedom"
     t = re.sub(r"\b(\d+)\s+pm\b", r"\1pm", t)
     t = re.sub(r"[^a-z0-9 ]+", " ", t)
     toks = [x for x in t.split() if x not in _DROP_TOKENS]
