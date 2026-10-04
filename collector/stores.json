@@ -1,0 +1,86 @@
+{
+  "_comment": "Stores the collector reads. Delivery fees were checked on 2026-10-04 from each store's own delivery page; 'estimated' means the store doesn't publish the fee.",
+  "stores": [
+    {
+      "id": "panda",
+      "name": "Panda Perfumes",
+      "url": "https://pandaperfumes.co.za",
+      "platform": "shopify",
+      "paths": ["/products.json"],
+      "filter_fragrance": true,
+      "delivery": {
+        "fee": 120,
+        "free_over": 2000,
+        "eta": "2–7 working days",
+        "note": "Standard courier. Some product pages still mention free shipping over R2,500; the shipping policy says R2,000.",
+        "source": "https://pandaperfumes.co.za/policies/shipping-policy",
+        "estimated": false
+      }
+    },
+    {
+      "id": "rio",
+      "name": "Rio Perfumes",
+      "url": "https://www.rioperfumes.co.za",
+      "platform": "shopify",
+      "paths": ["/products.json"],
+      "filter_fragrance": true,
+      "delivery": {
+        "fee": 99,
+        "free_over": 1000,
+        "eta": "3–4 days",
+        "note": "Door-to-door courier.",
+        "source": "https://www.rioperfumes.co.za/pages/delivery",
+        "estimated": false
+      }
+    },
+    {
+      "id": "dpc",
+      "name": "Dubai Perfume Café",
+      "url": "https://www.dubaiperfumecafe.co.za",
+      "platform": "woocommerce",
+      "exclude_categories": ["bakhoor-incense", "diffusser", "diffuser"],
+      "delivery": {
+        "fee": 100,
+        "free_over": 2000,
+        "eta": "Next day (main centres)",
+        "note": "Free over R2,000 is published. The fee below that isn't, so R100 is an estimate. Check at checkout.",
+        "source": "https://www.dubaiperfumecafe.co.za/",
+        "estimated": true
+      }
+    },
+    {
+      "id": "edgars",
+      "name": "Edgars",
+      "url": "https://www.edgars.co.za",
+      "platform": "shopify",
+      "paths": ["/collections/fragrance/products.json"],
+      "filter_fragrance": false,
+      "delivery": {
+        "fee": 75,
+        "free_over": 750,
+        "eta": "3–5 working days",
+        "note": "Click & Collect is also R75 under R750.",
+        "source": "https://www.edgars.co.za/pages/delivery-information",
+        "estimated": false
+      }
+    },
+    {
+      "id": "bash",
+      "name": "Bash",
+      "url": "https://bash.com",
+      "platform": "vtex",
+      "paths": [
+        "/men/grooming/fragrances?map=c,c,c",
+        "/women/beauty---health/fragrances?map=c,c,c"
+      ],
+      "delivery": {
+        "fee": 60,
+        "free_over": 650,
+        "eta": "2–4 working days",
+        "note": "Collect from a TFG store: R25 under R650, free over.",
+        "source": "https://help.bash.com/support/solutions/articles/101000373299",
+        "estimated": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,438 @@
+{
+ "panda": {
+  "products": [
+   {
+    "id": 100,
+    "title": "Siyate The Nostalgia Collection Set EDP 6x 15ml",
+    "handle": "siyate-the-nostalgia-collection-set-edp-6x-15ml",
+    "body_html": "<p>This set contains 6 x 15 ml fragrances</p>",
+    "vendor": "SIYATE",
+    "product_type": "EDP",
+    "tags": [],
+    "variants": [
+     {
+      "id": 1,
+      "title": "Default Title",
+      "price": "1350.00",
+      "compare_at_price": null,
+      "available": true,
+      "featured_image": null
+     }
+    ],
+    "images": [
+     {
+      "src": "https://cdn.shopify.com/x.jpg?v=1"
+     }
+    ]
+   },
+   {
+    "id": 101,
+    "title": "Pop Mart Blind Box Figure",
+    "handle": "pop-mart-blind-box-figure",
+    "body_html": "",
+    "vendor": "POPMART",
+    "product_type": "Toy",
+    "tags": [],
+    "variants": [
+     {
+      "id": 2,
+      "title": "Default Title",
+      "price": "250.00",
+      "compare_at_price": null,
+      "available": true,
+      "featured_image": null
+     }
+    ],
+    "images": [
+     {
+      "src": "https://cdn.shopify.com/x.jpg?v=1"
+     }
+    ]
+   },
+   {
+    "id": 102,
+    "title": "Al Absar Mina EDP 100ml",
+    "handle": "al-absar-mina-edp-100ml",
+    "body_html": "<h3>INPIRED BY</h3><p>CHANEL - Chance Eau Spendide EDP</p>",
+    "vendor": "Al Absar",
+    "product_type": "EDP",
+    "tags": [],
+    "variants": [
+     {
+      "id": 3,
+      "title": "Default Title",
+      "price": "795.00",
+      "compare_at_price": null,
+      "available": true,
+      "featured_image": null
+     }
+    ],
+    "images": [
+     {
+      "src": "https://cdn.shopify.com/x.jpg?v=1"
+     }
+    ]
+   }
+  ]
+ },
+ "rio": {
+  "products": [
+   {
+    "id": 110,
+    "title": "Creed Aventus 100ml Eau De Parfum",
+    "handle": "creed-aventus-100ml-eau-de-parfum",
+    "body_html": "<p><strong>Creed Aventus</strong>, Fragrance for Men, <strong>100ml Eau De Parfum</strong></p><p>Aventus is available in flacons of 30, 75, 120 and 250 ml.</p>",
+    "vendor": "Creed",
+    "product_type": "Mens Fragrances",
+    "tags": [
+     "Creed",
+     "Men"
+    ],
+    "variants": [
+     {
+      "id": 11,
+      "title": "Default Title",
+      "price": "7560.00",
+      "compare_at_price": null,
+      "available": true,
+      "featured_image": null
+     }
+    ],
+    "images": [
+     {
+      "src": "https://cdn.shopify.com/x.jpg?v=1"
+     }
+    ]
+   },
+   {
+    "id": 111,
+    "title": "Fragrance World Dolores Pour Femme 100ml EDP",
+    "handle": "fragrance-world-dolores-pour-femme-100ml-edp",
+    "body_html": "",
+    "vendor": "Fragrance World",
+    "product_type": "",
+    "tags": [
+     "Women",
+     "Under R500"
+    ],
+    "variants": [
+     {
+      "id": 12,
+      "title": "Default Title",
+      "price": "250.00",
+      "compare_at_price": "800.00",
+      "available": false,
+      "featured_image": null
+     }
+    ],
+    "images": [
+     {
+      "src": "https://cdn.shopify.com/x.jpg?v=1"
+     }
+    ]
+   }
+  ]
+ },
+ "edgars": {
+  "products": [
+   {
+    "id": 120,
+    "title": "Goddess Eau de Parfum",
+    "handle": "goddess-eau-de-parfum",
+    "body_html": "",
+    "vendor": "Burberry",
+    "product_type": "Eau de Parfum",
+    "tags": [
+     "20offfrag30to6oct",
+     "buy2get20off20to26",
+     "Women"
+    ],
+    "variants": [
+     {
+      "id": 21,
+      "title": "30ML",
+      "price": "1276.00",
+      "compare_at_price": "1595.00",
+      "available": true,
+      "featured_image": null
+     },
+     {
+      "id": 22,
+      "title": "50ML",
+      "price": "1828.00",
+      "compare_at_price": "2285.00",
+      "available": false,
+      "featured_image": null
+     },
+     {
+      "id": 23,
+      "title": "100ML",
+      "price": "2576.00",
+      "compare_at_price": "3220.00",
+      "available": true,
+      "featured_image": null
+     }
+    ],
+    "images": [
+     {
+      "src": "https://cdn.shopify.com/x.jpg?v=1"
+     }
+    ]
+   }
+  ]
+ },
+ "dpc": [
+  {
+   "id": 31,
+   "name": "Asad by Lattafa (Inspired by Sauvage Elixir Dior)",
+   "type": "simple",
+   "permalink": "https://www.dubaiperfumecafe.co.za/product/31/",
+   "short_description": "",
+   "description": "<p>A lovely fragrance.</p>",
+   "prices": {
+    "price": "45000",
+    "regular_price": "45000",
+    "sale_price": "45000",
+    "currency_minor_unit": 2
+   },
+   "images": [
+    {
+     "src": "https://x/a.jpg",
+     "thumbnail": "https://x/a-300.jpg"
+    }
+   ],
+   "categories": [
+    {
+     "slug": "men-perfumes",
+     "name": "Men Perfumes"
+    }
+   ],
+   "brands": [
+    {
+     "name": "Lattafa Perfumes"
+    }
+   ],
+   "is_in_stock": true,
+   "variations": []
+  },
+  {
+   "id": 32,
+   "name": "Asad by Lattafa (Inspired by Sauvage Elixir Dior)",
+   "type": "simple",
+   "permalink": "https://www.dubaiperfumecafe.co.za/product/32/",
+   "short_description": "",
+   "description": "<p>A lovely fragrance.</p>",
+   "prices": {
+    "price": "29900",
+    "regular_price": "29900",
+    "sale_price": "29900",
+    "currency_minor_unit": 2
+   },
+   "images": [
+    {
+     "src": "https://x/a.jpg",
+     "thumbnail": "https://x/a-300.jpg"
+    }
+   ],
+   "categories": [
+    {
+     "slug": "men-perfumes",
+     "name": "Men Perfumes"
+    }
+   ],
+   "brands": [
+    {
+     "name": "Lattafa Perfumes"
+    }
+   ],
+   "is_in_stock": true,
+   "variations": []
+  },
+  {
+   "id": 33,
+   "name": "Lattafa Bakhoor Khamrah",
+   "type": "simple",
+   "permalink": "https://www.dubaiperfumecafe.co.za/product/33/",
+   "short_description": "",
+   "description": "<p>A lovely fragrance.</p>",
+   "prices": {
+    "price": "15000",
+    "regular_price": "15000",
+    "sale_price": "15000",
+    "currency_minor_unit": 2
+   },
+   "images": [
+    {
+     "src": "https://x/a.jpg",
+     "thumbnail": "https://x/a-300.jpg"
+    }
+   ],
+   "categories": [
+    {
+     "slug": "bakhoor-incense",
+     "name": "Bakhoor Incense"
+    }
+   ],
+   "brands": [
+    {
+     "name": "Lattafa Perfumes"
+    }
+   ],
+   "is_in_stock": true,
+   "variations": []
+  },
+  {
+   "id": 34,
+   "name": "Club de Nuit Intense Man&nbsp;by&nbsp;Armaf (Inspired by Aventus by Creed)",
+   "type": "simple",
+   "permalink": "https://www.dubaiperfumecafe.co.za/product/34/",
+   "short_description": "",
+   "description": "<p>A lovely fragrance.</p>",
+   "prices": {
+    "price": "85000",
+    "regular_price": "120000",
+    "sale_price": "85000",
+    "currency_minor_unit": 2
+   },
+   "images": [
+    {
+     "src": "https://x/a.jpg",
+     "thumbnail": "https://x/a-300.jpg"
+    }
+   ],
+   "categories": [
+    {
+     "slug": "men-perfumes",
+     "name": "Men Perfumes"
+    }
+   ],
+   "brands": [
+    {
+     "name": "Armaf"
+    }
+   ],
+   "is_in_stock": true,
+   "variations": []
+  },
+  {
+   "id": 35,
+   "name": "Khamrah by Lattafa",
+   "type": "variable",
+   "permalink": "https://www.dubaiperfumecafe.co.za/product/35/",
+   "short_description": "",
+   "description": "<p>A lovely fragrance.</p>",
+   "prices": {
+    "price": "0",
+    "regular_price": "0",
+    "sale_price": "0",
+    "currency_minor_unit": 2
+   },
+   "images": [
+    {
+     "src": "https://x/a.jpg",
+     "thumbnail": "https://x/a-300.jpg"
+    }
+   ],
+   "categories": [
+    {
+     "slug": "unisex-perfumes",
+     "name": "Unisex Perfumes"
+    }
+   ],
+   "brands": [
+    {
+     "name": "Lattafa Perfumes"
+    }
+   ],
+   "is_in_stock": true,
+   "variations": [
+    {
+     "id": 9001,
+     "attributes": [
+      {
+       "name": "Size",
+       "value": "50ml"
+      }
+     ]
+    },
+    {
+     "id": 9002,
+     "attributes": [
+      {
+       "name": "Size",
+       "value": "100ml"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "dpc_var_9001": {
+  "prices": {
+   "price": "45000",
+   "regular_price": "45000",
+   "currency_minor_unit": 2
+  },
+  "is_in_stock": true
+ },
+ "dpc_var_9002": {
+  "prices": {
+   "price": "69900",
+   "regular_price": "69900",
+   "currency_minor_unit": 2
+  },
+  "is_in_stock": true
+ },
+ "bash": [
+  {
+   "productId": "500",
+   "productName": "Armaf Club De Nuit Intense Eau de Toilette",
+   "brand": "Armaf",
+   "link": "https://bash.com/armaf-club-de-nuit-intense-eau-de-toilette-435402abth1/p",
+   "categories": [
+    "/Men/Grooming/Fragrances/",
+    "/Men/Grooming/",
+    "/Men/"
+   ],
+   "description": "",
+   "items": [
+    {
+     "itemId": "41",
+     "name": "105ml",
+     "nameComplete": "Armaf Club De Nuit Intense Eau de Toilette 105ml",
+     "images": [
+      {
+       "imageUrl": "https://bash/a.jpg"
+      }
+     ],
+     "sellers": [
+      {
+       "commertialOffer": {
+        "Price": 1399.0,
+        "ListPrice": 1399.0,
+        "AvailableQuantity": 100,
+        "IsAvailable": true
+       }
+      }
+     ]
+    },
+    {
+     "itemId": "42",
+     "name": "200ml",
+     "nameComplete": "Armaf Club De Nuit Intense Eau de Toilette 200ml",
+     "images": [],
+     "sellers": [
+      {
+       "commertialOffer": {
+        "Price": 2199.0,
+        "ListPrice": 2199.0,
+        "AvailableQuantity": 9,
+        "IsAvailable": true
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

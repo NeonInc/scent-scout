@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scent Scout</title>
+<meta name="description" content="Find the cheapest price for a fragrance across South African stores, delivery included.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: sticky search bar over a single column of fragrance cards; each card holds one fragrance's prices, grouped by bottle size. */
+:root {
+  --bg: #f5f3f4;
+  --surface: #ffffff;
+  --sunk: #efebee;
+  --ink: #1d1a1f;
+  --muted: #6a6370;
+  --line: #e3dde1;
+  --accent: #8a2f5e;
+  --accent-ink: #ffffff;
+  --accent-soft: #f4e6ee;
+  --deal: #1b7347;
+  --deal-soft: #e2f2e9;
+  --warn: #8f5a00;
+  --warn-soft: #faefd9;
+  --bad: #a3322b;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius: 14px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141116; --surface: #1d1920; --sunk: #241f28; --ink: #f1ecf0; --muted: #a8a0ab; --line: #342d38;
+    --accent: #e48fba; --accent-ink: #1d1220; --accent-soft: #3a2231; --deal: #73d3a0; --deal-soft: #183224;
+    --warn: #e8b85e; --warn-soft: #382c14; --bad: #f08a80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141116; --surface: #1d1920; --sunk: #241f28; --ink: #f1ecf0; --muted: #a8a0ab; --line: #342d38;
+  --accent: #e48fba; --accent-ink: #1d1220; --accent-soft: #3a2231; --deal: #73d3a0; --deal-soft: #183224;
+  --warn: #e8b85e; --warn-soft: #382c14; --bad: #f08a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; }
+
+/* Header + search */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top .wrap { display: grid; gap: 10px; padding-block: 14px 12px; }
+.brandline { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.logo { font: 800 26px/1 var(--font-display); letter-spacing: -0.02em; margin: 0; }
+.logo span { color: var(--accent); }
+.tagline { color: var(--muted); font-size: 14px; }
+.searchrow { display: flex; gap: 8px; }
+.search { flex: 1; min-width: 0; position: relative; }
+.search input {
+  width: 100%; height: 48px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface);
+  padding: 0 44px 0 18px; font-size: 16px;
+}
+.search input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.clear { position: absolute; right: 8px; top: 8px; width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--sunk); cursor: pointer; }
+.save { height: 48px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); font-weight: 600; cursor: pointer; white-space: nowrap; }
+.save:hover { background: var(--accent-soft); }
+
+.watch { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.watch .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-right: 2px; }
+.wchip { display: inline-flex; align-items: center; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; font-size: 13px; overflow: hidden; }
+.wchip button { border: 0; background: none; cursor: pointer; padding: 5px 10px; }
+.wchip button.x { padding: 5px 9px 5px 2px; color: var(--muted); }
+.wchip.on { border-color: var(--accent); background: var(--accent-soft); }
+
+/* Filters */
+.filters { display: flex; gap: 8px 16px; flex-wrap: wrap; align-items: center; padding-block: 14px 4px; }
+.fgroup { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.fgroup > .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-right: 4px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; cursor: pointer; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+select.sort { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 5px 8px; font-size: 13px; }
+details.more summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 600; list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more[open] summary { margin-bottom: 8px; }
+.morebox { display: flex; gap: 8px 16px; flex-wrap: wrap; }
+
+.status { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); padding-block: 8px 2px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--deal); margin-right: 5px; vertical-align: 1px; }
+.dot.err { background: var(--bad); }
+.summary { font-size: 14px; color: var(--muted); padding-block: 10px 6px; }
+.summary b { color: var(--ink); font-weight: 600; }
+
+/* Cards */
+.results { display: grid; gap: 14px; padding-block: 4px 24px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.chead { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px; }
+.thumb { width: 64px; height: 64px; border-radius: 10px; background: var(--sunk); object-fit: contain; }
+.thumb.noimg { visibility: hidden; }
+.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.fname { font: 600 21px/1.15 var(--font-display); margin: 2px 0 4px; text-wrap: balance; }
+.meta { display: flex; gap: 5px; flex-wrap: wrap; }
+.pill { font-size: 11.5px; padding: 1px 8px; border-radius: 999px; background: var(--sunk); color: var(--muted); font-weight: 600; white-space: nowrap; }
+.pill.deal { background: var(--deal-soft); color: var(--deal); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.acc { background: var(--accent-soft); color: var(--accent); }
+
+/* Price tag: the retail swing-tag, with its punched hole */
+.tag { position: relative; background: var(--accent); color: var(--accent-ink); border-radius: 8px 12px 12px 8px; padding: 8px 14px 8px 26px; text-align: right; min-width: 132px; }
+.tag::before { content: ""; position: absolute; left: 9px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--surface); }
+.tag .k { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; opacity: .85; font-weight: 600; }
+.tag .v { font: 500 22px/1.15 var(--font-data); font-variant-numeric: tabular-nums; }
+.tag .w { font-size: 12px; opacity: .9; }
+
+.size { border-top: 1px solid var(--line); }
+.shead { display: flex; justify-content: space-between; gap: 10px; padding: 7px 16px; background: var(--sunk); font-size: 12px; color: var(--muted); }
+.shead b { font: 500 13px var(--font-data); color: var(--ink); }
+.row {
+  display: grid; align-items: center; gap: 4px 14px; padding: 10px 16px; border-top: 1px solid var(--line);
+  grid-template-columns: minmax(110px, 1.3fr) minmax(120px, 1.4fr) 92px 92px 74px auto;
+  grid-template-areas: "store info price deliv ppm go";
+}
+.shead + .row { border-top: 0; }
+.row.out { opacity: .55; }
+.c-store { grid-area: store; font-weight: 600; min-width: 0; }
+.c-store small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.c-info { grid-area: info; min-width: 0; font-size: 13px; color: var(--muted); }
+.c-info .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+.c-price { grid-area: price; text-align: right; font: 500 15px var(--font-data); font-variant-numeric: tabular-nums; }
+.c-price s { display: block; font-size: 12px; color: var(--muted); }
+.c-deliv { grid-area: deliv; text-align: right; font-size: 12.5px; color: var(--muted); }
+.c-deliv b { display: block; font: 500 14px var(--font-data); color: var(--ink); font-variant-numeric: tabular-nums; }
+.c-ppm { grid-area: ppm; text-align: right; font: 500 12.5px var(--font-data); color: var(--muted); font-variant-numeric: tabular-nums; }
+.c-go { grid-area: go; }
+.go { display: inline-block; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); text-decoration: none; color: var(--ink); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.go:hover { border-color: var(--accent); color: var(--accent); }
+.best { color: var(--deal); font-weight: 700; }
+.showall { width: 100%; border: 0; border-top: 1px solid var(--line); background: none; padding: 9px; color: var(--accent); font-weight: 600; cursor: pointer; font-size: 13px; }
+.morebtn { justify-self: center; padding: 10px 22px; border-radius: 999px; border: 1.5px solid var(--ink); background: none; font-weight: 600; cursor: pointer; }
+
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); padding: 28px 20px; text-align: center; color: var(--muted); }
+.empty h3 { font: 600 19px var(--font-display); color: var(--ink); margin: 0 0 6px; }
+
+/* Footer info */
+.info { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; padding-block: 24px 40px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--muted); }
+.info h2 { font: 600 16px var(--font-display); color: var(--ink); margin: 0 0 8px; }
+.info p { margin: 0 0 8px; max-width: 62ch; }
+.tablewrap { overflow-x: auto; }
+.dtable { border-collapse: collapse; width: 100%; font-size: 13px; }
+.dtable th, .dtable td { text-align: left; padding: 5px 8px 5px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.dtable th { font-weight: 600; color: var(--ink); }
+.dtable td.n { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 720px) {
+  .chead { grid-template-columns: 52px minmax(0, 1fr); }
+  .thumb { width: 52px; height: 52px; }
+  .tag { grid-column: 1 / -1; text-align: left; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "store price" "info deliv" "ppm go";
+    gap: 2px 12px;
+  }
+  .c-ppm { text-align: left; align-self: center; }
+  .c-go { justify-self: end; margin-top: 4px; }
+  .save { padding: 0 12px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card { animation: rise .25s ease-out both; }
+  @keyframes rise { from { transform: translateY(4px); } to { transform: none; } }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brandline">
+      <h1 class="logo">Scent<span>Scout</span></h1>
+      <span class="tagline">The cheapest price for a fragrance across SA stores, delivery included.</span>
+    </div>
+    <div class="searchrow">
+      <div class="search">
+        <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search a fragrance, e.g. Bottled Absolu or Lattafa Asad" aria-label="Search fragrances">
+        <button class="clear" id="clear" type="button" aria-label="Clear search" hidden>×</button>
+      </div>
+      <button class="save" id="save" type="button" hidden>+ Watchlist</button>
+    </div>
+    <div class="watch" id="watch" aria-label="Watchlist"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="filters" id="filters">
+    <div class="fgroup" role="group" aria-label="Bottle size"><span class="lbl">Size</span><span id="sizes"></span></div>
+    <div class="fgroup"><span class="lbl">Sort</span>
+      <select class="sort" id="sort" aria-label="Sort by">
+        <option value="total">Cheapest incl. delivery</option>
+        <option value="price">Cheapest price</option>
+        <option value="ppm">Cheapest per ml</option>
+        <option value="disc">Biggest special</option>
+      </select>
+    </div>
+    <label class="toggle"><input type="checkbox" id="specials"> Specials only</label>
+    <label class="toggle"><input type="checkbox" id="instock" checked> In stock only</label>
+    <details class="more" id="moredetails">
+      <summary>More filters</summary>
+      <div class="morebox">
+        <div class="fgroup" role="group" aria-label="Stores"><span class="lbl">Stores</span><span id="stores"></span></div>
+        <div class="fgroup" role="group" aria-label="Type"><span class="lbl">Type</span><span id="kinds"></span></div>
+        <label class="toggle"><input type="checkbox" id="dupes"> Include "inspired by" alternatives</label>
+        <label class="toggle"><input type="checkbox" id="noassumed"> Hide guessed sizes</label>
+      </div>
+    </details>
+  </div>
+  <div class="status" id="status">Loading prices…</div>
+  <div class="summary" id="summary"></div>
+  <div class="results" id="results"></div>
+
+  <section class="info" id="info"></section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var DEFAULT_WATCH = ["Azzaro The Most Wanted", "Montblanc Explorer", "Afnan Lynkd Freedom", "Afnan 9pm Night Out", "Hugo Boss Bottled Absolu"];
+  var SIZES = [["any", "Any"], ["30", "30 ml"], ["50", "50 ml"], ["100", "90–125 ml"], ["other", "Other"]];
+  var KINDS = [["p", "Perfume"], ["set", "Gift sets"], ["mist", "Body mists"], ["oil", "Oils"]];
+  var CONC_WORDS = { EDP: "edp eau parfum", EDT: "edt eau toilette", EDC: "edc cologne", Parfum: "parfum", Extrait: "extrait parfum" };
+  var STOP = { the: 1, by: 1, for: 1, and: 1, de: 1, la: 1, le: 1, of: 1, a: 1, pour: 1, perfume: 1, fragrance: 1, spray: 1, ml: 1 };
+  var PAGE = 25, ROWS_PER_SIZE = 4;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { q: "", size: "any", kinds: { p: true }, stores: {}, specials: false, inStock: true, dupes: false, noAssumed: false, sort: "total", limit: PAGE, open: {} };
+  var data = null, stores = {}, listings = [];
+
+  // ---------- storage (watchlist), best-effort ----------
+  function loadWatch() {
+    try { var v = JSON.parse(localStorage.getItem("scentscout.watch")); if (Array.isArray(v)) return v; } catch (e) {}
+    return DEFAULT_WATCH.slice();
+  }
+  function saveWatch(list) { try { localStorage.setItem("scentscout.watch", JSON.stringify(list)); } catch (e) {} }
+  var watch = loadWatch();
+
+  // ---------- text ----------
+  function norm(s) {
+    s = (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    s = s.replace(/[’'`´]/g, "").replace(/&/g, " and ").replace(/mont\s+blanc/g, "montblanc");
+    s = s.replace(/(\d+)\s*pm\b/g, "$1pm").replace(/(\d+)\s*ml\b/g, "$1ml");
+    return s.replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function toks(s) { return norm(s).split(" ").filter(function (t) { return t && !STOP[t]; }); }
+  function lev1(a, b) { // true if edit distance <= 1
+    if (Math.abs(a.length - b.length) > 1) return false;
+    var i = 0, j = 0, edits = 0;
+    while (i < a.length && j < b.length) {
+      if (a[i] === b[j]) { i++; j++; continue; }
+      if (++edits > 1) return false;
+      if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
+    }
+    return edits + (a.length - i) + (b.length - j) <= 1;
+  }
+  function tokMatch(q, list) {
+    for (var i = 0; i < list.length; i++) {
+      var t = list[i];
+      if (t === q || (q.length >= 2 && t.indexOf(q) === 0)) return true;
+      if (q.length >= 5 && t.length >= 4 && lev1(q, t)) return true;
+    }
+    return false;
+  }
+  function matches(qt, list) {
+    for (var i = 0; i < qt.length; i++) if (!tokMatch(qt[i], list)) return false;
+    return true;
+  }
+
+  // ---------- money & delivery ----------
+  function R(n) {
+    if (n == null || !isFinite(n)) return "–";
+    var whole = Math.abs(n - Math.round(n)) < 0.005;
+    return "R" + n.toLocaleString("en-US", { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
+  }
+  function fee(li) {
+    var d = (stores[li.s] || {}).delivery || {};
+    if (d.fee == null) return 0;
+    return li.p >= d.free_over ? 0 : d.fee;
+  }
+  function metric(li) {
+    switch (state.sort) {
+      case "price": return li.p;
+      case "ppm": return li.ml && li.kd !== "set" ? li.p / li.ml : 1e9 + li.p;
+      case "disc": return li.w ? -(li.w - li.p) / li.w : 1;
+      default: return li.p + fee(li);
+    }
+  }
+  function sizeOk(li) {
+    if (state.noAssumed && li.ms === "a") return false;
+    if (state.size === "any") return true;
+    var m = li.ml;
+    if (state.size === "30") return m >= 25 && m <= 35;
+    if (state.size === "50") return m >= 40 && m <= 60;
+    if (state.size === "100") return m >= 90 && m <= 125;
+    return !m || m < 25 || (m > 35 && m < 40) || (m > 60 && m < 90) || m > 125;
+  }
+  function ago(iso) {
+    if (!iso) return "never";
+    var h = (Date.now() - new Date(iso).getTime()) / 36e5;
+    if (h < 1) return "just now";
+    if (h < 48) return Math.round(h) + " h ago";
+    return Math.round(h / 24) + " days ago";
+  }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  // ---------- data ----------
+  function prepare(d) {
+    data = d;
+    d.stores.forEach(function (s) { stores[s.id] = s; state.stores[s.id] = true; });
+    listings = d.listings.filter(function (li) { return li.p > 0; });
+    listings.forEach(function (li) {
+      li._t = toks([li.b, li.t, li.n, CONC_WORDS[li.c] || "", li.ml ? li.ml + "ml" : ""].join(" "));
+      li._ib = li.ib ? toks(li.ib) : [];
+    });
+  }
+
+  function filtered() {
+    var qt = toks(state.q);
+    var out = [];
+    for (var i = 0; i < listings.length; i++) {
+      var li = listings[i];
+      if (!state.stores[li.s] || !state.kinds[li.kd]) continue;
+      if (state.inStock && !li.st) continue;
+      if (state.specials && !li.w) continue;
+      if (!sizeOk(li)) continue;
+      if (qt.length) {
+        if (!matches(qt, li._t) && !(state.dupes && li._ib.length && matches(qt, li._ib))) continue;
+      } else if (!li.w) {
+        continue; // with no search, show the specials
+      }
+      out.push(li);
+    }
+    return out;
+  }
+
+  function groupUp(rows) {
+    var map = {};
+    rows.forEach(function (li) { (map[li.k] = map[li.k] || []).push(li); });
+    var groups = Object.keys(map).map(function (k) {
+      var items = map[k].sort(function (a, b) { return metric(a) - metric(b); });
+      var best = items[0];
+      // Prefer the cheapest 100ml-ish bottle as the headline when one exists and size is "Any".
+      if (state.size === "any" && state.sort !== "disc") {
+        var hundred = items.filter(function (x) { return x.ml >= 90 && x.ml <= 125; });
+        if (hundred.length) best = hundred[0];
+      }
+      var name = items.map(function (x) { return x.n; }).sort(function (a, b) { return a.length - b.length; })[0];
+      return { k: k, items: items, best: best, name: name, brand: best.b };
+    });
+    groups.sort(function (a, b) { return metric(a.items[0]) - metric(b.items[0]); });
+    if (!state.q && state.sort === "total") groups.sort(function (a, b) { // homepage: biggest specials first
+      return (b.best.w - b.best.p) / b.best.w - (a.best.w - a.best.p) / a.best.w;
+    });
+    return groups;
+  }
+
+  // ---------- render ----------
+  function renderWatch() {
+    var cur = norm(state.q);
+    $("watch").innerHTML = '<span class="lbl">Watchlist</span>' + watch.map(function (w, i) {
+      return '<span class="wchip' + (norm(w) === cur ? " on" : "") + '"><button type="button" data-w="' + i + '">' + esc(w) +
+        '</button><button type="button" class="x" data-wx="' + i + '" aria-label="Remove ' + esc(w) + '">×</button></span>';
+    }).join("") + (watch.length ? "" : '<span class="tagline">Search for a fragrance and tap “+ Watchlist” to pin it here.</span>');
+    var q = state.q.trim();
+    $("save").hidden = !q || watch.some(function (w) { return norm(w) === norm(q); });
+    $("clear").hidden = !q;
+  }
+
+  function chips(el, items, isOn, attr) {
+    $(el).innerHTML = items.map(function (it) {
+      return '<button type="button" class="chip" ' + attr + '="' + it[0] + '" aria-pressed="' + isOn(it[0]) + '">' + esc(it[1]) + "</button>";
+    }).join(" ");
+  }
+
+  function renderFilters() {
+    chips("sizes", SIZES, function (v) { return state.size === v; }, "data-size");
+    chips("kinds", KINDS, function (v) { return !!state.kinds[v]; }, "data-kind");
+    chips("stores", data.stores.map(function (s) { return [s.id, s.name]; }), function (v) { return !!state.stores[v]; }, "data-store");
+  }
+
+  function renderStatus() {
+    $("status").innerHTML = "<span>Prices updated " + esc(ago(data.generated)) + " · " + listings.length.toLocaleString("en-US") + " prices from " + data.stores.length + " stores</span>" +
+      data.stores.map(function (s) {
+        var bad = s.status !== "ok";
+        return '<span title="' + esc(bad ? (s.error || "Not updated") + " — showing last known prices" : (s.count || 0) + " prices") + '"><i class="dot' + (bad ? " err" : "") + '"></i>' + esc(s.name) + (bad ? " (old prices)" : "") + "</span>";
+      }).join("");
+  }
+
+  function badges(li) {
+    var b = [];
+    if (li.w) b.push('<span class="pill deal">Special −' + Math.round((li.w - li.p) / li.w * 100) + "%</span>");
+    if (li.pv) b.push('<span class="pill deal">Dropped from ' + R(li.pv) + "</span>");
+    if (li.lo && li.lo < li.p - 0.5) b.push('<span class="pill" title="Lowest price recorded on ' + esc(li.lod) + '">Was ' + R(li.lo) + " on " + esc((li.lod || "").slice(5)) + "</span>");
+    else if (li.since && (Date.now() - new Date(li.since).getTime()) > 7 * 864e5 && li.lo && li.p <= li.lo) b.push('<span class="pill deal">Lowest we’ve seen</span>');
+    if (li.ms === "a") b.push('<span class="pill warn" title="The store doesn’t list the size. This is the dearer of its listings, so it’s assumed to be the 100 ml.">Size guessed</span>');
+    if (li.ms === "d") b.push('<span class="pill" title="Size taken from the product description">Size from description</span>');
+    if (li.kd === "set") b.push('<span class="pill acc">Gift set</span>');
+    if (li.ib) b.push('<span class="pill acc">Inspired by ' + esc(li.ib) + "</span>");
+    if (li.dl) b.push('<span class="pill acc">' + esc(li.dl) + "</span>");
+    if (!li.st) b.push('<span class="pill">Out of stock</span>');
+    if (li.stale) b.push('<span class="pill warn">Old price</span>');
+    return b.join("");
+  }
+
+  function row(li, isBest) {
+    var st = stores[li.s] || {}, d = st.delivery || {}, f = fee(li);
+    var dtxt = f === 0 ? "Free delivery" : "+" + R(f) + (d.estimated ? "*" : "") + " delivery";
+    var total = li.p + f;
+    var info = li.c && !/edp|edt|edc|eau de|parfum|cologne|extrait/i.test(li.t) ? li.c : "";
+    return '<div class="row' + (li.st ? "" : " out") + '">' +
+      '<div class="c-store">' + esc(st.name || li.s) + (isBest ? ' <span class="best">· Cheapest</span>' : "") + "<small>" + esc(d.eta || "") + "</small></div>" +
+      '<div class="c-info" title="' + esc(li.t) + '">' + esc(li.t) + (info ? " · " + esc(info) : "") + '<div class="badges">' + badges(li) + "</div></div>" +
+      '<div class="c-price">' + R(li.p) + (li.w ? "<s>" + R(li.w) + "</s>" : "") + "</div>" +
+      '<div class="c-deliv"><b>' + R(total) + "</b>" + esc(dtxt) + "</div>" +
+      '<div class="c-ppm">' + (li.ml && li.kd !== "set" ? R(li.p / li.ml) + "/ml" : "") + "</div>" +
+      '<div class="c-go"><a class="go" href="' + esc(li.u) + '" target="_blank" rel="noopener">View ↗</a></div>' +
+      "</div>";
+  }
+
+  function card(g) {
+    var b = g.best, f = fee(b), open = state.open[g.k];
+    var bySize = {};
+    g.items.forEach(function (li) { var key = li.ml ? String(li.ml) : "?"; (bySize[key] = bySize[key] || []).push(li); });
+    var keys = Object.keys(bySize).sort(function (a, c) { return (c === "?" ? -1 : +c) - (a === "?" ? -1 : +a); });
+    var concs = {}, img = "";
+    g.items.forEach(function (li) { if (li.c) concs[li.c] = 1; if (!img && li.i) img = li.i; });
+    var storesIn = {}; g.items.forEach(function (li) { storesIn[li.s] = 1; });
+    var hidden = 0;
+    var sections = keys.map(function (k) {
+      var rows = bySize[k], shown = open ? rows : rows.slice(0, ROWS_PER_SIZE);
+      hidden += rows.length - shown.length;
+      var label = k === "?" ? "Size not listed" : k + " ml";
+      var cheap = rows[0];
+      return '<div class="size"><div class="shead"><span><b>' + label + "</b></span><span>" + rows.length + " price" + (rows.length > 1 ? "s" : "") +
+        (rows.length > 1 ? " · cheapest " + R(cheap.p + fee(cheap)) + " delivered" : "") + "</span></div>" +
+        shown.map(function (li, i) { return row(li, i === 0 && rows.length > 1); }).join("") + "</div>";
+    }).join("");
+    var tagLabel = { total: "Cheapest delivered", price: "Lowest price", ppm: "Best per ml", disc: "Biggest special" }[state.sort];
+    var tagValue = state.sort === "price" ? R(b.p) : state.sort === "ppm" && b.ml ? R(b.p / b.ml) + "/ml" : R(b.p + f);
+    return '<article class="card">' +
+      '<div class="chead">' + (img ? '<img class="thumb" loading="lazy" alt="" src="' + esc(img) + '">' : '<div class="thumb"></div>') +
+      '<div style="min-width:0"><div class="eyebrow">' + esc(g.brand || "Unbranded") + '</div><h2 class="fname">' + esc(g.name) + "</h2>" +
+      '<div class="meta">' + Object.keys(concs).map(function (c) { return '<span class="pill">' + esc(c) + "</span>"; }).join("") +
+      '<span class="pill">' + Object.keys(storesIn).length + " store" + (Object.keys(storesIn).length > 1 ? "s" : "") + "</span></div></div>" +
+      '<div class="tag"><div class="k">' + tagLabel + '</div><div class="v">' + tagValue + '</div><div class="w">' + esc((stores[b.s] || {}).name || "") + (b.ml ? " · " + b.ml + " ml" : "") + "</div></div>" +
+      "</div>" + sections +
+      (hidden || open ? '<button type="button" class="showall" data-open="' + esc(g.k) + '">' + (open ? "Show fewer" : "Show all " + g.items.length + " prices") + "</button>" : "") +
+      "</article>";
+  }
+
+  function render() {
+    renderWatch();
+    var rows = filtered(), groups = groupUp(rows), q = state.q.trim();
+    if (!q) {
+      $("summary").innerHTML = "<b>Specials right now</b> · " + groups.length.toLocaleString("en-US") + " fragrances marked down. Search above or tap a watchlist item to compare a specific one.";
+    } else {
+      $("summary").innerHTML = "<b>" + groups.length + "</b> fragrance" + (groups.length === 1 ? "" : "s") + " · <b>" + rows.length + "</b> prices for “" + esc(q) + "”";
+    }
+    if (!groups.length) {
+      var hint = state.inStock || state.specials || state.size !== "any" ? "Try turning off “In stock only”, “Specials only” or the size filter." : state.dupes ? "Try fewer words or a different spelling." : "Try fewer words, or open More filters and include “inspired by” alternatives.";
+      $("results").innerHTML = '<div class="empty"><h3>No prices match “' + esc(q) + '”</h3><p>' + hint + "</p></div>";
+      return;
+    }
+    var html = groups.slice(0, state.limit).map(card).join("");
+    if (groups.length > state.limit) html += '<button type="button" class="morebtn" id="more">Show more (' + (groups.length - state.limit) + " left)</button>";
+    $("results").innerHTML = html;
+  }
+
+  function renderInfo() {
+    var rowsH = data.stores.map(function (s) {
+      var d = s.delivery || {};
+      return "<tr><td><a href=\"" + esc(s.url) + "\" target=\"_blank\" rel=\"noopener\">" + esc(s.name) + "</a></td><td class=\"n\">" + R(d.fee) + (d.estimated ? "*" : "") +
+        "</td><td class=\"n\">" + R(d.free_over) + "</td><td>" + esc(d.eta || "") + "</td><td><a href=\"" + esc(d.source) + "\" target=\"_blank\" rel=\"noopener\">source</a></td></tr>";
+    }).join("");
+    var notes = data.stores.filter(function (s) { return s.delivery && s.delivery.note; }).map(function (s) { return "<p><b>" + esc(s.name) + ":</b> " + esc(s.delivery.note) + "</p>"; }).join("");
+    $("info").innerHTML =
+      "<div><h2>Delivery fees</h2><div class=\"tablewrap\"><table class=\"dtable\"><thead><tr><th>Store</th><th>Fee</th><th>Free from</th><th>Takes</th><th></th></tr></thead><tbody>" + rowsH +
+      "</tbody></table></div><p style=\"margin-top:8px\">“Delivered” prices assume you buy just that one item. Buying several from one store can get you over its free-delivery amount. * = estimate.</p>" + notes + "</div>" +
+      "<div><h2>How prices are matched</h2>" +
+      "<p>Each store’s catalogue is read twice a day and the same fragrance from different stores is grouped together, then split by bottle size.</p>" +
+      "<p><b>Size guessed:</b> some stores don’t list the size. If a store has two listings of the same fragrance with no size, the dearer one is taken to be the 100 ml. A single unsized listing is also treated as 100 ml. Turn on “Hide guessed sizes” under More filters to leave these out.</p>" +
+      "<p><b>Inspired by:</b> clone fragrances only show up when you search their own name, unless you include “inspired by” alternatives.</p>" +
+      "<p>Prices last checked " + esc(new Date(data.generated).toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short" })) + ". Always confirm the price on the store’s page before buying.</p></div>";
+  }
+
+  // ---------- events ----------
+  var t;
+  function setQuery(v, push) {
+    state.q = v; state.limit = PAGE; state.open = {};
+    if ($("q").value !== v) $("q").value = v;
+    try {
+      if (location.protocol.indexOf("http") === 0) {
+        var u = new URL(location.href);
+        if (v) u.searchParams.set("q", v); else u.searchParams.delete("q");
+        history.replaceState(null, "", u);
+      }
+    } catch (e) {}
+    render();
+  }
+  $("q").addEventListener("input", function (e) { clearTimeout(t); var v = e.target.value; t = setTimeout(function () { setQuery(v); }, 140); });
+  $("clear").addEventListener("click", function () { setQuery(""); $("q").focus(); });
+  $("save").addEventListener("click", function () { var q = state.q.trim(); if (q) { watch.push(q); saveWatch(watch); renderWatch(); } });
+  $("watch").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.wx != null) { watch.splice(+b.dataset.wx, 1); saveWatch(watch); renderWatch(); return; }
+    if (b.dataset.w != null) { var w = watch[+b.dataset.w]; setQuery(norm(state.q) === norm(w) ? "" : w); }
+  });
+  $("filters").addEventListener("click", function (e) {
+    var b = e.target.closest("button.chip"); if (!b) return;
+    if (b.dataset.size) state.size = b.dataset.size;
+    if (b.dataset.kind) { state.kinds[b.dataset.kind] = !state.kinds[b.dataset.kind]; if (!Object.keys(state.kinds).some(function (k) { return state.kinds[k]; })) state.kinds.p = true; }
+    if (b.dataset.store) { state.stores[b.dataset.store] = !state.stores[b.dataset.store]; }
+    state.limit = PAGE; renderFilters(); render();
+  });
+  [["specials", "specials"], ["instock", "inStock"], ["dupes", "dupes"], ["noassumed", "noAssumed"]].forEach(function (p) {
+    $(p[0]).addEventListener("change", function (e) { state[p[1]] = e.target.checked; state.limit = PAGE; render(); });
+  });
+  $("sort").addEventListener("change", function (e) { state.sort = e.target.value; render(); });
+  $("results").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.id === "more") { state.limit += PAGE; render(); }
+    if (b.dataset.open) { state.open[b.dataset.open] = !state.open[b.dataset.open]; render(); }
+  });
+  document.addEventListener("error", function (e) { if (e.target && e.target.tagName === "IMG") e.target.classList.add("noimg"); }, true);
+
+  function start(d) {
+    prepare(d); renderFilters(); renderStatus(); renderInfo();
+    var q0 = "";
+    try { q0 = new URLSearchParams(location.search).get("q") || ""; } catch (e) {}
+    setQuery(q0);
+  }
+  var seed = document.getElementById("seed-data");
+  if (seed) start(JSON.parse(seed.textContent));
+  else fetch("data/prices.json", { cache: "no-cache" }).then(function (r) {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }).then(start).catch(function (e) {
+    $("status").textContent = "Couldn’t load prices (" + e.message + "). The first price run may not have finished yet; try again in a few minutes.";
+  });
+})();
+</script>
+</body>
+</html>
