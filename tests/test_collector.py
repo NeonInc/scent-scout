@@ -27,6 +27,10 @@ def fake_get(url, params=None, as_json=True):
         if url.endswith("/products/9002"):
             return FIX["dpc_var_9002"]
         return FIX["dpc"] if params.get("page", 1) == 1 else []
+    if "arcstore" in url:
+        if not as_json:
+            return FIX["arc_html"] if url.endswith("/fragrance/men") else FIX["arc_html"].replace("14236", "7865")
+        return FIX["arc_feed"] if params.get("ID") == "14236" else [{"totalPages": "1", "ProductsContainer": []}]
     if "bash.com" in url:
         return FIX["bash"] if params.get("_from", 0) == 0 and "men/grooming" in url else []
     raise AssertionError(url)
@@ -155,6 +159,14 @@ def test_collect(tmp):
     check(cdni[0]["k"] == L["dpc-34"]["k"], "Bash CDNI groups with DPC CDNI")
     check(all("since" not in li for li in data["listings"]), "compact history fields")
     check(L["rio-11"]["u"].startswith("/products/"), "store URLs stored relative")
+    libre = sorted((li for li in data["listings"] if li["s"] == "arc" and "Libre" in li["t"]), key=lambda x: x["ml"])
+    check([(li["ml"], li["p"]) for li in libre] == [(50, 3000), (100, 4150)], "ARC: each bottle size is its own listing with its own price")
+    check(libre[0]["b"] == "Yves Saint Laurent" and libre[0]["c"] == "EDP" and libre[0]["g"] == "m", "ARC: brand, concentration, gender from category")
+    check(libre[0]["u"].startswith("/products/brand/") and "GetImage.ashx" in libre[0]["i"], "ARC: relative link and resized image")
+    mb = L["arc-300100-VOLVOL100ML"]
+    check(mb["p"] == 1499 and mb["w"] == 1999 and mb["k"] == "montblanc|explorer", "ARC: sale price with RRP, groups with other stores' Explorer")
+    check(L["arc-300200-VOLVOL10ML"]["st"] == 0, "ARC: out of stock")
+    check(not any("Candle" in li["t"] for li in data["listings"]), "ARC: candles excluded")
     check(all("_sx" not in li for li in data["listings"]), "private note data not written")
     check(data["profiles"].get("lattafa|asad|", {}).get("like") == "Dior Sauvage Elixir", "hand-checked 'often compared to' applied")
     size = C.OUT.stat().st_size

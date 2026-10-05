@@ -6,7 +6,9 @@
       "name": "Panda Perfumes",
       "url": "https://pandaperfumes.co.za",
       "platform": "shopify",
-      "paths": ["/products.json"],
+      "paths": [
+        "/products.json"
+      ],
       "filter_fragrance": true,
       "delivery": {
         "fee": 120,
@@ -22,7 +24,9 @@
       "name": "Rio Perfumes",
       "url": "https://www.rioperfumes.co.za",
       "platform": "shopify",
-      "paths": ["/products.json"],
+      "paths": [
+        "/products.json"
+      ],
       "filter_fragrance": true,
       "delivery": {
         "fee": 99,
@@ -38,7 +42,11 @@
       "name": "Dubai Perfume Café",
       "url": "https://www.dubaiperfumecafe.co.za",
       "platform": "woocommerce",
-      "exclude_categories": ["bakhoor-incense", "diffusser", "diffuser"],
+      "exclude_categories": [
+        "bakhoor-incense",
+        "diffusser",
+        "diffuser"
+      ],
       "delivery": {
         "fee": 100,
         "free_over": 2000,
@@ -53,7 +61,9 @@
       "name": "Edgars",
       "url": "https://www.edgars.co.za",
       "platform": "shopify",
-      "paths": ["/collections/fragrance/products.json"],
+      "paths": [
+        "/collections/fragrance/products.json"
+      ],
       "filter_fragrance": false,
       "delivery": {
         "fee": 75,
@@ -79,6 +89,39 @@
         "eta": "2–4 working days",
         "note": "Collect from a TFG store: R25 under R650, free over.",
         "source": "https://help.bash.com/support/solutions/articles/101000373299",
+        "estimated": false
+      }
+    },
+    {
+      "id": "arc",
+      "name": "ARC",
+      "url": "https://www.arcstore.co.za",
+      "platform": "dynamicweb",
+      "_comment": "ARC's own category pages load their product grid from a JSON feed; the collector reads the same feed. Men/women/unisex first so listings get a gender, then the whole fragrance section for anything else.",
+      "paths": [
+        {
+          "path": "/fragrance/men",
+          "g": "m"
+        },
+        {
+          "path": "/fragrance/women",
+          "g": "f"
+        },
+        {
+          "path": "/fragrance/unisex",
+          "g": "u"
+        },
+        {
+          "path": "/fragrance",
+          "g": ""
+        }
+      ],
+      "delivery": {
+        "fee": 60,
+        "free_over": 750,
+        "eta": "2–3 working days (main centres)",
+        "note": "Economy courier; 2–5 days regional, 5–7 remote.",
+        "source": "https://www.arcstore.co.za/customer/help-centre/delivery",
         "estimated": false
       }
     }

@@ -296,7 +296,69 @@ def collect_vtex(store):
     return out
 
 
-COLLECTORS = {"shopify": collect_shopify, "woocommerce": collect_woocommerce, "vtex": collect_vtex}
+# ---------- Dynamicweb Rapido (ARC) ----------
+# Each category page has a "Show more" button whose data-feed-url points at the JSON feed the page
+# itself uses for its product grid. The feed lists each product once, at its default bottle size and
+# price; other sizes of the same product aren't in the feed, so they're not collected.
+
+def rand(text):
+    """'R3 000,00' -> 3000.0"""
+    m = re.search(r"(\d[\d\s\u00a0.]*)(?:,(\d{2}))?", text or "")
+    if not m:
+        return None
+    whole = re.sub(r"[\s\u00a0.]", "", m.group(1))
+    return money(f"{whole}.{m.group(2) or '00'}")
+
+
+def dw_image(store, path):
+    path = requests.utils.unquote(path or "")
+    if not path:
+        return ""
+    return f"//{store['url'].split('://')[1]}/Admin/Public/GetImage.ashx?Width=300&Image={requests.utils.quote(path)}"
+
+
+def collect_dynamicweb(store):
+    out, seen = [], set()
+    for entry in store["paths"]:
+        html = get(store["url"] + entry["path"], as_json=False)
+        m = re.search(r'data-feed-url="/Default\.aspx\?ID=(\d+)', html)
+        if not m:
+            raise RuntimeError(f"no product feed on {entry['path']}")
+        feed_id, page, pages = m.group(1), 1, 1
+        while page <= pages and page <= 60:
+            data = get(store["url"] + "/Default.aspx", params={
+                "ID": feed_id, "feed": "true", "DoNotShowVariantsAsSingleProducts": "True", "pagesize": 100, "pagenum": page})
+            block = data[0] if isinstance(data, list) and data else {}
+            pages = int(block.get("totalPages") or 1)
+            items = [p for c in block.get("ProductsContainer", []) for p in c.get("Product", [])]
+            for p in items:
+                key = (p.get("productId"), p.get("variantid"))
+                if key in seen:
+                    continue
+                seen.add(key)
+                title = N.strip_html(p.get("name", ""))
+                price = money(p.get("priceDouble")) or rand(p.get("price"))
+                if not price or N.is_excluded(title):
+                    continue
+                try:
+                    brand = json.loads(p.get("googleImpression") or "{}").get("brand", "")
+                except ValueError:
+                    brand = ""
+                was = rand(p.get("priceRRP"))
+                size = p.get("variantName") or ""
+                out.append(make_listing(
+                    store, pid=f"{p.get('productId')}-{p.get('variantid') or 'x'}", title=title, brand_raw=brand or p.get("brand", ""),
+                    price=price, was=was, stock="out" not in (p.get("stockState") or "") and "out of stock" not in (p.get("stockText") or "").lower(),
+                    url=store["url"] + (p.get("link") or ""), img=dw_image(store, p.get("image")),
+                    variant_text=size.replace("ML", " ml"), desc_text=N.strip_html(p.get("description") or ""),
+                    tags_text={"m": "men", "f": "women", "u": "unisex"}.get(entry.get("g"), ""),
+                ))
+            log(f"  {store['id']} {entry['path']} page {page}/{pages}: {len(items)} products")
+            page += 1
+    return out
+
+
+COLLECTORS = {"shopify": collect_shopify, "woocommerce": collect_woocommerce, "vtex": collect_vtex, "dynamicweb": collect_dynamicweb}
 
 
 # ---------- history (lowest seen, recent drops) ----------

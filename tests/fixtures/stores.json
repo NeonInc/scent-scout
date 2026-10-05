@@ -434,5 +434,145 @@
     }
    ]
   }
+ ],
+ "arc_html": "<button id=\"LoadMoreButton\" data-feed-url=\"/Default.aspx?ID=14236&feed=true&DoNotShowVariantsAsSingleProducts=True&groupid={{loadMoreFeedParams}}\">Show more</button>",
+ "arc_feed": [
+  {
+   "currentPage": "1",
+   "totalPages": "1",
+   "pageSize": "100",
+   "ProductsContainer": [
+    {
+     "template": "ProductGridItemContainer",
+     "Product": [
+      {
+       "template": "SearchProductsTemplate",
+       "zIndex": "11",
+       "priceWithVAT": "R3 000,00",
+       "hasVariants": "disabled",
+       "currency": "ZAR",
+       "productId": "202176",
+       "number": "202176",
+       "name": "Libre Santal Couture Eau de Parfum",
+       "variantid": "VOLVOL50ML",
+       "variantName": "50ML",
+       "price": "R3 000,00",
+       "priceDouble": 3000.0,
+       "priceRRP": "",
+       "stockState": "stock-icon--in",
+       "stockText": "In stock",
+       "link": "/products/brand/yves-saint-laurent/libre-santal-couture-eau-de-parfum",
+       "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f202176_A.jpg",
+       "googleImpression": "{\"name\": \"Libre Santal Couture Eau de Parfum\", \"id\": \"202176\", \"price\": 3000, \"brand\": \"YVES SAINT LAURENT\"}",
+       "description": ""
+      }
+     ]
+    },
+    {
+     "template": "ProductGridItemContainer",
+     "Product": [
+      {
+       "template": "SearchProductsTemplate",
+       "zIndex": "11",
+       "priceWithVAT": "R3 000,00",
+       "hasVariants": "disabled",
+       "currency": "ZAR",
+       "productId": "202176",
+       "number": "202176",
+       "name": "Libre Santal Couture Eau de Parfum",
+       "variantid": "VOLVOL100ML",
+       "variantName": "100ML",
+       "price": "R4 150,00",
+       "priceDouble": 4150.0,
+       "priceRRP": "",
+       "stockState": "stock-icon--in",
+       "stockText": "In stock",
+       "link": "/products/brand/yves-saint-laurent/libre-santal-couture-eau-de-parfum",
+       "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f202176_A.jpg",
+       "googleImpression": "{\"name\": \"Libre Santal Couture Eau de Parfum\", \"id\": \"202176\", \"price\": 4150, \"brand\": \"YVES SAINT LAURENT\"}",
+       "description": ""
+      }
+     ]
+    },
+    {
+     "template": "ProductGridItemContainer",
+     "Product": [
+      {
+       "template": "SearchProductsTemplate",
+       "zIndex": "11",
+       "priceWithVAT": "R3 000,00",
+       "hasVariants": "disabled",
+       "currency": "ZAR",
+       "productId": "300100",
+       "number": "300100",
+       "name": "Explorer Eau de Parfum",
+       "variantid": "VOLVOL100ML",
+       "variantName": "100ML",
+       "price": "R1 499,00",
+       "priceDouble": 1499.0,
+       "priceRRP": "R1 999,00",
+       "stockState": "stock-icon--in",
+       "stockText": "In stock",
+       "link": "/products/brand/x/y",
+       "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f300100_A.jpg",
+       "googleImpression": "{\"name\": \"Explorer Eau de Parfum\", \"id\": \"300100\", \"price\": 1499, \"brand\": \"MONTBLANC\"}",
+       "description": ""
+      }
+     ]
+    },
+    {
+     "template": "ProductGridItemContainer",
+     "Product": [
+      {
+       "template": "SearchProductsTemplate",
+       "zIndex": "11",
+       "priceWithVAT": "R3 000,00",
+       "hasVariants": "disabled",
+       "currency": "ZAR",
+       "productId": "300200",
+       "number": "300200",
+       "name": "Born In Roma Donna EDP Intense",
+       "variantid": "VOLVOL10ML",
+       "variantName": "10ML",
+       "price": "R590,00",
+       "priceDouble": 590.0,
+       "priceRRP": "",
+       "stockState": "stock-icon--out",
+       "stockText": "Out of stock",
+       "link": "/products/brand/x/y",
+       "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f300200_A.jpg",
+       "googleImpression": "{\"name\": \"Born In Roma Donna EDP Intense\", \"id\": \"300200\", \"price\": 590, \"brand\": \"Valentino\"}",
+       "description": ""
+      }
+     ]
+    },
+    {
+     "template": "ProductGridItemContainer",
+     "Product": [
+      {
+       "template": "SearchProductsTemplate",
+       "zIndex": "11",
+       "priceWithVAT": "R3 000,00",
+       "hasVariants": "disabled",
+       "currency": "ZAR",
+       "productId": "300300",
+       "number": "300300",
+       "name": "Wood Sage & Sea Salt Scented Candle",
+       "variantid": "",
+       "variantName": "",
+       "price": "R1 200,00",
+       "priceDouble": 1200.0,
+       "priceRRP": "",
+       "stockState": "stock-icon--in",
+       "stockText": "In stock",
+       "link": "/products/brand/x/y",
+       "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f300300_A.jpg",
+       "googleImpression": "{\"name\": \"Wood Sage & Sea Salt Scented Candle\", \"id\": \"300300\", \"price\": 1200, \"brand\": \"Jo Malone\"}",
+       "description": ""
+      }
+     ]
+    }
+   ]
+  }
  ]
 }
