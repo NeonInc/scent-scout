@@ -2,7 +2,7 @@
 
 Finds the cheapest price for a fragrance across South African stores, with delivery included.
 
-**Stores:** Panda Perfumes, Rio Perfumes, Dubai Perfume Café, Edgars and Bash. Only authorised retailers and specialist perfume shops, no marketplaces.
+**Stores:** Panda Perfumes, Rio Perfumes, Dubai Perfume Café, Edgars, Bash (which also covers Foschini and Markham) and ARC. Only authorised retailers and specialist perfume shops, no marketplaces.
 
 ## How it works
 
@@ -10,6 +10,7 @@ Finds the cheapest price for a fragrance across South African stores, with deliv
    - Shopify feeds (`/products.json`): Panda, Rio and Edgars
    - The WooCommerce store API: Dubai Perfume Café
    - The VTEX catalogue API: Bash
+   - ARC's Dynamicweb product feed: the JSON its own category pages load. It lists each product once, at its default size.
 2. It writes every fragrance listing to `docs/data/prices.json`. Each listing has a brand, name, size, concentration, price, "was" price, stock and link.
 3. GitHub Actions runs this on a schedule (`.github/workflows/update-prices.yml`) and commits the new prices.
 4. `docs/index.html` is the website. It's a single page that loads `prices.json` and does the search and comparison in the browser.
@@ -64,6 +65,7 @@ These are set in `collector/stores.json`. They were checked on 2026-10-04:
 | Dubai Perfume Café | R100 (estimate, not published) | R2,000 |
 | Edgars | R75 | R750 |
 | Bash | R60 | R650 |
+| ARC | R60 | R750 |
 
 ## Common tasks
 
@@ -80,6 +82,7 @@ These were checked from GitHub Actions on 2026-10-04:
 - **Superbalist and Dis-Chem** show a Cloudflare "checking your browser" page to automated visitors. They block on purpose, so they aren't collected. Each fragrance on the site links to their search instead (*Also check*).
 - **Clicks** loads its product list through a third-party search service (Algolia) rather than in the page. It could be added by querying that service; it's left out for now.
 - **Truworths** blocks automated requests.
+- **Skins Cosmetics** (checked 2026-10-05) answers every automated request, robots.txt included, with a Cloudflare block. It would need their permission or a feed.
 - **Woolworths** loads products through its own API after the page loads. Not investigated further yet.
 - Marketplaces (Takealot, Amazon, Makro) are left out on purpose: third-party sellers make fakes too likely.
 

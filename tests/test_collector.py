@@ -163,6 +163,8 @@ def test_collect(tmp):
     check([(li["ml"], li["p"]) for li in libre] == [(50, 3000), (100, 4150)], "ARC: each bottle size is its own listing with its own price")
     check(libre[0]["b"] == "Yves Saint Laurent" and libre[0]["c"] == "EDP" and libre[0]["g"] == "m", "ARC: brand, concentration, gender from category")
     check(libre[0]["u"].startswith("/products/brand/") and "GetImage.ashx" in libre[0]["i"], "ARC: relative link and resized image")
+    check(C.dw_image({"url": "https://www.arcstore.co.za"}, "%2fFiles%2fImages%2fEcom%2fBrands%2fVWXYZ%2fYves+Saint+Laurent%2f202176_A.jpg").endswith(
+          "image=/Files/Images/Ecom/Brands/VWXYZ/Yves%20Saint%20Laurent/202176_A.jpg"), "ARC: image path decoded once ('+' is a space)")
     mb = L["arc-300100-VOLVOL100ML"]
     check(mb["p"] == 1499 and mb["w"] == 1999 and mb["k"] == "montblanc|explorer", "ARC: sale price with RRP, groups with other stores' Explorer")
     check(L["arc-300200-VOLVOL10ML"]["st"] == 0, "ARC: out of stock")

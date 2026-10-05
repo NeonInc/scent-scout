@@ -311,10 +311,12 @@ def rand(text):
 
 
 def dw_image(store, path):
-    path = requests.utils.unquote(path or "")
+    """Same resized image ARC's own product grid uses. The feed's path is form-encoded ('+' = space)."""
+    path = requests.utils.unquote((path or "").replace("+", " "))
     if not path:
         return ""
-    return f"//{store['url'].split('://')[1]}/Admin/Public/GetImage.ashx?Width=300&Image={requests.utils.quote(path)}"
+    return (f"//{store['url'].split('://')[1]}/Admin/Public/GetImage.ashx?width=300&height=300&crop=5&Compression=75"
+            f"&FillCanvas=true&DoNotUpscale=true&Format=webp&image={requests.utils.quote(path, safe='/')}")
 
 
 def collect_dynamicweb(store):
