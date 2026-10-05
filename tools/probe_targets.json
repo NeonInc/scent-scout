@@ -1,4 +1,4 @@
 {
-  "arc_feed_frag": "https://www.arcstore.co.za/Default.aspx?ID=7865&feed=true&DoNotShowVariantsAsSingleProducts=True&pagesize=12&pagenum=1",
-  "arc_feed_frag_p2": "https://www.arcstore.co.za/Default.aspx?ID=7865&feed=true&DoNotShowVariantsAsSingleProducts=True&pagesize=12&pagenum=2"
+  "arc_feed_var": "https://www.arcstore.co.za/Default.aspx?ID=7865&feed=true&DoNotShowVariantsAsSingleProducts=False&pagesize=100&pagenum=1",
+  "woolies_sitemap": "https://content.woolworthsstatic.co.za/sitemap/index.xml"
 }
