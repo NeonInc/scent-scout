@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "collector"))
 import collect as C  # noqa: E402
 import normalize as N  # noqa: E402
+import scent as S  # noqa: E402
+from collections import Counter  # noqa: E402
 
 FIX = json.loads((ROOT / "tests" / "fixtures" / "stores.json").read_text())
 
@@ -71,6 +73,37 @@ def test_keys():
     check(N.inspired_by("Al Absar Mina EDP 100ml", "INPIRED BY CHANEL - Chance Eau Spendide EDP") .startswith("CHANEL"), "inspired-by from description")
 
 
+def test_scent():
+    notes, acc = S.extract("Top notes: Bergamot, Lemon. Heart: Rosemary, Lavender. Base notes: Vetiver, Cedar.")
+    check({"bergamot", "lemon", "rosemary", "lavender", "vetiver", "cedar"} <= notes, "notes read from a notes list")
+    notes, _ = S.extract("Orange Blossom and Rosemary over Amberwood")
+    check("orange blossom" in notes and "orange" not in notes and "rose" not in notes and "amber" not in notes,
+          "longest note wins (orange blossom, rosemary, amberwood)")
+    notes, _ = S.extract("Smokeless and drip less, fresh inspiration for a date night in the rain. Wrapped in an orange box.")
+    check(not notes, "ordinary words aren't notes unless the text lists notes")
+    _, acc = S.extract("Executor by Bujairami is a Woody Spicy fragrance for men.")
+    check(acc == {"woo", "spi"}, "scent family words from 'is a Woody Spicy fragrance'")
+    _, acc = S.extract("Profile: Floral • Fruity • Elegant • Musky INSPIRED BY Dior J'adore")
+    check(acc == {"flo", "fru", "mus"}, "scent family words from 'Profile:'")
+    p = S.build_profile(Counter({"lemon": 2, "bergamot": 2, "sea notes": 2, "grapefruit": 1, "cedar": 1}), Counter())
+    check("su" in p["s"] and p["d"] == "d" and "beach" in p["l"], "citrus + sea notes = summer, daytime, beach line")
+    p = S.build_profile(Counter({"vanilla": 2, "amber": 2, "tonka bean": 2, "benzoin": 1, "cinnamon": 1}), Counter())
+    check(p["s"][-1] == "wi" and p["d"] == "n", "vanilla + amber = winter, evening")
+    check(S.build_profile(Counter({"lemon": 1}), Counter()) is None, "too few notes gives no profile")
+    p = S.build_profile(Counter({"vanilla": 3, "lavender": 3, "mint": 2, "sea notes": 2}), Counter())
+    check(p["s"] not in (["su", "wi"], ["sp", "au"]), "seasons are only paired with a neighbour")
+    lis = [
+        {"k": "x|y", "c": "EDP", "s": "a", "kd": "p", "_sx": ({"lemon", "bergamot", "vetiver"}, set())},
+        {"k": "x|y", "c": "EDP", "s": "a", "kd": "p", "_sx": ({"lemon", "bergamot", "vetiver"}, set())},
+        {"k": "x|y", "c": "EDP", "s": "b", "kd": "p", "_sx": ({"lemon", "grapefruit", "cedar"}, set())},
+        {"k": "x|y", "c": "", "s": "b", "kd": "set", "_sx": ({"vanilla", "amber", "oud"}, set())},
+    ]
+    prof = S.build_profiles(lis, {"x|y": {"like": "Something Famous"}})
+    base = prof["x|y|"]
+    check(base["n"][0] == "Lemon" and "Vanilla" not in base["n"], "notes counted once per store; gift sets ignored")
+    check("x|y|EDP" not in prof and base.get("like") == "Something Famous", "duplicate concentration profile dropped; override kept")
+
+
 def test_collect(tmp):
     C.get = fake_get
     C.OUT = tmp / "prices.json"
@@ -107,6 +140,8 @@ def test_collect(tmp):
     check(cdni[0]["k"] == L["dpc-34"]["k"], "Bash CDNI groups with DPC CDNI")
     check(all("since" not in li for li in data["listings"]), "compact history fields")
     check(L["rio-11"]["u"].startswith("/products/"), "store URLs stored relative")
+    check(all("_sx" not in li for li in data["listings"]), "private note data not written")
+    check(data["profiles"].get("lattafa|asad|", {}).get("like") == "Dior Sauvage Elixir", "hand-checked 'often compared to' applied")
     size = C.OUT.stat().st_size
     print(f"fixture output: {len(L)} listings, {size} bytes")
 
@@ -114,6 +149,7 @@ def test_collect(tmp):
 if __name__ == "__main__":
     import tempfile
     test_keys()
+    test_scent()
     with tempfile.TemporaryDirectory() as d:
         test_collect(Path(d))
     print("ALL PASSED")

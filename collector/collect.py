@@ -19,11 +19,13 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent))
 import normalize as N  # noqa: E402
+import scent as S  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "collector" / "stores.json"
 OUT = ROOT / "docs" / "data" / "prices.json"
 HISTORY = ROOT / "data" / "history.json"
+OVERRIDES = ROOT / "collector" / "scent_overrides.json"
 
 UA = "ScentScout/1.0 (personal price comparison; +https://github.com/NeonInc/scent-scout)"
 DELAY = 1.2          # seconds between requests to the same store, to stay polite
@@ -114,7 +116,11 @@ def make_listing(store, *, pid, title, brand_raw, price, was, stock, url, img,
         li["ib"] = ib
     if deal:
         li["dl"] = deal
-    return {k: v for k, v in li.items() if v not in (None, "") or k in ("p", "st")}
+    out = {k: v for k, v in li.items() if v not in (None, "") or k in ("p", "st")}
+    sx = S.extract(desc_text)
+    if sx[0] or sx[1]:
+        out["_sx"] = sx  # notes for the scent profile; removed before writing
+    return out
 
 
 # ---------- Shopify (Panda, Rio, Edgars) ----------
@@ -331,6 +337,20 @@ def update_history(listings, today):
     HISTORY.write_text(json.dumps(hist, separators=(",", ":"), sort_keys=True))
 
 
+def make_profiles(listings, previous):
+    """Scent profiles for every fragrance. Fragrances whose store failed this run keep yesterday's profile."""
+    overrides = {k: v for k, v in json.loads(OVERRIDES.read_text(encoding="utf-8")).items() if not k.startswith("_")}
+    profiles = S.build_profiles(listings, overrides)
+    live = {li["k"] for li in listings}
+    for key, p in previous.items():
+        if key not in profiles and key.rsplit("|", 1)[0] in live:
+            profiles[key] = p
+    for li in listings:
+        li.pop("_sx", None)
+    log(f"Scent profiles: {len(profiles)}")
+    return profiles
+
+
 def main(only=None):
     cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
     previous = json.loads(OUT.read_text()) if OUT.exists() else {"listings": [], "stores": []}
@@ -372,9 +392,10 @@ def main(only=None):
     N.infer_sizes_by_price(fresh)
     N.apply_size_assumptions(fresh)
     update_history(all_listings, today)
+    profiles = make_profiles(all_listings, previous.get("profiles", {}))
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"generated": now.isoformat(), "stores": stores_out, "listings": all_listings},
-                              ensure_ascii=False, separators=(",", ":")))
+    OUT.write_text(json.dumps({"generated": now.isoformat(), "stores": stores_out, "listings": all_listings,
+                               "profiles": profiles}, ensure_ascii=False, separators=(",", ":")))
     ok = sum(1 for s in stores_out if s.get("status") == "ok")
     log(f"Done: {len(all_listings)} listings, {ok}/{len(stores_out)} stores updated.")
     return 0 if ok else 1
