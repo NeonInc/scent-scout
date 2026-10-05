@@ -190,7 +190,7 @@ select.sort { border: 1px solid var(--line); background: var(--surface); border-
 /* Wide screens: two columns of fragrances; an opened one spans both, with "smells like" beside the prices. */
 @media (min-width: 900px) {
   .list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .list > .item.open, .list > .empty, .list > .morebtn { grid-column: 1 / -1; }
+  .list > .item.open, .list > .empty, .list > .morebtn, .list > .backup, .list > .banner, .list > .stub { grid-column: 1 / -1; }
   .list > .morebtn { justify-self: center; }
   .item.open .ibody { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start; gap: 16px; }
 }
@@ -269,6 +269,31 @@ button.vchip:hover { background: var(--accent-soft); color: var(--accent); }
 .stub { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
 .stub .n { font: 600 16px var(--font-display); }
 .stub .m { font-size: 13px; color: var(--muted); }
+
+/* ---------- watchlist backup ---------- */
+.backup { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); margin-top: 6px; }
+.backup summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 14px 16px; font: 600 16px var(--font-display); }
+.backup summary::-webkit-details-marker { display: none; }
+.backup summary .ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 16px; flex: none; }
+.backup summary small { display: block; font: 500 13px var(--font-body); color: var(--muted); }
+.backup summary::after { content: "+"; margin-left: auto; font: 400 22px/1 var(--font-body); color: var(--muted); }
+.backup[open] summary::after { content: "–"; }
+.bk { padding: 0 16px 16px; display: grid; gap: 12px; font-size: 14px; color: var(--muted); }
+.bk h3 { font: 600 15px var(--font-display); color: var(--ink); margin: 6px 0 0; }
+.bk p { margin: 0; }
+.bk textarea { width: 100%; min-height: 64px; resize: vertical; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink);
+               padding: 10px 12px; font: 500 12.5px/1.4 var(--font-data); word-break: break-all; }
+.bk textarea::placeholder { font: 500 14px var(--font-body); color: var(--muted); }
+.bk textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.bkrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.bkrow .sbtn { min-height: 40px; }
+.bkrow .sbtn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.bk hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
+.banner.imp { background: var(--accent-soft); border-color: var(--accent); }
+.banner.imp h2 { color: var(--accent); }
+.banner .bkrow button { justify-self: auto; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; max-width: calc(100% - 32px);
+         background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow); }
 
 /* ---------- filter sheet ---------- */
 .scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
@@ -358,6 +383,8 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   <div class="wrap">SCENT SCOUT · NEON INC™ © 2026 · All rights reserved. Prices belong to the stores shown; always confirm on their site before buying.</div>
 </footer>
 
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<input type="file" id="bkfile" accept=".txt,.json,text/plain,application/json" hidden>
 <div class="scrim" id="scrim" hidden></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheettitle" hidden>
   <div class="grab"></div>
@@ -671,10 +698,13 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     var idx = groupIndex(), changed = false;
     watch.forEach(function (e) {
       if (e.gk && idx[e.gk]) return;
-      if (e.gk || !e.q) return; // saved fragrance that's out of stock everywhere right now
+      if (!e.q) return;
       var qt = toks(e.q);
       var gs = Object.keys(idx).map(function (k) { return idx[k]; }).filter(function (g) { return matches(qt, toks(g.brand + " " + g.name + " " + (CONC_WORDS[g.conc] || ""))); });
       var g = rankFor(e.q, gs)[0];
+      // A saved fragrance that's out of stock keeps its place; it only moves to an exact name match
+      // (e.g. after an import where the store renamed it).
+      if (g && e.gk && g._score < 9) return; // 9+ = exact name
       if (g) { e.gk = g.gk; e.b = g.brand; e.n = g.name; changed = true; }
     });
     if (changed) saveWatch();
@@ -710,6 +740,130 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     saveWatch();
   }
   var lastGroups = {};
+
+  // ---------- watchlist backup: save codes like Neon Arcade's ----------
+  // "SS1-<checksum>-<data>": the data is the watchlist as JSON in URL-safe base64, and the checksum
+  // catches codes that were cut off when copying. Codes hold only fragrance names, sizes and prices.
+  var pendingImport = null; // a watchlist from a shared link, waiting for "Add" or "Replace"
+  function hashStr(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); }
+  function b64enc(str) { return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function b64dec(str) { str = str.replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "="; return decodeURIComponent(escape(atob(str))); }
+  function exportCode() {
+    var json = JSON.stringify({ v: 1, d: new Date().toISOString().slice(0, 10),
+      w: watch.map(function (e) { return [e.gk || "", e.n || e.q || "", e.b || "", e.ml || 0, e.p0 == null ? null : e.p0, e.at || ""]; }) });
+    return "SS1-" + hashStr(json) + "-" + b64enc(json);
+  }
+  function readCode(text) {
+    var m = String(text || "").match(/SS1-([a-z0-9]+)-([A-Za-z0-9_\-+\/=]+)/);
+    if (!m) return { ok: false, reason: "That isn’t a Scent Scout save code. It starts with SS1-." };
+    try {
+      var json = b64dec(m[2]);
+      if (hashStr(json) !== m[1]) return { ok: false, reason: "That code is incomplete. Copy all of it and try again." };
+      var d = JSON.parse(json);
+      if (d.v !== 1 || !Array.isArray(d.w)) return { ok: false, reason: "That save code is from a newer version of the site." };
+      var list = d.w.map(function (r) {
+        return { gk: r[0] || undefined, n: r[1], b: r[2], q: (r[2] ? r[2] + " " : "") + r[1], ml: r[3] || null, p0: r[4] == null ? undefined : r[4], at: r[5] || "" };
+      }).filter(function (e) { return e.gk || e.q.trim(); });
+      return { ok: true, list: list, date: d.d };
+    } catch (e) { return { ok: false, reason: "Couldn’t read that code. Check it was copied in full." }; }
+  }
+  function applyImport(list, mode) {
+    var added = 0;
+    if (mode === "replace") { watch = list.slice(); added = list.length; }
+    else list.forEach(function (e) {
+      var dupe = watch.some(function (w) { return (e.gk && w.gk === e.gk) || (!e.gk && norm(w.q) === norm(e.q)); });
+      if (!dupe) { watch.push(e); added++; }
+    });
+    watch.forEach(function (e) { delete e.last; }); // start drop tracking from today's prices
+    saveWatch(); resolveWatch(); checkDrops();
+    toast(mode === "replace" ? "Watchlist replaced: " + watch.length + " fragrance" + (watch.length === 1 ? "" : "s") + "."
+      : added ? "Added " + added + " fragrance" + (added === 1 ? "" : "s") + " to your watchlist." : "Those are already on your watchlist.");
+    render();
+  }
+  function shareUrl(code) {
+    var base = location.protocol.indexOf("http") === 0 ? location.origin + location.pathname : "https://neoninc.github.io/scent-scout/";
+    return base + "?view=watchlist#import=" + code;
+  }
+  function copyText(text, okMsg) {
+    var done = function () { toast(okMsg); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text) ? done() : toast("Select the code and copy it."); });
+    else if (fallbackCopy(text)) done(); else toast("Select the code and copy it.");
+  }
+  function fallbackCopy(text) {
+    try { var t = document.createElement("textarea"); t.value = text; t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t); t.select();
+      var ok = document.execCommand("copy"); document.body.removeChild(t); return ok; } catch (e) { return false; }
+  }
+  var toastTimer;
+  function toast(msg) { var el = $("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 3200); }
+
+  function backupHtml() {
+    var n = watch.length;
+    return '<details class="backup"' + (n ? "" : " open") + '><summary><span class="ic">⇅</span><span>Back up or move your watchlist' +
+      "<small>Save a copy, or load it on another phone or computer</small></span></summary><div class=\"bk\">" +
+      "<p>Your watchlist lives in this browser only. Clearing your browser data removes it, so keep a copy.</p>" +
+      (n ? '<h3>Save a copy</h3><textarea readonly id="bkcode" aria-label="Your save code">' + esc(exportCode()) + "</textarea>" +
+        '<div class="bkrow"><button type="button" class="sbtn primary" data-bk="copy">⧉ Copy save code</button>' +
+        '<button type="button" class="sbtn" data-bk="share">↗ Share or bookmark link</button>' +
+        '<button type="button" class="sbtn" data-bk="download">⤓ Download backup file</button></div>' +
+        "<p>Send the link to yourself on WhatsApp or email, or bookmark it. Opening it on any device loads this watchlist.</p><hr>" : "") +
+      '<h3>Load a watchlist</h3><textarea id="bkin" placeholder="Paste a save code (SS1-…) or a Scent Scout link" aria-label="Paste a save code"></textarea>' +
+      '<div class="bkrow"><button type="button" class="sbtn primary" data-bk="add">＋ Add to my watchlist</button>' +
+      (n ? '<button type="button" class="sbtn" data-bk="replace">Replace my watchlist</button>' : "") +
+      '<button type="button" class="sbtn" data-bk="file">Load backup file</button></div>' +
+      "<p>Save codes only contain fragrance names, bottle sizes and prices. Nothing personal.</p></div></details>";
+  }
+  function pendingHtml() {
+    if (!pendingImport) return "";
+    var n = pendingImport.list.length;
+    return '<div class="banner imp"><h2>📥 Load a shared watchlist?</h2><p style="margin:0">This link has ' + n + " fragrance" + (n === 1 ? "" : "s") +
+      (pendingImport.date ? ", saved " + esc(pendingImport.date) : "") + ".</p>" +
+      '<div class="bkrow"><button type="button" class="sbtn primary" data-bk="pending-add">＋ Add to mine</button>' +
+      (watch.length ? '<button type="button" class="sbtn" data-bk="pending-replace">Replace mine</button>' : "") +
+      '<button type="button" class="sbtn link" data-bk="pending-no">Not now</button></div></div>';
+  }
+  function onBackup(action) {
+    var r;
+    switch (action) {
+      case "copy": copyText(exportCode(), "Save code copied. Paste it into “Load a watchlist” on your other device."); break;
+      case "share":
+        var url = shareUrl(exportCode());
+        if (navigator.share) navigator.share({ title: "My Scent Scout watchlist", text: "Open this to load my Scent Scout watchlist.", url: url }).catch(function () {});
+        else copyText(url, "Link copied. Bookmark it or send it to yourself.");
+        break;
+      case "download":
+        var day = new Date().toISOString().slice(0, 10);
+        var text = "Scent Scout watchlist backup (" + day + ")\n" + watch.length + " fragrances: " +
+          watch.map(function (e) { return (e.b ? e.b + " " : "") + (e.n || e.q); }).join(", ") +
+          "\n\nTo restore: open Scent Scout, go to Watchlist, then Back up or move your watchlist, then Load backup file.\n\n" + exportCode() + "\n";
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+        a.download = "scent-scout-watchlist-" + day + ".txt";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        toast("Backup file saved to your downloads.");
+        break;
+      case "add": case "replace":
+        r = readCode($("bkin").value);
+        if (!r.ok) { toast(r.reason); break; }
+        applyImport(r.list, action);
+        break;
+      case "file": $("bkfile").value = ""; $("bkfile").click(); break;
+      case "pending-add": case "pending-replace":
+        var list = pendingImport ? pendingImport.list : [];
+        pendingImport = null;
+        applyImport(list, action === "pending-replace" ? "replace" : "add");
+        break;
+      case "pending-no": pendingImport = null; render(); break;
+    }
+  }
+  function readHashImport() {
+    var m = (location.hash || "").match(/import=(SS1-[^&]+)/);
+    if (!m) return;
+    var r = readCode(decodeURIComponent(m[1]));
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    if (r.ok) { pendingImport = r; state.view = "watch"; }
+    else setTimeout(function () { toast(r.reason); }, 300);
+  }
 
   // ---------- rendering ----------
   function concName(c) { return CONC_LABEL[c] || c; }
@@ -1014,10 +1168,10 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   // ---------- Watchlist ----------
   function watchHtml() {
     var idx = groupIndex();
-    if (!watch.length) return '<div class="empty"><h3>Nothing saved yet</h3><p>Open any fragrance and tap “♡ Add to watchlist”. We’ll show you here when its price drops.</p></div>';
+    if (!watch.length) return pendingHtml() + '<div class="empty"><h3>Nothing saved yet</h3><p>Open any fragrance and tap “♡ Add to watchlist”. We’ll show you here when its price drops. Moving from another device? Load your watchlist below.</p></div>' + backupHtml();
     var rows = watch.map(function (e, i) { return { e: e, g: e.gk && idx[e.gk], i: i }; });
     rows.sort(function (a, b) { return (!!sessionDrops[b.e.gk] - !!sessionDrops[a.e.gk]) || a.i - b.i; });
-    return rows.map(function (r) {
+    return pendingHtml() + rows.map(function (r) {
       var e = r.e, g = r.g;
       if (!g) {
         return '<div class="stub"><div><div class="n">' + esc(e.n ? (e.b ? e.b + " " : "") + e.n : e.q) + '</div><div class="m">' +
@@ -1028,7 +1182,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       else if (e.p0 != null && wp.sameSize && wp.total < e.p0 - 0.5) extra += '<span class="pill deal">↓ ' + R(e.p0 - wp.total) + " since you saved it</span>";
       else if (e.p0 != null && wp.sameSize && wp.total > e.p0 + 0.5) extra += '<span class="pill">↑ ' + R(wp.total - e.p0) + " since you saved it</span>";
       return item(g, extra);
-    }).join("");
+    }).join("") + backupHtml();
   }
 
   function render() {
@@ -1194,6 +1348,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     if (b.dataset.preset) { setPreset(b.dataset.preset, b.dataset.arg); return true; }
     if (b.dataset.nav) { setView(b.dataset.nav); return true; }
     if (b.dataset.watch) { toggleWatch(b.dataset.watch); render(); return true; }
+    if (b.dataset.bk) { onBackup(b.dataset.bk); return true; }
     if (b.dataset.unwatch != null) { watch.splice(+b.dataset.unwatch, 1); saveWatch(); render(); return true; }
     return false;
   }
@@ -1205,6 +1360,14 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     if (b.dataset.toggle) { var gk = b.dataset.toggle; state.open = state.open === gk ? null : gk; render(); if (state.open) scrollToItem(gk); return; }
     if (b.dataset.sz) { state.sizeSel[b.dataset.gk] = b.dataset.sz; state.allOffers[b.dataset.gk] = false; render(); return; }
     if (b.dataset.all) { state.allOffers[b.dataset.all] = !state.allOffers[b.dataset.all]; render(); }
+  });
+  $("bkfile").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () { var r = readCode(String(rd.result)); if (!r.ok) { toast(r.reason); return; } applyImport(r.list, "add"); };
+    rd.onerror = function () { toast("Couldn’t open that file."); };
+    rd.readAsText(f);
   });
   $("sort").addEventListener("change", function (e) { state.sort = e.target.value; render(); });
 
@@ -1245,6 +1408,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     var q0 = "", v0 = "";
     try { var sp = new URLSearchParams(location.search); q0 = sp.get("q") || ""; v0 = sp.get("view") || ""; } catch (e) {}
     if (v0 === "watchlist" && !q0) state.view = "watch";
+    readHashImport();
     setQuery(q0);
   }
   var seed = document.getElementById("seed-data");

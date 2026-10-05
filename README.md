@@ -47,6 +47,11 @@ Each note counts once per store, so one store with many variants doesn't skew th
   - lowest prices we've seen
 - **Designer and clone pairs:** worked out in the browser by matching a clone's "inspired by" text to a designer fragrance's brand and name.
 - **Watchlist:** saved in the visitor's browser only (localStorage). It records the price and bottle size when a fragrance is saved, and flags a drop for the same size on the next visit. Email alerts would need a small backend, so they're left for later.
+- **Watchlist backup:** Watchlist → *Back up or move your watchlist*. It works like Neon Arcade's save codes:
+  - **Save code** (`SS1-<checksum>-<data>`): the watchlist as JSON in URL-safe base64. The checksum catches codes that were cut off when copying.
+  - **Share link** (`?view=watchlist#import=SS1-…`): opening it on any device offers *Add to mine* or *Replace mine*. The code sits after the `#`, so it never reaches the server.
+  - **Backup file:** a `.txt` with the code in it, which *Load backup file* reads back.
+  - **Contents:** codes only contain fragrance keys, names, bottle sizes, saved prices and dates.
 
 ## Delivery fees
 
