@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Simplified Scent Scout mark for small browser tabs: bigger bottle, thicker lines, no mist. -->
+  <defs>
+    <linearGradient id="ink" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#ff5fa8"/>
+      <stop offset="1" stop-color="#9b5cff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="#0d0b1a"/>
+  <g fill="none" stroke="url(#ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="36">
+    <rect x="196" y="62" width="120" height="64" rx="16"/>
+    <rect x="110" y="168" width="292" height="290" rx="72"/>
+    <path d="M318 248c-18-26-120-28-120 20c0 50 124 28 124 84c0 48-112 50-130 16"/>
+  </g>
+</svg>

@@ -98,7 +98,8 @@ _EXCLUDE = re.compile(
     r"keychain|key ?ring|lotion|shower|body wash|body butter|body cream|hand cream|balm|soap|shampoo|conditioner|"
     r"gummies|organi[sz]er|pouch|cosmetic bag|deo(?:dorant)?|anti-?perspirant|aftershave balm|after ?shave lotion|"
     r"hand wash|car freshener|air freshener|room spray|mug|tumbler|lipstick|lip balm|mascara|serum|merch|water bottle|"
-    r"nail polish|nail|foundation|concealer|primer|eyeliner|eye ?shadow|beard|after ?shave|apres rasage|après rasage)\b",
+    r"nail polish|nail|foundation|concealer|primer|eyeliner|eye ?shadow|beard|after ?shave|apres rasage|après rasage|"
+    r"gel|hand gel|sanitiser|sanitizer|body oil|dry oil)\b",
     re.I,
 )
 _FRAGRANCE_HINT = re.compile(

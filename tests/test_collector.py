@@ -84,7 +84,8 @@ def test_gender_split():
           "men's and women's versions split when titles say so; untagged listing stays")
     check(lis[4]["k"] == lis[5]["k"] == "tom ford|ombre leather", "no split from store categories alone")
     check(N.is_excluded("Anny Nail Polish 15ML") and N.is_excluded("Cartier Apres Rasage 100ml After Shave splash")
-          and not N.is_excluded("Paris Corner Marshmallow Blush 50ml"), "cosmetics and aftershave excluded, 'Blush' perfumes kept")
+          and N.is_excluded("Miss Dior Purifying Rose Gel for Hands")
+          and not N.is_excluded("Paris Corner Marshmallow Blush 50ml"), "cosmetics, hand gel and aftershave excluded, 'Blush' perfumes kept")
 
 
 def test_scent():

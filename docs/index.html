@@ -7,6 +7,11 @@
 <meta name="description" content="Find the cheapest price for a fragrance across trusted South African stores, delivery included.">
 <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#07080f" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Scent Scout">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -63,11 +68,22 @@ a { color: var(--accent); }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.wrap { max-width: 760px; margin: 0 auto; padding-inline: 16px; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 16px; }
 .num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-weight: 500; }
 .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
 .hscroll { display: flex; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
 .hscroll::-webkit-scrollbar { display: none; }
+
+/* Product photos: stores shoot bottles on white, so every photo sits on the same light card and is
+   scaled to fit (never cropped). Multiply blends off-white photo backgrounds into the card. */
+.ph { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 1; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+.ph.empty {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c3c7d0' stroke-width='1.4' stroke-linejoin='round'%3E%3Crect x='9' y='2.5' width='6' height='3' rx='.8'/%3E%3Cpath d='M10.3 5.5v2M13.7 5.5v2'/%3E%3Crect x='6' y='7.5' width='12' height='14' rx='3.5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: center; background-size: 38%; }
+.ph.empty img { display: none; }
+.ph img { width: 100%; height: 100%; object-fit: contain; padding: 9%; display: block; mix-blend-mode: multiply; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ph { background-color: #eceef3; box-shadow: none; } }
+:root[data-theme="dark"] .ph { background-color: #eceef3; box-shadow: none; }
 
 /* ---------- top bar ---------- */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
@@ -108,7 +124,7 @@ button { cursor: pointer; }
 .suggest .all { display: block; color: var(--accent); font-weight: 600; font-size: 14px; }
 
 /* ---------- discover (home) ---------- */
-.home { display: grid; gap: 6px; padding-top: 12px; }
+.home { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding-block: 12px 32px; }
 .picks { gap: 8px; padding-block: 2px 4px; }
 .pick { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 9px 14px; font-size: 14px; font-weight: 600; white-space: nowrap; box-shadow: var(--card); }
 .pick:active { transform: scale(.97); }
@@ -116,11 +132,40 @@ button { cursor: pointer; }
 .sechead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
 .sechead h2 { font: 600 18px/1.2 var(--font-display); margin: 0; }
 .sechead p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.arrows { display: none; gap: 6px; }
+.arrows button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 18px; line-height: 1; color: var(--ink); }
+.arrows button:hover { border-color: var(--accent); color: var(--accent); }
+@media (hover: hover) and (min-width: 760px) { .arrows { display: inline-flex; } }
+@media (min-width: 760px) {
+  .hscroll { margin-inline: 0; padding-inline: 0; scroll-padding-inline: 0; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); }
+}
+.browse { justify-self: center; margin-top: 18px; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1.5px solid var(--ink); background: none; font-weight: 600; }
+
+/* Fragrance of the day */
+.fotd { position: relative; display: grid; grid-template-columns: 96px minmax(0, 1fr); grid-template-areas: "ph head" "body body"; gap: 12px 14px; align-items: center; padding: 14px; margin-top: 4px;
+        border-radius: 22px; border: 1px solid var(--line); background: linear-gradient(135deg, var(--accent-soft), var(--surface) 55%); box-shadow: var(--card); overflow: hidden; }
+.fotd .ph { grid-area: ph; border-radius: 16px; }
+.fotd .fhead { grid-area: head; min-width: 0; }
+.fotd .fbody { grid-area: body; min-width: 0; }
+.fotd .slbl { margin-bottom: 4px; }
+.fotd .fb { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.fotd h2 { font: 800 21px/1.15 var(--font-display); margin: 1px 0 0; letter-spacing: -0.01em; }
+.fotd .fl { margin: 0 0 8px; font-size: 14.5px; color: var(--muted); }
+.fotd .fp { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.fotd .fp .price { font: 500 17px var(--font-data); margin-right: 4px; }
+.fotd .fp .price small { font: 500 12.5px var(--font-body); color: var(--muted); margin-left: 4px; }
+.fotd .go { min-height: 38px; }
+@media (min-width: 760px) {
+  .fotd { grid-template-columns: 210px minmax(0, 1fr); grid-template-areas: "ph head" "ph body"; gap: 6px 26px; align-items: end; padding: 18px 26px 18px 18px; }
+  .fotd .fbody { align-self: start; }
+  .fotd h2 { font-size: 30px; }
+  .fotd .fl { font-size: 16px; }
+}
 .seeall { flex: none; border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 4px 0; }
 .rail { gap: 10px; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; padding-block: 2px 8px; }
 .tile { flex: none; width: 150px; scroll-snap-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px; text-align: left; display: flex; flex-direction: column; gap: 3px; box-shadow: var(--card); }
 .tile:active { transform: scale(.98); }
-.tile img, .tile .noimgbox { width: 100%; height: 92px; object-fit: contain; background: var(--sunk); border-radius: 10px; margin-bottom: 5px; display: block; }
+.tile .ph { margin-bottom: 7px; }
 .tile .tb { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tile .tn { font: 600 15px/1.2 var(--font-display); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
 .tile .tp { font: 500 16px var(--font-data); margin-top: auto; padding-top: 3px; }
@@ -140,13 +185,21 @@ button { cursor: pointer; }
 .bar .sub { color: var(--muted); font-size: 14px; }
 .back { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 0 0 4px; display: block; }
 select.sort { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
-.list { display: grid; gap: 10px; padding-block: 2px 28px; }
+.list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 2px 28px; align-items: start; }
+.pcol { display: grid; gap: 10px; min-width: 0; }
+/* Wide screens: two columns of fragrances; an opened one spans both, with "smells like" beside the prices. */
+@media (min-width: 900px) {
+  .list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .list > .item.open, .list > .empty, .list > .morebtn { grid-column: 1 / -1; }
+  .list > .morebtn { justify-self: center; }
+  .item.open .ibody { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start; gap: 16px; }
+}
 
 .item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--card); }
 .item.open { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset, var(--glow); }
-.ihead { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 12px 14px; min-height: 76px; }
-.thumb { width: 52px; height: 52px; border-radius: 10px; background: var(--sunk); object-fit: contain; display: block; }
-.thumb.noimg { opacity: 0; }
+.ihead { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 12px 14px; min-height: 76px; }
+.thumb { width: 56px; height: 56px; border-radius: 12px; }
+.thumb img { padding: 6%; }
 .iname { min-width: 0; }
 .iname .b { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
 .iname .b, .iname .n { display: block; }
@@ -163,7 +216,7 @@ select.sort { border: 1px solid var(--line); background: var(--surface); border-
 .chev { width: 18px; height: 18px; color: var(--muted); transition: transform .2s; margin-top: 2px; }
 .item.open .chev { transform: rotate(180deg); }
 
-.ibody { border-top: 1px solid var(--line); padding: 12px 14px 14px; display: grid; gap: 10px; background: var(--bg); }
+.ibody { border-top: 1px solid var(--line); padding: 12px 14px 14px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; background: var(--bg); }
 
 /* "smells like" panel */
 .scent { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 8px; position: relative; overflow: hidden; }
@@ -203,7 +256,7 @@ button.vchip:hover { background: var(--accent-soft); color: var(--accent); }
 .offer .tot b { color: var(--ink); font: 500 13px var(--font-data); }
 .offer .title { grid-column: 1 / -1; font-size: 13px; color: var(--muted); min-width: 0; }
 .offer .foot { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-.go { box-shadow: var(--glow); display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.go { border: 0; box-shadow: var(--glow); display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; }
 .offer:not(.best) .go { background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
 .moreoffers { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 6px; }
 .note { font-size: 12.5px; color: var(--muted); }
@@ -240,8 +293,13 @@ button.vchip:hover { background: var(--accent-soft); color: var(--accent); }
 }
 
 /* ---------- info ---------- */
-.info { display: grid; gap: 22px; padding-block: 22px 40px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
-.info h2 { font: 600 17px var(--font-display); color: var(--ink); margin: 0 0 8px; }
+.info { display: grid; gap: 0; padding-block: 8px 32px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+.info details { border-bottom: 1px solid var(--line); }
+.info summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 14px 0; font: 600 16px var(--font-display); color: var(--ink); }
+.info summary::-webkit-details-marker { display: none; }
+.info summary::after { content: "+"; font: 400 22px/1 var(--font-body); color: var(--muted); }
+.info details[open] summary::after { content: "–"; }
+.info details > div { padding-bottom: 14px; }
 .info p { margin: 0 0 8px; max-width: 65ch; }
 .tablewrap { overflow-x: auto; }
 .dtable { border-collapse: collapse; width: 100%; font-size: 13.5px; }
@@ -327,6 +385,19 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   var STOP = { the: 1, by: 1, for: 1, and: 1, de: 1, la: 1, le: 1, of: 1, a: 1, pour: 1, perfume: 1, fragrance: 1, spray: 1, ml: 1 };
   var CONC_TOK = { eau: 1, parfum: 1, toilette: 1, edp: 1, edt: 1, edc: 1, cologne: 1, extrait: 1, vaporisateur: 1, men: 1, women: 1, man: 1, woman: 1 };
   var PAGE = 20, OFFERS = 4, RAIL = 12;
+  // Fragrance of the day: a daily rotation through well-loved fragrances, keeping the ones that suit
+  // the current season (from their notes). Not about price.
+  var FOTD = ["Dior Sauvage", "Chanel Bleu de Chanel", "Armani Acqua di Gio", "Acqua di Gio Profumo", "Versace Eros", "Versace Dylan Blue",
+    "Rabanne 1 Million", "Rabanne Invictus", "Yves Saint Laurent Y", "Jean Paul Gaultier Le Male", "Jean Paul Gaultier Le Male Elixir",
+    "Jean Paul Gaultier Le Beau", "Prada Luna Rossa Carbon", "Valentino Born in Roma Uomo", "Viktor Rolf Spicebomb", "Montblanc Explorer",
+    "Montblanc Legend", "Hugo Boss Bottled", "Hugo Boss Bottled Absolu", "Azzaro The Most Wanted", "Creed Aventus", "Dolce Gabbana Light Blue",
+    "Emporio Armani Stronger With You", "Carolina Herrera Bad Boy", "Tom Ford Ombre Leather", "Tom Ford Oud Wood", "Diesel Only The Brave",
+    "Davidoff Cool Water", "John Varvatos", "Burberry Hero", "Lancome La Vie Est Belle", "Yves Saint Laurent Libre", "Dior J'adore",
+    "Carolina Herrera Good Girl", "Chanel Coco Mademoiselle", "Marc Jacobs Daisy", "Gucci Bloom", "Chloe", "Dior Miss Dior", "Burberry Her",
+    "Prada Paradoxe", "Yves Saint Laurent Black Opium", "Valentino Donna Born in Roma", "Lancome Idole", "Mugler Angel", "Mugler Alien",
+    "Viktor Rolf Flowerbomb", "Armani My Way", "Rabanne Lady Million", "DKNY Be Delicious", "Ariana Grande Cloud", "Burberry Goddess",
+    "Gucci Flora", "Lattafa Khamrah", "Lattafa Asad", "Afnan 9pm", "Armaf Club de Nuit Intense Man", "Lattafa Yara", "Rasasi Hawas",
+    "Afnan Supremacy Not Only Intense", "Lattafa Fakhar", "Al Haramain Amber Oud Gold", "Afnan Lynked Freedom", "Afnan 9pm Night Out"];
   // Trusted stores whose prices can't be read automatically (they block automated visits),
   // so each fragrance links straight to their own search instead.
   var ALSO_CHECK = [
@@ -347,7 +418,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   var defaults = { size: "any", kinds: { p: true }, specials: false, inStock: true, dupes: false, noAssumed: false };
   var state = { q: "", size: "any", kinds: { p: true }, stores: {}, specials: false, inStock: true, dupes: false, noAssumed: false,
                 sort: "total", limit: PAGE, open: null, sizeSel: {}, allOffers: {}, view: "home", preset: null, presetArg: "" };
-  var data = null, stores = {}, listings = [], profiles = {}, concsByKey = {}, hi = -1;
+  var data = null, stores = {}, listings = [], profiles = {}, concsByKey = {}, hi = -1, fotdCache;
   var idxCache = null, pairCache = null, sessionDrops = {}, dropsSeen = false;
 
   // ---------- watchlist (kept on this device only) ----------
@@ -472,6 +543,8 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
                  g: function (g) { return (pairs().clonesOf[a] || []).indexOf(g.gk) >= 0; } };
       case "drops":
         return { label: "Price drops", desc: "Dropped in the last two weeks or marked down.", li: function (li) { return li.pv || li.w; } };
+      case "specials":
+        return { label: "All specials", desc: "Marked down right now.", li: function (li) { return li.w; } };
       case "lows":
         return { label: "Lowest we’ve seen", desc: "At the lowest price we’ve recorded for at least a week.", li: function (li) { return li.ls; } };
     }
@@ -691,6 +764,15 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       "</div>";
   }
 
+  function shortName(g) {
+    var n = g.name.replace(/\s*\b(eau de parfum|eau de toilette|eau de cologne|extrait de parfum|perfumed spray|edp|edt|edc)\b\s*/ig, " ")
+      .replace(/\s+/g, " ").replace(/^[\s\-–,]+|[\s\-–,]+$/g, "");
+    return n || g.name;
+  }
+  function photo(src, cls) {
+    return '<span class="ph' + (cls ? " " + cls : "") + (src ? "" : " empty") + '">' + (src ? '<img loading="lazy" alt="" src="' + esc(src) + '">' : "") + "</span>";
+  }
+
   function sizeLabel(k) { return k === "?" ? "Size not listed" : k + " ml"; }
   function searchName(g) {
     return ((g.brand ? g.brand + " " : "") + g.name).replace(/\b(eau de (parfum|toilette|cologne)|edp|edt|extrait de parfum)\b/ig, "").replace(/\s+/g, " ").trim();
@@ -748,29 +830,28 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
         sizeLabel(k) + "<small>" + R(bySize[k][0].p + (state.sort === "total" ? fee(bySize[k][0]) : 0)) + "</small></button>";
     }).join("") + "</div>" : '<div class="lbl">' + sizeLabel(sel) + "</div>";
     var anyEst = rows.some(function (li) { return fee(li) && (stores[li.s].delivery || {}).estimated; });
-    return '<div class="ibody">' + scentHtml(g) + tabs + '<div class="offers">' +
+    return '<div class="ibody">' + scentHtml(g) + '<div class="pcol">' + tabs + '<div class="offers">' +
       shown.map(function (li, i) { return offer(li, i === 0 && rows.length > 1); }).join("") + "</div>" +
       (rows.length > OFFERS ? '<button type="button" class="moreoffers" data-all="' + esc(g.gk) + '">' + (showAll ? "Show fewer stores" : "Show all " + rows.length + " stores") + "</button>" : "") +
       (anyEst ? '<div class="note">* Delivery fee is an estimate. The store doesn’t publish it.</div>' : "") +
       '<div class="also"><span class="note">Also check:</span>' + ALSO_CHECK.map(function (a) {
         return '<a href="' + a[1] + encodeURIComponent(searchName(g)) + '" target="_blank" rel="noopener">' + a[0] + " ↗</a>";
-      }).join("") + "</div></div>";
+      }).join("") + "</div></div></div>";
   }
 
   function item(g, extra) {
     var b = g.best, open = state.open === g.gk;
     lastGroups[g.gk] = g;
-    var label = { total: "from", price: "from", ppm: "per ml from", disc: "now" }[state.sort];
+    var label = { total: "from", price: "from", ppm: "per ml from", disc: "now" }[state.sort] + (g.nstores > 1 ? " · " + g.nstores + " stores" : "");
     var value = state.sort === "ppm" && b.ml ? R(b.p / b.ml) : state.sort === "total" ? R(b.p + fee(b)) : R(b.p);
     var sub = esc((stores[b.s] || {}).name || "") + (b.ml ? " · " + b.ml + " ml" : "");
     return '<article class="item' + (open ? " open" : "") + '" id="g-' + esc(g.gk) + '">' +
       '<button type="button" class="ihead" data-toggle="' + esc(g.gk) + '" aria-expanded="' + open + '">' +
-      (g.img ? '<img class="thumb" loading="lazy" alt="" src="' + esc(g.img) + '">' : '<span class="thumb"></span>') +
-      '<span class="iname"><span class="b">' + esc(g.brand || "Unbranded") + '</span><span class="n">' + esc(g.name) + "</span>" +
+      photo(g.img, "thumb") +
+      '<span class="iname"><span class="b">' + esc(g.brand || "Unbranded") + '</span><span class="n">' + esc(shortName(g)) + "</span>" +
       '<span class="chips">' + (extra || "") + (g.conc ? '<span class="pill">' + esc(concName(g.conc)) + "</span>" : "") +
-      '<span class="pill">' + g.nstores + " store" + (g.nstores > 1 ? "s" : "") + "</span>" +
       (b.w ? '<span class="pill deal">−' + Math.round((b.w - b.p) / b.w * 100) + "%</span>" : "") +
-      (g.ib ? '<span class="pill acc">Inspired by ' + esc(nice(g.ib)) + "</span>" : "") +
+      (g.ib ? '<span class="pill acc">Like ' + esc(nice(g.ib)) + "</span>" : "") +
       (watchEntry(g.gk) && state.view !== "watch" ? '<span class="pill acc">♥</span>' : "") + "</span></span>" +
       '<span class="iprice"><span class="from">' + label + '</span><span class="v">' + value + '</span><span class="w">' + sub + "</span>" +
       '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>' +
@@ -787,8 +868,8 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   function tile(g, li, extra, muted) {
     li = li || g.best;
     return '<button type="button" class="tile" data-open="' + esc(g.gk) + '">' +
-      (g.img ? '<img loading="lazy" alt="" src="' + esc(g.img) + '">' : '<span class="noimgbox"></span>') +
-      '<span class="tb">' + esc(g.brand || "Unbranded") + '</span><span class="tn">' + esc(g.name) + "</span>" +
+      photo(g.img) +
+      '<span class="tb">' + esc(g.brand || "Unbranded") + '</span><span class="tn">' + esc(shortName(g)) + "</span>" +
       '<span class="tp">' + R(tot(li)) + (li.ml ? "<small>" + li.ml + " ml</small>" : "") + "</span>" +
       (extra ? '<span class="tx' + (extra.acc ? " acc" : "") + '">' + extra.html + "</span>" : "") +
       (muted ? '<span class="tm">' + muted + "</span>" : "") + "</button>";
@@ -796,7 +877,9 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   function rail(id, arg, title, desc, tiles) {
     if (tiles.length < 3) return "";
     return '<section class="sec"><div class="sechead"><div><h2>' + title + "</h2>" + (desc ? "<p>" + desc + "</p>" : "") + "</div>" +
+      '<span style="display:inline-flex;gap:12px;align-items:center">' +
       (id ? '<button type="button" class="seeall" data-preset="' + id + '" data-arg="' + esc(arg) + '">See all</button>' : "") +
+      '<span class="arrows"><button type="button" data-scroll="-1" aria-label="Scroll left">‹</button><button type="button" data-scroll="1" aria-label="Scroll right">›</button></span></span>' +
       '</div><div class="rail hscroll">' + tiles.slice(0, RAIL).join("") + "</div></section>";
   }
   function bestDrop(g) {
@@ -826,6 +909,43 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     return top;
   }
 
+  function fotd() {
+    if (fotdCache !== undefined) return fotdCache;
+    var idx = groupIndex(), all = Object.keys(idx).map(function (k) { return idx[k]; }), seen = {}, inSeason = [], other = [];
+    FOTD.forEach(function (q) {
+      var qt = toks(q);
+      var gs = all.filter(function (g) {
+        return g.img && !g.ib && (g.best.ml || 100) >= 30 && !/\b(gel|hands?|lotion|cream|deodorant|mist|oil|set)\b/i.test(g.name) &&
+          matches(qt, toks(g.brand + " " + g.name + " " + (CONC_WORDS[g.conc] || "")));
+      });
+      var g = rankFor(q, gs)[0];
+      if (!g || seen[g.gk]) return;
+      seen[g.gk] = 1;
+      var p = prof(g);
+      (p && p.s && p.s.indexOf(NOW) >= 0 ? inSeason : other).push(g);
+    });
+    var pool = inSeason.length >= 5 ? inSeason : inSeason.concat(other);
+    var now = new Date(), day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5);
+    fotdCache = pool.length ? pool[(day * 37) % pool.length] : null; // step through the list so consecutive days differ
+    return fotdCache;
+  }
+  function fotdHtml() {
+    var g = fotd();
+    if (!g) return "";
+    var p = prof(g), b = g.best, watched = !!watchEntry(g.gk);
+    var chips = p && p.s ? p.s.map(function (s) { return '<button type="button" class="vchip" data-preset="season" data-arg="' + s + '">' + SEASONS[s][1] + " " + SEASONS[s][0] + "</button>"; }).join("") +
+      (p.f || []).slice(0, 2).map(function (f) { return '<button type="button" class="vchip f" data-preset="fam" data-arg="' + f + '">' + FAM[f] + "</button>"; }).join("") : "";
+    return '<section class="fotd" aria-label="Fragrance of the day">' + photo(g.img) +
+      '<div class="fhead"><div class="slbl">✦ Fragrance of the day</div><div class="fb">' + esc(g.brand) + "</div><h2>" + esc(shortName(g)) + "</h2></div>" +
+      '<div class="fbody">' +
+      (p && p.l ? '<p class="fl">Smells like ' + esc(p.l) + ".</p>" : "") +
+      (chips ? '<div class="vibes">' + chips + "</div>" : "") +
+      '<div class="fp"><span class="price">' + R(tot(b)) + "<small>" + esc(stores[b.s].name) + (b.ml ? " · " + b.ml + " ml" : "") + "</small></span>" +
+      '<button type="button" class="go" data-open="' + esc(g.gk) + '">See prices</button>' +
+      '<button type="button" class="sbtn' + (watched ? " on" : "") + '" data-watch="' + esc(g.gk) + '" aria-label="' + (watched ? "Remove from" : "Add to") + ' watchlist">' + (watched ? "♥" : "♡") + "</button></div>" +
+      "</div></section>";
+  }
+
   function homeHtml() {
     var all = groupUp(filtered("", false), false, { sort: "total", size: "any" });
     var idx = groupIndex(), P = pairs(), out = "";
@@ -837,6 +957,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
         return "<li>" + esc((e.b ? e.b + " " : "") + e.n) + " · <b>" + R(d.to) + "</b> <s>" + R(d.from) + "</s></li>";
       }).join("") + '</ul><button type="button" data-nav="watch">Open your watchlist →</button></div>';
     }
+    out += fotdHtml();
     // quick picks
     var picks = [["season", NOW, SEASONS[NOW][1] + " " + SEASONS[NOW][0] + " picks"]].concat(
       FAM_PICKS.map(function (f) { return ["fam", f[0], f[1]]; }),
@@ -848,13 +969,13 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     // biggest drops
     var dr = all.map(function (g) { var d = bestDrop(g); return d && { g: g, d: d }; }).filter(Boolean)
       .sort(function (a, b) { return (b.d.li.pv ? 0.15 : 0) + b.d.pct - (a.d.li.pv ? 0.15 : 0) - a.d.pct; });
-    out += rail("drops", "", "Biggest price drops", "Recently dropped or on special.", dr.slice(0, RAIL).map(function (x) {
+    out += rail("drops", "", "Biggest price drops", "", dr.slice(0, RAIL).map(function (x) {
       return tile(x.g, x.d.li, { html: "−" + Math.round(x.d.pct * 100) + "% · was " + R(x.d.from + fee(x.d.li)) });
     }));
     // in season now
     var se = all.filter(function (g) { var p = prof(g); return p && p.s && p.s.indexOf(NOW) >= 0 && g.nstores >= 2; })
       .sort(function (a, b) { return (!!b.best.w - !!a.best.w) || (b.nstores - a.nstores) || (tot(a.best) - tot(b.best)); });
-    out += rail("season", NOW, SEASONS[NOW][1] + " In season: " + SEASONS[NOW][0], "Picked from their notes. Stocked by two or more stores.", se.slice(0, RAIL).map(function (g) {
+    out += rail("season", NOW, SEASONS[NOW][1] + " In season: " + SEASONS[NOW][0], "Chosen from their notes.", se.slice(0, RAIL).map(function (g) {
       var p = prof(g);
       return tile(g, null, { html: esc((p.f || []).slice(0, 2).map(function (f) { return FAM[f]; }).join(" · ")), acc: true });
     }));
@@ -869,22 +990,24 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       cl.push({ c: c, d: d });
     });
     cl.sort(function (a, b) { return (b.d.nstores - a.d.nstores) || (tot(b.d.best) - tot(a.d.best)); });
-    out += rail("clones", "", "Designer smell, for less", "Alternatives inspired by famous fragrances.", cl.slice(0, RAIL).map(function (x) {
+    out += rail("clones", "", "Designer smell, for less", "", cl.slice(0, RAIL).map(function (x) {
       return tile(x.c, null, { html: "Like " + esc(x.d.name), acc: true }, "Original from " + R(tot(x.d.best)));
     }));
     // same bottle, very different price
     var gp = all.map(function (g) { var x = priceGap(g); return x && { g: g, x: x }; }).filter(Boolean)
       .sort(function (a, b) { return b.x.gap - a.x.gap; });
-    out += rail("", "", "Shop around and save", "Same bottle, big price difference between stores.", gp.slice(0, RAIL).map(function (y) {
+    out += rail("", "", "Shop around and save", "Same bottle, cheaper at another store.", gp.slice(0, RAIL).map(function (y) {
       return tile(y.g, y.x.li, { html: "Save " + R(y.x.gap) + " at " + esc(stores[y.x.li.s].name) }, "Others up to " + R(y.x.hi));
     }));
     // lowest we've seen
     var lw = all.filter(function (g) { return g.items.some(function (li) { return li.ls && li.st; }); })
       .sort(function (a, b) { return (b.nstores - a.nstores) || (tot(a.best) - tot(b.best)); });
-    out += rail("lows", "", "Lowest prices we’ve seen", "At their lowest recorded price.", lw.slice(0, RAIL).map(function (g) {
+    out += rail("lows", "", "Lowest prices we’ve seen", "", lw.slice(0, RAIL).map(function (g) {
       var li = g.items.filter(function (x) { return x.ls && x.st; })[0];
       return tile(g, li, { html: "Lowest we’ve seen" });
     }));
+    var nSpecials = groupUp(filtered("", true), false).length;
+    out += '<button type="button" class="browse" data-preset="specials" data-arg="">Browse all ' + nSpecials.toLocaleString("en-US") + " specials →</button>";
     return out;
   }
 
@@ -913,6 +1036,8 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     var q = state.q.trim(), spec = state.preset ? presetSpec() : null;
     var home = state.view === "home" && !q && !spec;
     $("homeview").hidden = !home;
+    document.querySelector(".bar").hidden = home;
+    $("results").hidden = home;
     $("back").hidden = !(spec || state.view === "watch") || !!q;
     $("sort").hidden = state.view === "watch" && !q;
     if (state.view === "watch" && !q) {
@@ -922,7 +1047,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       dropsSeen = true; renderNav();
       return;
     }
-    if (home) $("homeview").innerHTML = homeHtml();
+    if (home) { $("homeview").innerHTML = homeHtml(); return; }
     var groups = groupUp(filtered(q, home, spec), home);
     if (spec && spec.g) groups = groups.filter(spec.g);
     if (!home && !spec && groups.length === 1) state.open = groups[0].gk; // one match: open it straight away
@@ -970,14 +1095,14 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
         "</td><td class=\"num\">" + R(d.free_over) + "</td><td>" + esc(d.eta || "") + "</td></tr>";
     }).join("");
     $("info").innerHTML =
-      "<div><h2>Stores and delivery</h2><div class=\"tablewrap\"><table class=\"dtable\"><thead><tr><th>Store</th><th>Delivery</th><th>Free from</th><th>Takes</th></tr></thead><tbody>" + rowsH +
-      "</tbody></table></div><p style=\"margin-top:8px\">Only authorised retailers and specialist perfume shops are included, no marketplaces. Delivered prices assume you buy one item; buying more from the same store can get you free delivery. * = estimate.</p></div>" +
-      "<div><h2>How it works</h2>" +
+      "<details><summary>Stores and delivery</summary><div><div class=\"tablewrap\"><table class=\"dtable\"><thead><tr><th>Store</th><th>Delivery</th><th>Free from</th><th>Takes</th></tr></thead><tbody>" + rowsH +
+      "</tbody></table></div><p style=\"margin-top:8px\">Only authorised retailers and specialist perfume shops are included, no marketplaces. Delivered prices assume you buy one item; buying more from the same store can get you free delivery. * = estimate.</p></div></details>" +
+      "<details><summary>How it works</summary><div>" +
       "<p>Every store’s catalogue is read twice a day, at about 05:15 and 17:15. The same fragrance from different stores is put together and split by bottle size.</p>" +
       "<p><b>Smells like:</b> worked out from the notes the stores list (for example bergamot, vanilla or oud). The notes decide the scent family, the seasons it suits and the short description. It’s a guide, not a review; for ratings, use the Fragrantica link.</p>" +
       "<p><b>Watchlist:</b> saved on this device only. When you come back, any saved fragrance that got cheaper (same bottle size) is flagged.</p>" +
       "<p><b>Missing sizes:</b> when a store gives no size, the description is checked first. Then, if another store sells the same fragrance at exactly the same price, that size is used (“Size matched by price”). Otherwise the dearer of the store’s listings is taken to be the 100 ml (“Size guessed”).</p>" +
-      "<p>Prices last checked " + esc(new Date(data.generated).toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short" })) + ". Always confirm the price on the store’s site before you buy.</p></div>";
+      "<p>Prices last checked " + esc(new Date(data.generated).toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short" })) + ". Always confirm the price on the store’s site before you buy.</p></div></details>";
   }
 
   // ---------- actions ----------
@@ -1060,6 +1185,11 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   // Taps anywhere in the page: tiles, picks, "See all", chips in the scent panel, watch buttons.
   function onAction(e) {
     var b = e.target.closest("button"); if (!b) return false;
+    if (b.dataset.scroll) {
+      var r = b.closest(".sec").querySelector(".rail");
+      r.scrollBy({ left: +b.dataset.scroll * r.clientWidth * 0.85, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      return true;
+    }
     if (b.dataset.open) { openGroup(b.dataset.open); return true; }
     if (b.dataset.preset) { setPreset(b.dataset.preset, b.dataset.arg); return true; }
     if (b.dataset.nav) { setView(b.dataset.nav); return true; }
@@ -1101,10 +1231,10 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     data.stores.forEach(function (s) { state.stores[s.id] = true; });
     renderFilters(); render();
   });
-  // A photo that fails to load becomes a plain grey box instead of a broken-image icon.
+  // A photo that fails to load shows a neat bottle outline instead of a broken-image icon.
   document.addEventListener("error", function (e) {
     var im = e.target;
-    if (im && im.tagName === "IMG" && !im.dataset.failed) { im.dataset.failed = "1"; im.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="; }
+    if (im && im.tagName === "IMG" && im.parentNode && im.parentNode.classList) im.parentNode.classList.add("empty");
   }, true);
 
   function start(d) {
