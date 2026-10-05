@@ -97,7 +97,8 @@ _EXCLUDE = re.compile(
     r"\b(candle|diffus+er|reed|bakh?oo?r|bakhour|incense|burner|gift ?card|voucher|blind ?box|figure|plush|"
     r"keychain|key ?ring|lotion|shower|body wash|body butter|body cream|hand cream|balm|soap|shampoo|conditioner|"
     r"gummies|organi[sz]er|pouch|cosmetic bag|deo(?:dorant)?|anti-?perspirant|aftershave balm|after ?shave lotion|"
-    r"hand wash|car freshener|air freshener|room spray|mug|tumbler|lipstick|lip balm|mascara|serum|merch|water bottle)\b",
+    r"hand wash|car freshener|air freshener|room spray|mug|tumbler|lipstick|lip balm|mascara|serum|merch|water bottle|"
+    r"nail polish|nail|foundation|concealer|primer|eyeliner|eye ?shadow|beard|after ?shave|apres rasage|après rasage)\b",
     re.I,
 )
 _FRAGRANCE_HINT = re.compile(
@@ -244,6 +245,36 @@ def name_key(title, brand):
 
 def group_key(brand, title):
     return f"{fold(brand)}|{name_key(title, brand)}"
+
+
+# ---------- men's vs women's versions ----------
+
+_TITLE_M = re.compile(r"\b(men|man|mens|homme|him|male)\b")
+_TITLE_F = re.compile(r"\b(women|woman|womens|femme|her|ladies|lady|elle|female)\b")
+
+
+def title_gender(title):
+    t = fold(_remove_inspired(title or ""))
+    m, f = bool(_TITLE_M.search(t)), bool(_TITLE_F.search(t))
+    return "m" if m and not f else "f" if f and not m else ""
+
+
+def split_by_gender(listings):
+    """'Cool Water Man' and 'Cool Water Woman' share a name once 'man'/'woman' are dropped from the key.
+    When the store titles of one group explicitly say men's AND women's, split the group: listings say
+    which one they are in the title, or else by the store's own men/women category."""
+    seen = {}
+    for li in listings:
+        tg = title_gender(li.get("t", ""))
+        if tg:
+            seen.setdefault(li["k"], set()).add(tg)
+    split = {k for k, g in seen.items() if g == {"m", "f"}}
+    for li in listings:
+        if li["k"] in split:
+            g = title_gender(li.get("t", "")) or (li.get("g") if li.get("g") in ("m", "f") else "")
+            if g:
+                li["k"] += " men" if g == "m" else " women"
+    return listings
 
 
 # ---------- size assumption ----------

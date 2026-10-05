@@ -73,6 +73,20 @@ def test_keys():
     check(N.inspired_by("Al Absar Mina EDP 100ml", "INPIRED BY CHANEL - Chance Eau Spendide EDP") .startswith("CHANEL"), "inspired-by from description")
 
 
+def test_gender_split():
+    lis = [{"k": "davidoff|cool water", "t": t, "g": g} for t, g in [
+        ("Cool Water Man Eau de Toilette", "m"), ("Cool Water Woman Eau de Toilette", "f"),
+        ("Davidoff Cool Water 125ml EDT", "m"), ("Davidoff Cool Water EDT", "")]]
+    lis.append({"k": "tom ford|ombre leather", "t": "Tom Ford Ombre Leather Parfum", "g": "m"})
+    lis.append({"k": "tom ford|ombre leather", "t": "Tom Ford Ombré Leather Eau de Parfum", "g": "f"})
+    N.split_by_gender(lis)
+    check([li["k"] for li in lis[:4]] == ["davidoff|cool water men", "davidoff|cool water women", "davidoff|cool water men", "davidoff|cool water"],
+          "men's and women's versions split when titles say so; untagged listing stays")
+    check(lis[4]["k"] == lis[5]["k"] == "tom ford|ombre leather", "no split from store categories alone")
+    check(N.is_excluded("Anny Nail Polish 15ML") and N.is_excluded("Cartier Apres Rasage 100ml After Shave splash")
+          and not N.is_excluded("Paris Corner Marshmallow Blush 50ml"), "cosmetics and aftershave excluded, 'Blush' perfumes kept")
+
+
 def test_scent():
     notes, acc = S.extract("Top notes: Bergamot, Lemon. Heart: Rosemary, Lavender. Base notes: Vetiver, Cedar.")
     check({"bergamot", "lemon", "rosemary", "lavender", "vetiver", "cedar"} <= notes, "notes read from a notes list")
@@ -150,6 +164,7 @@ if __name__ == "__main__":
     import tempfile
     test_keys()
     test_scent()
+    test_gender_split()
     with tempfile.TemporaryDirectory() as d:
         test_collect(Path(d))
     print("ALL PASSED")

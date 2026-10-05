@@ -389,6 +389,7 @@ def main(only=None):
         stores_out.append(info)
 
     fresh = [li for li in all_listings if not li.get("stale")]
+    N.split_by_gender(fresh)
     N.infer_sizes_by_price(fresh)
     N.apply_size_assumptions(fresh)
     update_history(all_listings, today)

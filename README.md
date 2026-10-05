@@ -22,6 +22,32 @@ Finds the cheapest price for a fragrance across South African stores, with deliv
 - If no size can be found, the dearer of a store's unsized listings for that fragrance is assumed to be the 100 ml. A single unsized listing is also assumed to be 100 ml. These show a **Size guessed** badge.
 - `data/history.json` keeps each listing's lowest price, which powers the "Was R… on …" and "Lowest we've seen" badges.
 
+## Scent profiles ("Smells like")
+
+`collector/scent.py` reads the notes each store lists in its product description (for example bergamot, vanilla or oud), plus any scent-family words ("a Woody Spicy fragrance", "Profile: Floral • Fruity"). Only the note names are used, never the store's own text. The notes become:
+
+- **Scent families:** Citrusy, Fresh & airy, Green vibes, Herbal, Floral, Fruity, Sweet, Spicy, Woody, Oud, Warm & ambery, Leathery & smoky, Clean & musky, Boozy.
+- **Seasons and time of day:** for example "🌸 Spring" and "Daytime".
+- **A short "smells like" line:** for example "a summer day at the beach: zesty citrus and sea air".
+
+Each note counts once per store, so one store with many variants doesn't skew the result. Fragrances need at least three notes to get a profile.
+
+- **"Inspired by":** clones that say what they're inspired by show "Smells like Creed Aventus".
+- **"Often compared to":** a few widely made comparisons are added by hand in `collector/scent_overrides.json`.
+
+**Ratings:** Fragrantica's terms of service forbid scraping and automated access, allow their content for personal non-commercial use only, and offer no public API. So the site doesn't copy their ratings; each fragrance links to its Fragrantica reviews instead.
+
+## Discover and the watchlist
+
+- **Discover (home page):** quick picks (season, scent family, under R500, for him or her, designer alternatives) and rails:
+  - biggest price drops
+  - in season now
+  - designer smell for less
+  - same bottle, big price difference between stores
+  - lowest prices we've seen
+- **Designer and clone pairs:** worked out in the browser by matching a clone's "inspired by" text to a designer fragrance's brand and name.
+- **Watchlist:** saved in the visitor's browser only (localStorage). It records the price and bottle size when a fragrance is saved, and flags a drop for the same size on the next visit. Email alerts would need a small backend, so they're left for later.
+
 ## Delivery fees
 
 These are set in `collector/stores.json`. They were checked on 2026-10-04:
@@ -38,6 +64,7 @@ These are set in `collector/stores.json`. They were checked on 2026-10-04:
 
 - **Run the prices now:** Actions → *Update prices* → *Run workflow*.
 - **Add a brand spelling:** add it to `collector/brands.json`.
+- **Add an "often compared to" line:** add it to `collector/scent_overrides.json`.
 - **Change a delivery fee:** edit `collector/stores.json`.
 - **Run tests locally:** `python tests/test_collector.py` (offline, no network needed).
 
