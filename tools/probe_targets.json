@@ -1,9 +1,6 @@
 {
-  "skins_robots": "https://www.skins.co.za/robots.txt",
-  "skins_home": "https://www.skins.co.za/",
-  "skins_graphql": "https://www.skins.co.za/graphql?query=%7Bproducts(search%3A%22azzaro%22%2CpageSize%3A3)%7Btotal_count%20items%7Bname%20sku%20url_key%20price_range%7Bminimum_price%7Bfinal_price%7Bvalue%7D%20regular_price%7Bvalue%7D%7D%7D%7D%7D%7D",
+  "arc_men_edp": "https://www.arcstore.co.za/fragrance/men/edp",
+  "arc_frag": "https://www.arcstore.co.za/fragrance",
   "woolies_cat": "https://www.woolworths.co.za/cat/Fragrances/_/N-14ze7qd",
-  "woolies_api": "https://www.woolworths.co.za/server/searchCategory?pageURL=%2Fcat%2FFragrances%2F_%2FN-14ze7qd&inStoreReservation=false",
-  "arc_home": "https://www.arcstore.co.za/",
-  "arc_sitemap": "https://www.arcstore.co.za/sitemap.xml"
+  "woolies_browse": "https://www.woolworths.co.za/browse/beauty-products-south-africa/fragrance"
 }

@@ -29,7 +29,7 @@ for name, url in targets.items():
             }
             info["hints"] = hints
             (OUT / f"{name}.{label}.json").write_text(json.dumps(info, indent=1))
-            (OUT / f"{name}.{label}.body.txt").write_text(body[:600000])
+            (OUT / f"{name}.{label}.body.txt").write_text(body[:4000000])
             print(name, label, r.status_code, len(body), hints["price_mentions"])
         except Exception as e:
             (OUT / f"{name}.{label}.json").write_text(json.dumps({"url": url, "error": str(e)}))
