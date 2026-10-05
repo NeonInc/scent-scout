@@ -1,6 +1,4 @@
 {
-  "arc_men_edp": "https://www.arcstore.co.za/fragrance/men/edp",
-  "arc_frag": "https://www.arcstore.co.za/fragrance",
-  "woolies_cat": "https://www.woolworths.co.za/cat/Fragrances/_/N-14ze7qd",
-  "woolies_browse": "https://www.woolworths.co.za/browse/beauty-products-south-africa/fragrance"
+  "arc_feed_frag": "https://www.arcstore.co.za/Default.aspx?ID=7865&feed=true&DoNotShowVariantsAsSingleProducts=True&pagesize=12&pagenum=1",
+  "arc_feed_frag_p2": "https://www.arcstore.co.za/Default.aspx?ID=7865&feed=true&DoNotShowVariantsAsSingleProducts=True&pagesize=12&pagenum=2"
 }
