@@ -4,6 +4,9 @@ on:
   schedule:
     # 05:17 and 17:17 South African time (03:17 / 15:17 UTC)
     - cron: "17 3,15 * * *"
+    # Backups: GitHub sometimes delays or drops scheduled runs when it's busy. These check every two
+    # hours after each main run and only collect if the prices are more than 10 hours old.
+    - cron: "43 5,7,9,17,19,21 * * *"
   workflow_dispatch:
     inputs:
       stores:
@@ -25,20 +28,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Skip backup run if prices are fresh
+        id: guard
+        if: github.event_name == 'schedule' && github.event.schedule != '17 3,15 * * *'
+        run: |
+          age=$(python3 -c "import json,datetime as d;g=json.load(open('docs/data/prices.json'))['generated'];print(int((d.datetime.now(d.timezone.utc)-d.datetime.fromisoformat(g)).total_seconds()//3600))")
+          echo "Prices are ${age} h old."
+          if [ "$age" -lt 10 ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+
       - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != 'true'
         with:
           python-version: "3.12"
 
       - name: Install
+        if: steps.guard.outputs.skip != 'true'
         run: pip install requests==2.32.3
 
       - name: Offline tests
+        if: steps.guard.outputs.skip != 'true'
         run: python tests/test_collector.py
 
       - name: Collect prices
+        if: steps.guard.outputs.skip != 'true'
         run: python collector/collect.py ${{ github.event.inputs.stores }}
 
       - name: Commit new prices
+        if: steps.guard.outputs.skip != 'true'
         run: |
           git config user.name "scent-scout-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -92,6 +92,7 @@ To check a new store, add its URL to `tools/probe_targets.json` and run **Action
 
 - The collector waits about a second between requests and identifies itself in its User-Agent.
 - GitHub pauses scheduled workflows in repos with no activity for 60 days. The price commits normally count as activity.
+- GitHub runs scheduled workflows on a best-effort basis and can delay or drop them when it's busy. Backup check-ins run every two hours after each main run (07:43–11:43 and 19:43–23:43 SAST) and only collect when the prices are more than 10 hours old.
 
 ---
 
