@@ -1,4 +1,6 @@
 {
-  "woolies_mens_leaf": "https://www.woolworths.co.za/browse/beauty-products-south-africa/fragrance/mens-fragrance/fragrance",
-  "woolies_womens_leaf": "https://www.woolworths.co.za/browse/beauty-products-south-africa/fragrance/womens-fragrance/fragrance"
+  "arc_img": "https://www.arcstore.co.za/Admin/Public/GetImage.ashx?width=300&height=300&crop=5&Compression=75&FillCanvas=true&DoNotUpscale=true&Format=webp&image=/Files/Images/Ecom/Brands/ABC/Coach/201710_A.jpg",
+  "arc_prod": "https://www.arcstore.co.za/products/brand/yves-saint-laurent/libre-santal-couture-eau-de-parfum",
+  "arc_prod2": "https://www.arcstore.co.za/products/brand/coach/pure-platinum-parfum",
+  "arc_feed": "https://www.arcstore.co.za/Default.aspx?ID=7865&feed=true&DoNotShowVariantsAsSingleProducts=True&pagesize=12&pagenum=1"
 }
