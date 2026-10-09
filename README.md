@@ -54,6 +54,18 @@ Each note counts once per store, so one store with many variants doesn't skew th
   - **Backup file:** a `.txt` with the code in it, which *Load backup file* reads back.
   - **Contents:** codes only contain fragrance keys, names, bottle sizes, saved prices and dates.
 
+## Speed
+
+- **Offline copy:** `docs/sw.js` keeps the page and prices on the phone. After the first visit the site opens straight from that copy (offline too) and fetches fresh prices in the background.
+- **Smaller price file:** the collector compacts `prices.json` (`compact()`); the page expands it in `prepare()`.
+- **Parallel price checks:** the collector reads all stores at the same time, one connection per store, so a run takes about as long as the slowest store (ARC).
+
+## Profile, looks and email alerts
+
+- **Profile sheet** (round button top-right): Neon Inc sign-in, appearance (Auto, Light, Graphite dark, Love) and email alerts.
+- **Email alerts are a sign-up list for now.** A signed-in person can opt in, and their choice is saved in their own account at `users/{uid}/alerts/scent` with `status: "pending"`. Nothing is emailed yet.
+- **Switching alerts on later:** a scheduled job (GitHub Action or Cloud Function with Firebase Admin access) reads these documents and each person's watchlist (`users/{uid}/apps/scent`), compares prices and sends through an email service. Update the hub's privacy page first.
+
 ## Delivery fees
 
 These are set in `collector/stores.json`. They were checked on 2026-10-04:

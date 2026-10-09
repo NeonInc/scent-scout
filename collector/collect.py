@@ -9,10 +9,13 @@ If one store fails, the others still update and that store keeps its last good p
 """
 import datetime as dt
 import json
+import os
 import re
+import threading
 import sys
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import requests
@@ -32,8 +35,15 @@ UA = "ScentScout/1.0 (personal price comparison; +https://github.com/NeonInc/sce
 DELAY = 1.2          # seconds between requests to the same store, to stay polite
 MAX_VARIATIONS = 300  # cap on extra WooCommerce variation lookups per run
 
-session = requests.Session()
-session.headers.update({"User-Agent": UA, "Accept": "application/json,text/html;q=0.9,*/*;q=0.5"})
+# Stores are collected at the same time, one thread each, so each thread gets its own connection.
+_local = threading.local()
+
+
+def _session():
+    if not hasattr(_local, "s"):
+        _local.s = requests.Session()
+        _local.s.headers.update({"User-Agent": UA, "Accept": "application/json,text/html;q=0.9,*/*;q=0.5"})
+    return _local.s
 
 
 def log(*a):
@@ -44,7 +54,7 @@ def get(url, params=None, as_json=True, delay=None):
     last = None
     for attempt in range(3):
         try:
-            r = session.get(url, params=params, timeout=40)
+            r = _session().get(url, params=params, timeout=40)
             time.sleep(DELAY if delay is None else delay)
             if r.status_code in (200, 206):
                 return r.json() if as_json else r.text
@@ -497,9 +507,105 @@ def make_profiles(listings, previous):
     return profiles
 
 
+# ---------- smaller file for the website ----------
+# The site downloads prices.json on every first visit, so repeated text is factored out:
+# - each store's image addresses share a long start and end, kept once in stores[].img = [start, end];
+# - a listing's title "t" is dropped when it adds no words beyond brand + name + size;
+# - scent profiles refer to a shared list of "smells like" lines and note names by number.
+
+_WORD = re.compile(r"[a-z0-9]+")
+_FILLER = {"ml", "for", "the", "by", "and", "de", "spray", "eau", "parfum", "toilette", "edp", "edt", "perfume", "fragrance",
+           "men", "women", "man", "woman", "pour", "homme", "femme", "unisex", "natural", "vaporisateur", "new"}
+
+
+def _words(text):
+    text = re.sub(r"(\d+)(?:[.,]\d+)?\s*ml\b", r"\1", N.fold(text or ""))  # "100ml" -> "100"
+    return {w for w in _WORD.findall(text) if w not in _FILLER}
+
+
+def compact(stores_out, listings, profiles):
+    by_store = {}
+    for li in listings:
+        if li.get("i"):
+            by_store.setdefault(li["s"], []).append(li["i"])
+    for s in stores_out:
+        s.pop("img", None)
+        imgs = by_store.get(s["id"], [])
+        if len(imgs) < 20:
+            continue
+        pre = os.path.commonprefix(imgs)
+        suf = os.path.commonprefix([x[::-1] for x in imgs])[::-1]
+        shortest = min(len(x) for x in imgs)
+        if len(pre) + len(suf) > shortest:
+            suf = ""
+        if len(pre) + len(suf) >= 12:
+            s["img"] = [pre, suf]
+    affix = {s["id"]: s["img"] for s in stores_out if s.get("img")}
+    out = []
+    for li in listings:
+        li = dict(li)
+        a = affix.get(li["s"])
+        if a and li.get("i", "").startswith(a[0]) and li["i"].endswith(a[1]):
+            li["i"] = li["i"][len(a[0]):len(li["i"]) - len(a[1])]
+        if li.get("t") and _words(li["t"]) <= _words(f"{li.get('b', '')} {li.get('n', '')} {li.get('ml') or ''} {li.get('ib') or ''}"):
+            del li["t"]
+        out.append(li)
+    phrases, notes, pidx, nidx, prof_out = [], [], {}, {}, {}
+    for key, p in profiles.items():
+        p = dict(p)
+        if isinstance(p.get("l"), str):
+            if p["l"] not in pidx:
+                pidx[p["l"]] = len(phrases)
+                phrases.append(p["l"])
+            p["l"] = pidx[p["l"]]
+        if p.get("n") and isinstance(p["n"][0], str):
+            ids = []
+            for n in p["n"]:
+                if n not in nidx:
+                    nidx[n] = len(notes)
+                    notes.append(n)
+                ids.append(nidx[n])
+            p["n"] = ids
+        prof_out[key] = p
+    return out, prof_out, phrases, notes
+
+
+def expand(data):
+    """Undo compact() for a file written earlier (used for stores that fail and keep yesterday's prices)."""
+    affix = {s["id"]: s["img"] for s in data.get("stores", []) if s.get("img")}
+    for li in data.get("listings", []):
+        a = affix.get(li["s"])
+        if a and li.get("i"):
+            li["i"] = a[0] + li["i"] + a[1]
+        li.setdefault("t", li.get("n", ""))
+    phrases, notes = data.get("phrases") or [], data.get("notes") or []
+    for p in (data.get("profiles") or {}).values():
+        if isinstance(p.get("l"), int) and p["l"] < len(phrases):
+            p["l"] = phrases[p["l"]]
+        if p.get("n") and isinstance(p["n"][0], int):
+            p["n"] = [notes[i] for i in p["n"] if i < len(notes)]
+    for s in data.get("stores", []):
+        s.pop("img", None)
+    return data
+
+
+def collect_store(store, now):
+    """One store, start to finish. Returns (listings, error)."""
+    log(f"Collecting {store['name']}…")
+    try:
+        items = COLLECTORS[store["platform"]](store)
+        if not items:
+            raise RuntimeError("no products found")
+        log(f"  -> {store['name']}: {len(items)} listings")
+        return items, None
+    except Exception as e:  # keep going with the other stores
+        traceback.print_exc()
+        return None, e
+
+
 def main(only=None):
     cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
-    previous = json.loads(OUT.read_text()) if OUT.exists() else {"listings": [], "stores": []}
+    previous = expand(json.loads(OUT.read_text())) if OUT.exists() else {"listings": [], "stores": []}
     prev_by_store = {}
     for li in previous.get("listings", []):
         prev_by_store.setdefault(li["s"], []).append(li)
@@ -507,31 +613,31 @@ def main(only=None):
 
     now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
     today = now.astimezone(dt.timezone(dt.timedelta(hours=2))).date().isoformat()
-    all_listings, stores_out = [], []
+    todo = [s for s in cfg["stores"] if not only or s["id"] in only]
+    # Every store at once: each one is still read politely (one request at a time, with pauses),
+    # but a run now takes as long as the slowest store instead of all of them added up.
+    with ThreadPoolExecutor(max_workers=max(1, len(todo))) as pool:
+        results = dict(zip([s["id"] for s in todo], pool.map(lambda s: collect_store(s, now), todo)))
 
+    all_listings, stores_out = [], []
     for store in cfg["stores"]:
-        if only and store["id"] not in only:
+        if store["id"] not in results:
             all_listings += prev_by_store.get(store["id"], [])
             stores_out.append(prev_status.get(store["id"], {"id": store["id"], "name": store["name"]}))
             continue
-        log(f"Collecting {store['name']}…")
         info = {k: store[k] for k in ("id", "name", "url", "delivery")}
-        try:
-            items = COLLECTORS[store["platform"]](store)
-            if not items:
-                raise RuntimeError("no products found")
+        items, err = results[store["id"]]
+        if err is None:
             info.update(status="ok", count=len(items), updated=now.isoformat())
             all_listings += items
-            log(f"  -> {len(items)} listings")
-        except Exception as e:  # keep going with the other stores
-            traceback.print_exc()
+        else:
             old = prev_by_store.get(store["id"], [])
             for li in old:
                 li["stale"] = True
             all_listings += old
-            info.update(status="error", error=str(e)[:200], count=len(old),
+            info.update(status="error", error=str(err)[:200], count=len(old),
                         updated=prev_status.get(store["id"], {}).get("updated"))
-            log(f"  !! {store['name']} failed: {e} (kept {len(old)} old listings)")
+            log(f"  !! {store['name']} failed: {err} (kept {len(old)} old listings)")
         stores_out.append(info)
 
     fresh = [li for li in all_listings if not li.get("stale")]
@@ -540,9 +646,11 @@ def main(only=None):
     N.apply_size_assumptions(fresh)
     update_history(all_listings, today)
     profiles = make_profiles(all_listings, previous.get("profiles", {}))
+    small, prof_small, phrases, notes = compact(stores_out, all_listings, profiles)
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"generated": now.isoformat(), "stores": stores_out, "listings": all_listings,
-                               "profiles": profiles}, ensure_ascii=False, separators=(",", ":")))
+    OUT.write_text(json.dumps({"generated": now.isoformat(), "stores": stores_out, "listings": small,
+                               "profiles": prof_small, "phrases": phrases, "notes": notes},
+                              ensure_ascii=False, separators=(",", ":")))
     ok = sum(1 for s in stores_out if s.get("status") == "ok")
     log(f"Done: {len(all_listings)} listings, {ok}/{len(stores_out)} stores updated.")
     return 0 if ok else 1

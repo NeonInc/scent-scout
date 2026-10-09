@@ -6,7 +6,12 @@
 <title>Scent Scout</title>
 <meta name="description" content="Find the cheapest price for a fragrance across trusted South African stores, delivery included.">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#1f2023" media="(prefers-color-scheme: dark)">
+<script>
+  // Apply the chosen look before anything is drawn, so the page never flashes the wrong colours.
+  (function () { try { var t = localStorage.getItem("scentscout.theme"); if (t && t !== "auto") document.documentElement.setAttribute("data-theme", t); } catch (e) {} })();
+</script>
+<link rel="preload" href="data/prices.json" as="fetch" crossorigin="anonymous">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -14,10 +19,6 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Scent Scout">
-<!-- Inter is only a stand-in where Apple's system font (San Francisco) isn't available. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
 /* Scent Scout, iOS-style: grouped lists on a grey background, a blurred top bar with large titles
    that shrink into it, a bottom tab bar (Discover / Search / Watchlist), and a sheet that slides up
@@ -38,32 +39,50 @@
   --green: #248a3d;
   --green-soft: rgba(52, 199, 89, .14);
   --orange: #c24e00;
-  --bar: rgba(249, 249, 249, .94);
+  --bar: rgba(249, 249, 249, .97);
   --seg-on: #ffffff;
   --scrim: rgba(0, 0, 0, .32);
   --shadow: 0 10px 40px rgba(0, 0, 0, .12);
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --r-sheet: 16px;
   --r-card: 14px;
   --r-thumb: 10px;
   color-scheme: light;
 }
+/* Dark mode is graphite: warm dark greys rather than pure black. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --fill: rgba(118, 118, 128, .24); --fill-2: rgba(118, 118, 128, .32);
-    --label: #ffffff; --label-2: rgba(235, 235, 245, .62); --label-3: rgba(235, 235, 245, .3); --sep: rgba(84, 84, 88, .65);
-    --tint: #ff375f; --tint-soft: rgba(255, 55, 95, .16); --on-tint: #ffffff; --green: #30d158; --green-soft: rgba(48, 209, 88, .16); --orange: #ff9f0a;
-    --bar: rgba(22, 22, 24, .92); --seg-on: #636366; --scrim: rgba(0, 0, 0, .55); --shadow: 0 10px 40px rgba(0, 0, 0, .6);
+  :root:not([data-theme]) {
+    --bg: #1f2023; --surface: #2b2c30; --surface-2: #36373c; --fill: rgba(150, 150, 160, .18); --fill-2: rgba(150, 150, 160, .28);
+    --label: #f3f3f5; --label-2: rgba(235, 235, 245, .64); --label-3: rgba(235, 235, 245, .32); --sep: rgba(255, 255, 255, .1);
+    --tint: #ff4f74; --tint-soft: rgba(255, 79, 116, .16); --on-tint: #ffffff; --green: #3ed36a; --green-soft: rgba(62, 211, 106, .16); --orange: #ffa53a;
+    --bar: rgba(31, 32, 35, .97); --seg-on: #55565c; --scrim: rgba(0, 0, 0, .5); --shadow: 0 10px 40px rgba(0, 0, 0, .45);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --fill: rgba(118, 118, 128, .24); --fill-2: rgba(118, 118, 128, .32);
-  --label: #ffffff; --label-2: rgba(235, 235, 245, .62); --label-3: rgba(235, 235, 245, .3); --sep: rgba(84, 84, 88, .65);
-  --tint: #ff375f; --tint-soft: rgba(255, 55, 95, .16); --on-tint: #ffffff; --green: #30d158; --green-soft: rgba(48, 209, 88, .16); --orange: #ff9f0a;
-  --bar: rgba(22, 22, 24, .92); --seg-on: #636366; --scrim: rgba(0, 0, 0, .55); --shadow: 0 10px 40px rgba(0, 0, 0, .6);
+  --bg: #1f2023; --surface: #2b2c30; --surface-2: #36373c; --fill: rgba(150, 150, 160, .18); --fill-2: rgba(150, 150, 160, .28);
+  --label: #f3f3f5; --label-2: rgba(235, 235, 245, .64); --label-3: rgba(235, 235, 245, .32); --sep: rgba(255, 255, 255, .1);
+  --tint: #ff4f74; --tint-soft: rgba(255, 79, 116, .16); --on-tint: #ffffff; --green: #3ed36a; --green-soft: rgba(62, 211, 106, .16); --orange: #ffa53a;
+  --bar: rgba(31, 32, 35, .97); --seg-on: #55565c; --scrim: rgba(0, 0, 0, .5); --shadow: 0 10px 40px rgba(0, 0, 0, .45);
   color-scheme: dark;
 }
+/* Love mode: blush pink, rose tint, a faint heart pattern and a few hearts when it's switched on. */
+:root[data-theme="love"] {
+  --bg: #fff1f5; --surface: #ffffff; --surface-2: #ffe3ec; --fill: rgba(229, 23, 95, .08); --fill-2: rgba(229, 23, 95, .15);
+  --label: #3b0b22; --label-2: rgba(84, 18, 48, .64); --label-3: rgba(84, 18, 48, .3); --sep: rgba(214, 51, 108, .2);
+  --tint: #e0115f; --tint-soft: rgba(224, 17, 95, .1); --on-tint: #ffffff; --green: #23834a; --green-soft: rgba(35, 131, 74, .12); --orange: #b45309;
+  --bar: rgba(255, 241, 245, .97); --seg-on: #ffffff; --scrim: rgba(80, 10, 40, .3); --shadow: 0 10px 40px rgba(224, 17, 95, .16);
+  color-scheme: light;
+}
+:root[data-theme="love"] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath d='M24 34s-9-5.6-9-12.4A5.1 5.1 0 0 1 24 19a5.1 5.1 0 0 1 9 2.6C33 28.4 24 34 24 34zM72 82s-6-3.7-6-8.3a3.4 3.4 0 0 1 6-1.7 3.4 3.4 0 0 1 6 1.7c0 4.6-6 8.3-6 8.3z' fill='%23e0115f' fill-opacity='.05'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+:root[data-theme="love"] .large { background: linear-gradient(95deg, #e0115f, #ff6f9c 70%, #ff9ab8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+:root[data-theme="love"] .today { box-shadow: 0 0 0 1.5px rgba(224, 17, 95, .18), 0 10px 30px rgba(224, 17, 95, .12); }
+:root[data-theme="love"] .group, :root[data-theme="love"] .scent, :root[data-theme="love"] .dact, :root[data-theme="love"] .alert { box-shadow: 0 1px 2px rgba(224, 17, 95, .06); }
+.heart { position: fixed; z-index: 70; bottom: -40px; pointer-events: none; color: #ff2d75; animation: rise 2.2s cubic-bezier(.2, .7, .3, 1) forwards; }
+@keyframes rise { 0% { transform: translate(0, 0) scale(.6) rotate(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx), -95vh) scale(1.2) rotate(var(--rot)); opacity: 0; } }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
@@ -86,7 +105,7 @@ button { cursor: pointer; }
             background-repeat: no-repeat; background-position: center; background-size: 40%; }
 .ph.empty img { display: none; }
 .ph img { width: 100%; height: 100%; object-fit: contain; padding: 9%; display: block; mix-blend-mode: multiply; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ph { background-color: #f2f2f4; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .ph { background-color: #f2f2f4; } }
 :root[data-theme="dark"] .ph { background-color: #f2f2f4; }
 
 /* ---------- top bar ---------- */
@@ -105,10 +124,35 @@ button { cursor: pointer; }
 .toptabs { display: none; background: var(--fill); border-radius: 9px; padding: 2px; }
 .toptabs button { border: 0; background: none; border-radius: 7px; padding: 5px 14px; font-size: 14px; font-weight: 600; color: var(--label); }
 .toptabs button[aria-selected="true"] { background: var(--seg-on); box-shadow: 0 1px 3px rgba(0, 0, 0, .14); }
-/* Neon Inc account badge (from the hub's neon-cloud.js), restyled to match. */
-.acct .nc-badge { height: 30px; border-radius: 999px; background: var(--fill); color: var(--label); border: 0; font: 600 14px var(--font); letter-spacing: -0.01em; padding: 0 12px 0 10px; }
-.acct .nc-badge:hover { border: 0; background: var(--fill-2); }
-.acct .nc-badge .nc-dot { width: 7px; height: 7px; }
+/* Profile button (top right): the person's Google photo when signed in, otherwise an outline. */
+.avatar { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 0; padding: 0; background: var(--fill); color: var(--tint); display: grid; place-items: center; overflow: visible; flex: none; }
+.avatar img { width: 34px; height: 34px; border-radius: 50%; display: block; object-fit: cover; }
+.avatar svg { width: 20px; height: 20px; }
+.avatar .s { position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border-radius: 50%; background: #34c759; box-shadow: 0 0 0 2px var(--bg); }
+.avatar .s[data-s="saving"] { background: #ffcc00; }
+.avatar .s[data-s="error"], .avatar .s[data-s="offline"] { background: #ff9500; }
+/* Profile sheet */
+.acctcard { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 14px; align-items: center; padding: 14px 16px; }
+.acctcard .pic { width: 60px; height: 60px; border-radius: 50%; background: var(--fill); color: var(--tint); display: grid; place-items: center; overflow: hidden; }
+.acctcard .pic img { width: 100%; height: 100%; object-fit: cover; }
+.acctcard .pic svg { width: 30px; height: 30px; }
+.acctcard .nm { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; }
+.acctcard .em { font-size: 15px; color: var(--label-2); overflow-wrap: anywhere; }
+.themes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.theme { border: 0; background: none; padding: 0; display: grid; justify-items: center; gap: 7px; font-size: 13px; font-weight: 500; color: var(--label); }
+.theme .sw { width: 100%; aspect-ratio: 3 / 4; border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .14); }
+.theme .sw i { position: absolute; left: 12%; right: 12%; height: 14%; border-radius: 4px; }
+.theme .sw i:nth-child(1) { top: 14%; } .theme .sw i:nth-child(2) { top: 36%; } .theme .sw i:nth-child(3) { top: 58%; right: 40%; }
+.theme .sw b { position: absolute; left: 12%; bottom: 10%; width: 30%; height: 10%; border-radius: 999px; }
+.theme[aria-pressed="true"] .sw { box-shadow: 0 0 0 2.5px var(--tint); }
+.theme .tick { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--label-3); display: grid; place-items: center; font-size: 12px; color: #fff; }
+.theme[aria-pressed="true"] .tick { background: var(--tint); border-color: var(--tint); }
+.field2 { width: 100%; border: 0; background: none; font-size: 17px; color: var(--label); padding: 0; outline: none; text-align: right; min-width: 0; }
+.soon { font-size: 12px; font-weight: 600; color: var(--tint); background: var(--tint-soft); border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: 2px; }
+/* Loading placeholders */
+.sk { background: var(--fill); border-radius: 12px; }
+@media (prefers-reduced-motion: no-preference) { .sk { animation: pulse 1.4s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .55; } }
 
 /* ---------- page titles ---------- */
 .titlebar { padding: 6px 0 10px; }
@@ -342,7 +386,7 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
         <button type="button" role="tab" data-tab="search">Search</button>
         <button type="button" role="tab" data-tab="watch">Watchlist</button>
       </div>
-      <span class="acct brandline" id="acct"></span>
+      <button type="button" class="avatar" id="profilebtn" aria-label="Profile and settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></button>
     </div>
   </div>
 </header>
@@ -376,10 +420,15 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
   <div class="sheethead"><button type="button" class="reset" id="reset">Reset</button><h2 id="ftitle">Filters</h2><button type="button" class="done" id="done">Done</button></div>
   <div class="sheetbody" id="fbody"></div>
 </section>
+<section class="sheet" id="profile" role="dialog" aria-modal="true" aria-labelledby="ptitle" hidden>
+  <div class="sheethead"><span></span><h2 id="ptitle">Profile</h2><button type="button" class="done" id="pdone">Done</button></div>
+  <div class="sheetbody" id="pbody"></div>
+</section>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <input type="file" id="bkfile" accept=".txt,.json,text/plain,application/json" hidden>
 
-<script src="../neon-cloud.js"></script>
+<!-- Neon Inc sign-in and cloud saves (from the hub). Loaded without holding up the page. -->
+<script src="../neon-cloud.js" async onload="window.__ncLoaded = true; if (window.__ncReady) window.__ncReady();"></script>
 <script>
 (function () {
   "use strict";
@@ -549,10 +598,20 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
   function prepare(d) {
     data = d;
     profiles = d.profiles || {};
-    d.stores.forEach(function (s) { stores[s.id] = s; state.stores[s.id] = true; });
+    // The file stores repeated text once (see compact() in the collector): expand it here.
+    var phrases = d.phrases || [], notes = d.notes || [];
+    Object.keys(profiles).forEach(function (k) {
+      var p = profiles[k];
+      if (typeof p.l === "number") p.l = phrases[p.l];
+      if (p.n && typeof p.n[0] === "number") p.n = p.n.map(function (i) { return notes[i]; }).filter(Boolean);
+    });
+    stores = {}; concsByKey = {};
+    d.stores.forEach(function (s) { stores[s.id] = s; if (!(s.id in state.stores)) state.stores[s.id] = true; });
     listings = d.listings.filter(function (li) { return li.p > 0; });
     listings.forEach(function (li) {
       var st = stores[li.s] || {};
+      if (li.i && st.img) li.i = st.img[0] + li.i + st.img[1];
+      if (!li.t) li.t = li.n || "";
       if (li.u && li.u.charAt(0) === "/") li.u = (st.url || "") + li.u;
       if (li.i && li.i.indexOf("//") === 0) li.i = "https:" + li.i;
       var bare = (li.t || "").split(/\(?\s*(?:inspired\s+by|insp\.?\s+by|inpired\s+by)/i)[0];
@@ -709,12 +768,13 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
 
   // ---------- watchlist prices ----------
   function resolveWatch() {
-    var idx = groupIndex(), changed = false;
+    var idx = groupIndex(), changed = false, all = null;
     watch.forEach(function (e) {
       if (e.gk && idx[e.gk]) return;
       if (!e.q) return;
       var qt = toks(e.q);
-      var gs = Object.keys(idx).map(function (k) { return idx[k]; }).filter(function (g) { return matches(qt, toks(g.brand + " " + g.name + " " + (CONC_WORDS[g.conc] || ""))); });
+      all = all || Object.keys(idx).map(function (k) { return idx[k]; });
+      var gs = all.filter(function (g) { return matches(qt, gtoks(g)); });
       var g = rankFor(e.q, gs)[0];
       // A saved fragrance that's out of stock keeps its place; it only moves to an exact name match
       // (e.g. after an import where the store renamed it).
@@ -968,15 +1028,20 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
     });
     return top;
   }
+  // Words of every fragrance's brand + name, worked out once (searching re-reads them many times).
+  function gtoks(g) { return g._tk || (g._tk = toks(g.brand + " " + g.name + " " + (CONC_WORDS[g.conc] || ""))); }
   function fotd() {
     if (fotdCache !== undefined) return fotdCache;
-    var idx = groupIndex(), all = Object.keys(idx).map(function (k) { return idx[k]; }), seen = {}, inSeason = [], other = [];
+    var idx = groupIndex(), now = new Date(), day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5);
+    // Today's pick is remembered, so it only has to be worked out once a day.
+    try { var c = JSON.parse(localStorage.getItem("scentscout.fotd") || "null"); if (c && c.day === day && idx[c.gk]) return (fotdCache = idx[c.gk]); } catch (e) {}
+    var all = Object.keys(idx).map(function (k) { return idx[k]; }).filter(function (g) {
+      return g.img && !g.ib && (g.best.ml || 100) >= 30 && !/\b(gel|hands?|lotion|cream|deodorant|mist|oil|set)\b/i.test(g.name);
+    });
+    var seen = {}, inSeason = [], other = [];
     FOTD.forEach(function (q) {
       var qt = toks(q);
-      var gs = all.filter(function (g) {
-        return g.img && !g.ib && (g.best.ml || 100) >= 30 && !/\b(gel|hands?|lotion|cream|deodorant|mist|oil|set)\b/i.test(g.name) &&
-          matches(qt, toks(g.brand + " " + g.name + " " + (CONC_WORDS[g.conc] || "")));
-      });
+      var gs = all.filter(function (g) { return matches(qt, gtoks(g)); });
       var g = rankFor(q, gs)[0];
       if (!g || seen[g.gk]) return;
       seen[g.gk] = 1;
@@ -984,8 +1049,8 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
       (p && p.s && p.s.indexOf(NOW) >= 0 ? inSeason : other).push(g);
     });
     var pool = inSeason.length >= 5 ? inSeason : inSeason.concat(other);
-    var now = new Date(), day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5);
     fotdCache = pool.length ? pool[(day * 37) % pool.length] : null; // step through the list so consecutive days differ
+    try { if (fotdCache) localStorage.setItem("scentscout.fotd", JSON.stringify({ day: day, gk: fotdCache.gk })); } catch (e) {}
     return fotdCache;
   }
   function todayHtml() {
@@ -993,7 +1058,7 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
     if (!g) return "";
     var p = prof(g), b = g.best;
     return '<button type="button" class="today" data-open="' + esc(g.gk) + '" aria-label="Fragrance of the day: ' + esc(g.brand + " " + shortName(g)) + '">' + photo(g.img) +
-      '<span class="tb"><span class="k">Fragrance of the day</span><span class="h">' + esc(shortName(g)) + '</span><span class="br">' + esc(g.brand) + (g.conc ? " · " + esc(concName(g.conc)) : "") + "</span>" +
+      '<span class="tb"><span class="k">' + (theme() === "love" ? "Love pick of the day 💕" : "Fragrance of the day") + "</span>" + '<span class="h">' + esc(shortName(g)) + '</span><span class="br">' + esc(g.brand) + (g.conc ? " · " + esc(concName(g.conc)) : "") + "</span>" +
       (p && p.l ? '<span class="line">Smells like ' + esc(p.l) + ".</span>" : "") +
       '<span class="foot"><span class="pr">From <b>' + R(tot(b)) + "</b> at " + esc(stores[b.s].name) + '</span><span class="pill solid">View</span></span></span></button>';
   }
@@ -1243,6 +1308,115 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
     else if (!gk && state.open) closeDetail(true);
   });
 
+  // Grey placeholders shaped like the page, shown for the moment before prices arrive.
+  function skeleton() {
+    var tile = '<div style="flex:none;width:140px"><div class="sk" style="aspect-ratio:1;border-radius:16px"></div><div class="sk" style="height:11px;margin-top:9px;width:60%"></div><div class="sk" style="height:14px;margin-top:6px"></div></div>';
+    return '<div class="sk" style="height:420px;border-radius:22px;margin-top:6px"></div><div class="sec"><div class="sk" style="width:42%;height:24px;margin-bottom:12px"></div><div class="rail hscroll">' + tile + tile + tile + tile + "</div></div>";
+  }
+
+  // ---------- appearance: Auto, Light, Graphite (dark), Love ----------
+  var THEMES = [["auto", "Auto", "linear-gradient(135deg,#f2f2f7 50%,#1f2023 50%)", "#ffffff", "#e3184c"], ["light", "Light", "#f2f2f7", "#ffffff", "#e3184c"],
+                ["dark", "Graphite", "#1f2023", "#2b2c30", "#ff4f74"], ["love", "Love", "#fff1f5", "#ffffff", "#e0115f"]];
+  function theme() { try { return localStorage.getItem("scentscout.theme") || "auto"; } catch (e) { return "auto"; } }
+  function applyTheme(t) {
+    if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t);
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    if (t === "auto") { metas[0].setAttribute("media", "(prefers-color-scheme: light)"); metas[0].content = "#f2f2f7"; metas[1].setAttribute("media", "(prefers-color-scheme: dark)"); metas[1].content = "#1f2023"; }
+    else { var bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(); [].forEach.call(metas, function (m) { m.removeAttribute("media"); m.content = bg; }); }
+  }
+  function setTheme(t) {
+    try { localStorage.setItem("scentscout.theme", t); } catch (e) {}
+    applyTheme(t);
+    if (t === "love") hearts();
+    render(); renderProfile();
+  }
+  function hearts() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var glyphs = ["❤️", "💗", "💕", "💖", "♥"];
+    for (var i = 0; i < 18; i++) {
+      var h = document.createElement("span");
+      h.className = "heart"; h.setAttribute("aria-hidden", "true");
+      h.textContent = glyphs[i % glyphs.length];
+      h.style.left = (5 + Math.random() * 90) + "vw";
+      h.style.fontSize = (16 + Math.random() * 20) + "px";
+      h.style.animationDelay = (Math.random() * 0.7) + "s";
+      h.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+      h.style.setProperty("--rot", (Math.random() * 80 - 40) + "deg");
+      document.body.appendChild(h);
+      setTimeout(function (el) { el.remove(); }, 3200, h);
+    }
+  }
+
+  // ---------- profile: account, appearance, email alerts ----------
+  var PERSON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4"/></svg>';
+  var CONSENT = "Email me when fragrances on my Scent Scout watchlist drop in price. I can turn this off at any time.";
+  var alerts = null; // { enabled, email, minDrop, createdAt, updatedAt } for the signed-in person
+  function NC() { return window.NeonCloud && window.NeonCloud.enabled ? window.NeonCloud : null; }
+  function cloudUser() { var c = NC(); return c && c.user ? c.user() : null; }
+  function paintAvatar() {
+    var u = cloudUser(), c = NC(), b = $("profilebtn");
+    b.innerHTML = (u && u.photo ? '<img src="' + esc(u.photo) + '" alt="" referrerpolicy="no-referrer">' : PERSON) +
+      (u ? '<span class="s" data-s="' + esc(c.status()) + '"></span>' : "");
+    b.setAttribute("aria-label", u ? "Profile: signed in as " + (u.name || u.email) : "Profile and settings");
+  }
+  function cachedAlerts() {
+    var u = cloudUser();
+    try { var a = JSON.parse(localStorage.getItem("scentscout.alerts") || "null"); return a && u && a.uid === u.uid ? a : null; } catch (e) { return null; }
+  }
+  function loadAlerts() {
+    var c = NC(), u = cloudUser(); if (!c || !u) return;
+    alerts = cachedAlerts();
+    c.userRef("alerts/scent").then(function (ref) { return ref.get(); }).then(function (snap) {
+      alerts = snap.exists ? snap.data() : null;
+      try { localStorage.setItem("scentscout.alerts", JSON.stringify(Object.assign({ uid: u.uid }, alerts || {}))); } catch (e) {}
+      renderProfile();
+    }).catch(function () {});
+  }
+  // The "pending" list: each person's choice is saved in their own account (users/{uid}/alerts/scent).
+  // Nothing is emailed yet; a sender added later reads these and the watchlist next to them.
+  function saveAlerts(patch, okMsg) {
+    var c = NC(), u = cloudUser();
+    if (!c || !u) { toast("Sign in first, so we know where to send alerts."); return; }
+    var next = Object.assign({ enabled: false, email: u.email || "", minDrop: 10 }, alerts || {}, patch);
+    if (next.enabled && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(next.email || "")) { toast("Enter a valid email address first."); renderProfile(); return; }
+    var now = Date.now();
+    var doc = { enabled: !!next.enabled, email: next.email, minDrop: next.minDrop, status: "pending", app: "scent", consent: CONSENT,
+                createdAt: next.createdAt || now, updatedAt: now };
+    alerts = doc; renderProfile();
+    c.userRef("alerts/scent").then(function (ref) { return ref.set(doc, { merge: true }); }).then(function () {
+      try { localStorage.setItem("scentscout.alerts", JSON.stringify(Object.assign({ uid: u.uid }, doc))); } catch (e) {}
+      toast(okMsg);
+    }).catch(function () { toast("Couldn’t save. Check your connection and try again."); });
+  }
+  function renderProfile() {
+    if ($("profile").hidden) return;
+    var c = NC(), u = cloudUser(), a = alerts || {}, t = theme();
+    var STATUS = { synced: "Saved to your account", saving: "Saving…", offline: "Offline: will save when you’re back online", error: "Not saved yet. Try again later.", loading: "Checking…" };
+    var html = '<div class="group"><div class="acctcard"><span class="pic">' + (u && u.photo ? '<img src="' + esc(u.photo) + '" alt="" referrerpolicy="no-referrer">' : PERSON) + "</span><div>" +
+      '<div class="nm">' + (u ? esc(u.name || "Signed in") : "Not signed in") + '</div><div class="em">' +
+      (u ? esc(u.email) : c ? "Sign in to keep your watchlist on every device and join email alerts." : "Sign-in isn’t available right now.") + "</div></div></div>" +
+      (u ? '<div class="lrow"><span>Watchlist</span><span class="v">' + (STATUS[c.status()] || "") + "</span></div>" : "") +
+      (c ? '<button type="button" class="lrow link" data-pact="' + (u ? "signout" : "signin") + '"><span>' + (u ? "Sign out" : "Sign in with Google") + "</span></button>" : "") + "</div>";
+    html += '<div class="grouptitle">Appearance</div><div class="group" style="padding:14px 16px 12px"><div class="themes">' + THEMES.map(function (x) {
+      return '<button type="button" class="theme" data-theme-pick="' + x[0] + '" aria-pressed="' + (t === x[0]) + '"><span class="sw" style="background:' + x[2] + '"><i style="background:' + x[3] + '"></i><i style="background:' + x[3] + '"></i><i style="background:' + x[3] + '"></i><b style="background:' + x[4] + '"></b></span>' +
+        (x[0] === "love" ? "Love 💕" : x[1]) + '<span class="tick">' + (t === x[0] ? "✓" : "") + "</span></button>";
+    }).join("") + "</div></div>";
+    html += '<div class="grouptitle">Price alerts by email<span class="soon">Coming soon</span></div><div class="group">' +
+      '<label class="switchrow" for="alerton"><span>Email me when my watchlist drops</span><input type="checkbox" class="switch" id="alerton"' + (a.enabled ? " checked" : "") + (u ? "" : " disabled") + "></label>" +
+      '<label class="lrow"><span>Email</span><input class="field2" id="alertmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="' + esc(a.email || (u && u.email) || "") + '"' + (u ? "" : " disabled") + "></label>" +
+      '<div style="padding:10px 16px 12px"><div class="seg" style="margin:0" role="tablist" aria-label="How big a drop">' + [[0, "Any drop"], [10, "10% or more"], [20, "20% or more"]].map(function (x) {
+        var on = (a.minDrop == null ? 10 : a.minDrop) === x[0];
+        return '<button type="button" role="tab" data-mindrop="' + x[0] + '" aria-selected="' + on + '"' + (u ? "" : " disabled") + ">" + x[1] + "</button>";
+      }).join("") + "</div></div></div>" +
+      '<p class="capt">' + (u ? (a.enabled ? "You’re on the list. Alerts start automatically once they’re switched on. " : "Join the list now and alerts start automatically once they’re switched on. ") +
+        "We’ll only email about fragrances on your watchlist, and you can turn it off any time." : "Sign in first, so we know where to send them.") + "</p>";
+    html += '<div class="grouptitle">Your data</div><div class="group">' +
+      '<button type="button" class="lrow" data-pgo="watch"><span>Back up or move your watchlist</span><span class="v">' + CHEV + "</span></button>" +
+      '<button type="button" class="lrow" data-pclear="1"><span>Clear recent searches</span></button></div>';
+    html += '<p class="capt" style="margin-top:22px;text-align:center">' + (data ? "Prices updated " + ago(data.generated) + ". " : "") + "Scent Scout · NEON INC™ © 2026</p>";
+    $("pbody").innerHTML = html;
+  }
+
   // ---------- page rendering ----------
   var TITLES = { home: "Discover", search: "Search", watch: "Watchlist" };
   function render() {
@@ -1265,7 +1439,7 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
     $("searchrow").hidden = !(showSearch || spec);
     $("field").hidden = !showSearch;
     $("clear").hidden = !state.q;
-    if (!data) return;
+    if (!data) { $("content").innerHTML = skeleton(); return; }
     var html;
     if (spec) html = presetHtml(spec);
     else if (state.tab === "home") html = homeHtml();
@@ -1374,6 +1548,24 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
     rd.readAsText(f);
   });
 
+  // profile sheet
+  $("profilebtn").addEventListener("click", function () { renderProfile(); $("profile").hidden = false; renderProfile(); showSheet($("profile")); if (cloudUser()) loadAlerts(); $("pdone").focus({ preventScroll: true }); });
+  $("pdone").addEventListener("click", function () { hideSheet($("profile")); });
+  $("pbody").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b || b.disabled) return;
+    var d = b.dataset, c = NC();
+    if (d.themePick) setTheme(d.themePick);
+    else if (d.pact === "signin" && c) c.signIn().catch(function (x) { toast("Sign-in didn’t work: " + ((x && x.message) || x)); });
+    else if (d.pact === "signout" && c) { c.signOut(); alerts = null; }
+    else if (d.mindrop != null) saveAlerts({ minDrop: +d.mindrop, email: $("alertmail").value.trim() }, "Saved.");
+    else if (d.pgo) { hideSheet($("profile")); setTab(d.pgo); }
+    else if (d.pclear) { try { localStorage.removeItem("scentscout.recent"); } catch (x) {} toast("Recent searches cleared."); if (state.tab === "search") render(); }
+  });
+  $("pbody").addEventListener("change", function (e) {
+    if (e.target.id === "alerton") saveAlerts({ enabled: e.target.checked, email: $("alertmail").value.trim() }, e.target.checked ? "You’re on the alert list." : "Email alerts turned off.");
+    if (e.target.id === "alertmail" && alerts && alerts.enabled) saveAlerts({ email: e.target.value.trim() }, "Email updated.");
+  });
+
   // filters sheet
   $("filterbtn").addEventListener("click", function () { renderFilters(); showSheet($("filters")); $("done").focus({ preventScroll: true }); });
   $("done").addEventListener("click", function () { hideSheet($("filters")); });
@@ -1432,10 +1624,43 @@ footer.foot { color: var(--label-2); font-size: 13px; text-align: center; paddin
     render();
     if (state.open) renderDetail();
   });
-  if (window.NeonCloud && window.NeonCloud.enabled) {
-    window.NeonCloud.badge($("acct"), { className: "nc-compact" });
-    window.NeonCloud.onUser(function (u) { if (u) window.NeonCloud.sync("scent").catch(function () {}); });
+  // Neon Inc sign-in arrives a moment after the page (the script loads in the background).
+  var cloudStarted = false;
+  function initCloud() {
+    var c = NC();
+    if (cloudStarted || !c) return;
+    cloudStarted = true;
+    c.onUser(function (u) {
+      paintAvatar(); alerts = null;
+      if (u) { c.sync("scent").catch(function () {}); if (!$("profile").hidden) loadAlerts(); }
+      renderProfile();
+    });
+    c.onStatus(function () { paintAvatar(); renderProfile(); });
   }
+  if (window.__ncLoaded) initCloud(); else window.__ncReady = initCloud;
+
+  // Offline copy: after the first visit the page and prices open straight from the phone,
+  // and newer prices are fetched in the background (see sw.js).
+  function refreshPrices() {
+    fetch("data/prices.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
+      if (data && d.generated === data.generated) return;
+      idxCache = null; pairCache = null; fotdCache = undefined;
+      prepare(d); resolveWatch(); checkDrops(); render();
+      if (state.open) renderDetail();
+      toast("Prices updated.");
+    }).catch(function () {});
+  }
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+    navigator.serviceWorker.addEventListener("message", function (e) {
+      var type = e.data && e.data.type;
+      if (type === "prices-updated" && data) refreshPrices();
+      // A new version of the site: if it only just opened, switch now; otherwise use it next time.
+      if (type === "app-updated") { if (performance.now() < 4000 && !state.open) location.reload(); }
+    });
+  }
+  applyTheme(theme());
+  paintAvatar();
   render();
   var seed = document.getElementById("seed-data");
   if (seed) start(JSON.parse(seed.textContent));

@@ -16,8 +16,19 @@ folder) and is one tile on the Neon Inc hub (https://neoninc.github.io/, repo
 - Cloud saves: the watchlist syncs through the shared `/neon-cloud.js` (hub repo) for signed-in
   people. Use `saveWatch()` for changes the person makes (it syncs) and `saveWatch(true)` for
   automatic tidy-ups like price bookkeeping (stays on the device).
-- The Neon Inc account badge is placed in `#acct` (top-right of the bar) and restyled from this page
-  with `.acct .nc-badge`. Don't edit `neon-cloud.js` from here.
+- Sign-in lives in the Profile sheet (round button top-right, `#profilebtn`), built from
+  `NeonCloud.user()`, `signIn()`, `signOut()` and `onStatus()`. `neon-cloud.js` loads `async`;
+  `initCloud()` runs when it arrives. Don't edit `neon-cloud.js` from here.
+- Email alerts are a sign-up list only for now: each person's choice is saved in their own account
+  at `users/{uid}/alerts/scent` (`enabled`, `email`, `minDrop`, `status: "pending"`). Nothing sends
+  email yet. Before sending, update the hub's `privacy.html` (new use of email addresses).
+- Looks: `localStorage['scentscout.theme']` = auto | light | dark (graphite) | love, set on `<html data-theme>`
+  by an inline script in `<head>` so there's no flash. Keep new colours as CSS variables per theme.
+- `docs/sw.js` keeps an offline copy (page + prices) and refreshes it in the background. If you add
+  files the page needs offline, add them to `SHELL`; bump `CACHE` only to throw away old copies.
+- `prices.json` is compacted by the collector (`compact()`/`expand()`): image addresses share a
+  per-store start/end (`stores[].img`), titles equal to the name are dropped, and profiles use the
+  `phrases`/`notes` tables. The page expands these in `prepare()`.
 - Design: iOS-style. System font, grey grouped lists, one tint colour (`--tint`), bottom tab bar
   (Discover / Search / Watchlist) and a detail sheet for each fragrance. Keep new UI in that style.
 - ARC prices come from each product page's structured data, read within a time budget per run and

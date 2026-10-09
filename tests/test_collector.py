@@ -115,6 +115,21 @@ def test_page_budget(tmp):
           "budget: cache keeps what was read and drops products ARC no longer lists")
 
 
+def test_compact_roundtrip():
+    stores = [{"id": "x", "name": "X"}]
+    lis = [{"id": f"x-{i}", "s": "x", "b": "Brand", "n": f"Name {i}", "t": f"Brand Name {i} 100ml EDP", "ml": 100,
+            "i": f"//cdn.example.com/s/files/1/0001/products/img{i}.jpg?width=300", "k": "brand|name", "p": 10.0, "st": 1} for i in range(25)]
+    lis[0]["t"] = "Brand Name 0 Limited Edition"
+    profiles = {"brand|name|": {"f": ["cit"], "s": ["su"], "d": "d", "l": "a sea breeze", "n": ["Lemon", "Bergamot"]}}
+    small, prof, phrases, notes = C.compact(stores, lis, profiles)
+    check(stores[0]["img"] == ["//cdn.example.com/s/files/1/0001/products/img", ".jpg?width=300"] and small[3]["i"] == "3",
+          "compact: shared image start/end kept once per store")
+    check("t" not in small[3] and small[0]["t"] == "Brand Name 0 Limited Edition", "compact: title dropped only when it adds nothing")
+    check(prof["brand|name|"]["l"] == 0 and phrases == ["a sea breeze"] and prof["brand|name|"]["n"] == [0, 1], "compact: profile lines and notes by number")
+    back = C.expand({"stores": stores, "listings": small, "profiles": prof, "phrases": phrases, "notes": notes})
+    check(back["listings"][3]["i"] == lis[3]["i"] and back["profiles"]["brand|name|"]["n"] == ["Lemon", "Bergamot"], "compact: expands back exactly")
+
+
 def test_scent():
     notes, acc = S.extract("Top notes: Bergamot, Lemon. Heart: Rosemary, Lavender. Base notes: Vetiver, Cedar.")
     check({"bergamot", "lemon", "rosemary", "lavender", "vetiver", "cedar"} <= notes, "notes read from a notes list")
@@ -152,7 +167,9 @@ def test_collect(tmp):
     C.HISTORY = tmp / "history.json"
     C.PAGE_CACHE = tmp / "product_pages.json"
     rc = C.main()
-    data = json.loads(C.OUT.read_text())
+    raw = json.loads(C.OUT.read_text())
+    check(isinstance(raw.get("phrases"), list) and isinstance(raw.get("notes"), list), "compact file has phrase and note tables")
+    data = C.expand(json.loads(C.OUT.read_text()))
     L = {li["id"]: li for li in data["listings"]}
     check(rc == 0 and all(s["status"] == "ok" for s in data["stores"]), "all fixture stores ok")
 
@@ -207,6 +224,7 @@ if __name__ == "__main__":
     import tempfile
     test_keys()
     test_scent()
+    test_compact_roundtrip()
     test_gender_split()
     with tempfile.TemporaryDirectory() as d:
         test_collect(Path(d))
