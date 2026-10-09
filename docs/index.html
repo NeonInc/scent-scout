@@ -401,6 +401,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   <div class="sheetfoot"><button type="button" class="btn primary" id="done">Show results</button></div>
 </div>
 
+<script src="../neon-cloud.js"></script>
 <script>
 (function () {
   "use strict";
@@ -454,9 +455,19 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     try { var v = JSON.parse(localStorage.getItem("scentscout.watch2")); if (Array.isArray(v)) return v; } catch (e) {}
     var old = null;
     try { old = JSON.parse(localStorage.getItem("scentscout.watch")); } catch (e) {}
+    // Starter list for first-time visitors. Flagged so it never overwrites a signed-in person's own list.
+    if (!Array.isArray(old)) { try { localStorage.setItem("scentscout.watch2.default", "1"); } catch (e) {} }
     return (Array.isArray(old) ? old : DEFAULT_WATCH).map(function (q) { return { q: q }; });
   }
-  function saveWatch() { try { localStorage.setItem("scentscout.watch2", JSON.stringify(watch)); } catch (e) {} }
+  // auto = a background tidy-up (matching names to listings), not a change the person made.
+  function saveWatch(auto) {
+    try {
+      localStorage.setItem("scentscout.watch2", JSON.stringify(watch));
+      if (!auto) { localStorage.setItem("scentscout.watch2.at", String(Date.now())); localStorage.removeItem("scentscout.watch2.default"); }
+    } catch (e) {}
+    // Signed-in visitors: also save to their Neon Inc account (see /neon-cloud.js).
+    if (!auto && window.NeonCloud) window.NeonCloud.push("scent");
+  }
   var watch = loadWatch();
   function watchEntry(gk) { for (var i = 0; i < watch.length; i++) if (watch[i].gk === gk) return watch[i]; return null; }
 
@@ -707,7 +718,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       if (g && e.gk && g._score < 9) return; // 9+ = exact name
       if (g) { e.gk = g.gk; e.b = g.brand; e.n = g.name; changed = true; }
     });
-    if (changed) saveWatch();
+    if (changed) saveWatch(true);
   }
   // Price for the same bottle size as when it was saved, so a size change never looks like a drop.
   function watchPrice(e, g) {
@@ -726,7 +737,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       if (e.last != null && wp.sameSize && wp.total < e.last - 0.5) sessionDrops[e.gk] = { from: e.last, to: wp.total };
       e.last = wp.total;
     });
-    saveWatch();
+    saveWatch(true);
   }
   function toggleWatch(gk) {
     var e = watchEntry(gk);
@@ -1410,6 +1421,17 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     if (v0 === "watchlist" && !q0) state.view = "watch";
     readHashImport();
     setQuery(q0);
+  }
+  // Cloud saves: a newer watchlist from the person's account arrives as a 'storage' event.
+  window.addEventListener("storage", function (e) {
+    if (e.key !== "scentscout.watch2") return;
+    watch = loadWatch();
+    if (data) { resolveWatch(); checkDrops(); }
+    render();
+  });
+  if (window.NeonCloud && window.NeonCloud.enabled) {
+    window.NeonCloud.badge(document.querySelector(".brandline"), { className: "nc-compact" });
+    window.NeonCloud.onUser(function (u) { if (u) window.NeonCloud.sync("scent").catch(function () {}); });
   }
   var seed = document.getElementById("seed-data");
   if (seed) start(JSON.parse(seed.textContent));
