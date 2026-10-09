@@ -16,3 +16,9 @@ folder) and is one tile on the Neon Inc hub (https://neoninc.github.io/, repo
 - Cloud saves: the watchlist syncs through the shared `/neon-cloud.js` (hub repo) for signed-in
   people. Use `saveWatch()` for changes the person makes (it syncs) and `saveWatch(true)` for
   automatic tidy-ups like price bookkeeping (stays on the device).
+- The Neon Inc account badge is placed in `#acct` (top-right of the bar) and restyled from this page
+  with `.acct .nc-badge`. Don't edit `neon-cloud.js` from here.
+- Design: iOS-style. System font, grey grouped lists, one tint colour (`--tint`), bottom tab bar
+  (Discover / Search / Watchlist) and a detail sheet for each fragrance. Keep new UI in that style.
+- ARC prices come from each product page's structured data, read within a time budget per run and
+  remembered in `data/product_pages.json` (see `collect_dynamicweb`).

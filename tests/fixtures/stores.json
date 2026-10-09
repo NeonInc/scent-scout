@@ -513,7 +513,7 @@
        "priceRRP": "",
        "stockState": "stock-icon--in",
        "stockText": "In stock",
-       "link": "/products/brand/x/y",
+       "link": "/products/brand/montblanc/explorer-eau-de-parfum",
        "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f300100_A.jpg",
        "googleImpression": "{\"name\": \"Explorer Eau de Parfum\", \"id\": \"300100\", \"price\": 1499, \"brand\": \"MONTBLANC\"}",
        "description": "",
@@ -541,7 +541,7 @@
        "priceRRP": "",
        "stockState": "stock-icon--out",
        "stockText": "Out of stock",
-       "link": "/products/brand/x/y",
+       "link": "/products/brand/valentino/born-in-roma-donna-intense",
        "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f300200_A.jpg",
        "googleImpression": "{\"name\": \"Born In Roma Donna EDP Intense\", \"id\": \"300200\", \"price\": 590, \"brand\": \"Valentino\"}",
        "description": ""
@@ -567,7 +567,7 @@
        "priceRRP": "",
        "stockState": "stock-icon--in",
        "stockText": "In stock",
-       "link": "/products/brand/x/y",
+       "link": "/products/brand/jo-malone/candle",
        "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f300300_A.jpg",
        "googleImpression": "{\"name\": \"Wood Sage & Sea Salt Scented Candle\", \"id\": \"300300\", \"price\": 1200, \"brand\": \"Jo Malone\"}",
        "description": ""

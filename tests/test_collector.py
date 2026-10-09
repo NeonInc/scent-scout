@@ -94,6 +94,27 @@ def test_gender_split():
           and not N.is_excluded("Paris Corner Marshmallow Blush 50ml"), "cosmetics, hand gel and aftershave excluded, 'Blush' perfumes kept")
 
 
+def test_page_budget(tmp):
+    """Only reads product pages within the time budget; the rest come from the page cache or the feed."""
+    import datetime as dt
+    C.get = fake_get
+    C.PAGE_CACHE = tmp / "pages.json"
+    old = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=1)).isoformat(timespec="seconds")
+    C.PAGE_CACHE.write_text(json.dumps({
+        "/products/brand/montblanc/explorer-eau-de-parfum": {"t": old, "v": [{"size": "100ML", "price": 1299.0, "url": "", "stock": True, "sku": "", "gtin": ""}]},
+        "/products/brand/gone/item": {"t": old, "v": []}}))
+    ticks = iter([0, 0, 1000, 1000, 1000, 1000, 1000])  # budget runs out after the first page
+    store = {"id": "arc", "url": "https://www.arcstore.co.za", "paths": [{"path": "/fragrance/men", "g": "m"}]}
+    out = C.collect_dynamicweb(store, clock=lambda: next(ticks))
+    by = {li["id"]: li for li in out}
+    check(by["arc-202176-VOLVOL50ML"]["p"] == 2550, "budget: page read this run (never-read pages go first)")
+    check(by["arc-300100-VOLVOL100ML"]["p"] == 1299, "budget: unread product uses its page from an earlier run")
+    check(by["arc-300200-VOLVOL10ML"]["p"] == 590, "budget: no page yet -> feed price")
+    cache = json.loads(C.PAGE_CACHE.read_text())
+    check("/products/brand/gone/item" not in cache and "/products/brand/yves-saint-laurent/libre-santal-couture-eau-de-parfum" in cache,
+          "budget: cache keeps what was read and drops products ARC no longer lists")
+
+
 def test_scent():
     notes, acc = S.extract("Top notes: Bergamot, Lemon. Heart: Rosemary, Lavender. Base notes: Vetiver, Cedar.")
     check({"bergamot", "lemon", "rosemary", "lavender", "vetiver", "cedar"} <= notes, "notes read from a notes list")
@@ -129,6 +150,7 @@ def test_collect(tmp):
     C.get = fake_get
     C.OUT = tmp / "prices.json"
     C.HISTORY = tmp / "history.json"
+    C.PAGE_CACHE = tmp / "product_pages.json"
     rc = C.main()
     data = json.loads(C.OUT.read_text())
     L = {li["id"]: li for li in data["listings"]}
@@ -188,4 +210,6 @@ if __name__ == "__main__":
     test_gender_split()
     with tempfile.TemporaryDirectory() as d:
         test_collect(Path(d))
+    with tempfile.TemporaryDirectory() as d:
+        test_page_budget(Path(d))
     print("ALL PASSED")

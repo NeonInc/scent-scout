@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "collector" / "stores.json"
 OUT = ROOT / "docs" / "data" / "prices.json"
 HISTORY = ROOT / "data" / "history.json"
+PAGE_CACHE = ROOT / "data" / "product_pages.json"   # last structured data read from each ARC product page
 OVERRIDES = ROOT / "collector" / "scent_overrides.json"
 
 UA = "ScentScout/1.0 (personal price comparison; +https://github.com/NeonInc/scent-scout)"
@@ -303,10 +304,13 @@ def collect_vtex(store):
 # 2. So for perfumes the collector then opens each product page and reads its structured data
 #    (schema.org ProductGroup -> one Product per bottle size, each with its live price and stock),
 #    the same data ARC publishes for Google. Gift sets and mists keep the feed price.
-#    If a product page can't be read, the feed price is used.
+#    Reading ~900 pages takes over half an hour, so each run reads pages for at most PAGE_BUDGET
+#    seconds, oldest first, and remembers what it read in data/product_pages.json. Products not
+#    refreshed this run use their remembered page (if under PAGE_MAX_AGE days old), else the feed.
 
-PAGE_DELAY = 0.8        # seconds between ARC product pages
-MAX_PRODUCT_PAGES = 1300
+PAGE_DELAY = 0.8          # seconds between ARC product pages
+PAGE_BUDGET = 12 * 60     # seconds of product-page reading per run
+PAGE_MAX_AGE = 4          # days a remembered product page stays usable
 
 
 def rand(text):
@@ -390,20 +394,37 @@ def dw_feed_products(store):
     return products
 
 
-def collect_dynamicweb(store):
-    out, pages_read, pages_failed = [], 0, 0
-    for p in dw_feed_products(store).values():
-        if not p["price"] or N.is_excluded(p["title"]):
-            continue
+def collect_dynamicweb(store, clock=time.monotonic, now=None):
+    out, pages_read, pages_failed, from_cache = [], 0, 0, 0
+    products = [p for p in dw_feed_products(store).values() if p["price"] and not N.is_excluded(p["title"])]
+    cache = json.loads(PAGE_CACHE.read_text()) if PAGE_CACHE.exists() else {}
+    now = now or dt.datetime.now(dt.timezone.utc)
+    want = [p for p in products if N.kind_of(p["title"]) == "p" and p["link"]]
+    want.sort(key=lambda p: cache.get(p["link"], {}).get("t", ""))  # never read first, then oldest
+    started, fresh = clock(), {}
+    for p in want:
+        if clock() - started > PAGE_BUDGET:
+            break
+        try:
+            fresh[p["link"]] = ld_variants(get(store["url"] + p["link"], as_json=False, delay=PAGE_DELAY))
+            cache[p["link"]] = {"t": now.isoformat(timespec="seconds"), "v": fresh[p["link"]]}
+            pages_read += 1
+        except RuntimeError as e:
+            pages_failed += 1
+            log(f"  {store['id']} product page failed, using feed price: {e}")
+    cutoff = (now - dt.timedelta(days=PAGE_MAX_AGE)).isoformat()
+    live = {p["link"] for p in products}
+    for link in list(cache):  # forget pages for products ARC no longer lists, and very old ones
+        if link not in live or cache[link].get("t", "") < cutoff:
+            del cache[link]
+    PAGE_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    PAGE_CACHE.write_text(json.dumps(cache, separators=(",", ":"), sort_keys=True))
+    for p in products:
         common = dict(title=p["title"], brand_raw=p["brand"], img=dw_image(store, p["image"]), tags_text=p["tags"])
-        variants = []
-        if N.kind_of(p["title"]) == "p" and p["link"] and pages_read < MAX_PRODUCT_PAGES:
-            try:
-                variants = ld_variants(get(store["url"] + p["link"], as_json=False, delay=PAGE_DELAY))
-                pages_read += 1
-            except RuntimeError as e:
-                pages_failed += 1
-                log(f"  {store['id']} product page failed, using feed price: {e}")
+        variants = fresh.get(p["link"])
+        if variants is None and p["link"] in cache:
+            variants = cache[p["link"]]["v"]
+            from_cache += 1
         if variants:
             for v in variants:
                 size = v["size"].upper().replace(" ", "")
@@ -417,7 +438,7 @@ def collect_dynamicweb(store):
             out.append(make_listing(
                 store, pid=f"{p['pid']}-{p['variant'] or 'x'}", price=p["price"], was=p["was"], stock=p["stock"],
                 url=store["url"] + p["link"], variant_text=p["size"].replace("ML", " ml"), **common))
-    log(f"  {store['id']}: read {pages_read} product pages ({pages_failed} failed)")
+    log(f"  {store['id']}: read {pages_read} product pages ({pages_failed} failed), {from_cache} from earlier runs")
     return out
 
 

@@ -5,414 +5,394 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scent Scout</title>
 <meta name="description" content="Find the cheapest price for a fragrance across trusted South African stores, delivery included.">
-<meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#07080f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Scent Scout">
+<!-- Inter is only a stand-in where Apple's system font (San Francisco) isn't available. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: one narrow column built for a phone. Sticky search on top with two tabs (Discover, Watchlist).
-   Discover shows rails of picks; search results are a list of fragrances that drop down into
-   "smells like" and the store prices. */
+/* Scent Scout, iOS-style: grouped lists on a grey background, a blurred top bar with large titles
+   that shrink into it, a bottom tab bar (Discover / Search / Watchlist), and a sheet that slides up
+   with a fragrance's details. One tint (system pink). Wide screens: tabs move to the top bar. */
 :root {
-  --bg: #f6f7f9;
+  --bg: #f2f2f7;
   --surface: #ffffff;
-  --sunk: #eef0f4;
-  --ink: #0e1116;
-  --muted: #5d6471;
-  --line: #e4e7ed;
-  --accent: #d1145a;
-  --accent-ink: #ffffff;
-  --accent-soft: #fde8f0;
-  --deal: #0e7a4a;
-  --deal-soft: #e2f5eb;
-  --warn: #8a5a00;
-  --warn-soft: #fbf1dc;
-  --bad: #b42318;
-  --scrim: rgba(14, 17, 22, .45);
-  --shadow: 0 12px 32px rgba(14, 17, 22, .12);
-  --card: 0 1px 2px rgba(14, 17, 22, .05), 0 2px 8px rgba(14, 17, 22, .04);
-  --glow: none;
-  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --radius: 18px;
+  --surface-2: #f2f2f7;
+  --fill: rgba(118, 118, 128, .12);
+  --fill-2: rgba(118, 118, 128, .2);
+  --label: #000000;
+  --label-2: rgba(60, 60, 67, .62);
+  --label-3: rgba(60, 60, 67, .32);
+  --sep: rgba(60, 60, 67, .2);
+  --tint: #e3184c;
+  --tint-soft: rgba(227, 24, 76, .1);
+  --on-tint: #ffffff;
+  --green: #248a3d;
+  --green-soft: rgba(52, 199, 89, .14);
+  --orange: #c24e00;
+  --bar: rgba(249, 249, 249, .94);
+  --seg-on: #ffffff;
+  --scrim: rgba(0, 0, 0, .32);
+  --shadow: 0 10px 40px rgba(0, 0, 0, .12);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --r-sheet: 16px;
+  --r-card: 14px;
+  --r-thumb: 10px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #07080f; --surface: #10121b; --sunk: #181b27; --ink: #eef0f6; --muted: #99a0b1; --line: #232838;
-    --accent: #ff4f9a; --accent-ink: #16060d; --accent-soft: #2d1121; --deal: #4ee6a0; --deal-soft: #0e2a1e;
-    --warn: #f5c25b; --warn-soft: #2e2410; --bad: #ff7a6e; --scrim: rgba(0, 0, 0, .65); --shadow: 0 12px 32px rgba(0, 0, 0, .55);
-    --card: 0 0 0 rgba(0, 0, 0, 0); --glow: 0 0 18px rgba(255, 79, 154, .35);
+    --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --fill: rgba(118, 118, 128, .24); --fill-2: rgba(118, 118, 128, .32);
+    --label: #ffffff; --label-2: rgba(235, 235, 245, .62); --label-3: rgba(235, 235, 245, .3); --sep: rgba(84, 84, 88, .65);
+    --tint: #ff375f; --tint-soft: rgba(255, 55, 95, .16); --on-tint: #ffffff; --green: #30d158; --green-soft: rgba(48, 209, 88, .16); --orange: #ff9f0a;
+    --bar: rgba(22, 22, 24, .92); --seg-on: #636366; --scrim: rgba(0, 0, 0, .55); --shadow: 0 10px 40px rgba(0, 0, 0, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #07080f; --surface: #10121b; --sunk: #181b27; --ink: #eef0f6; --muted: #99a0b1; --line: #232838;
-  --accent: #ff4f9a; --accent-ink: #16060d; --accent-soft: #2d1121; --deal: #4ee6a0; --deal-soft: #0e2a1e;
-  --warn: #f5c25b; --warn-soft: #2e2410; --bad: #ff7a6e; --scrim: rgba(0, 0, 0, .65); --shadow: 0 12px 32px rgba(0, 0, 0, .55);
-  --card: 0 0 0 rgba(0, 0, 0, 0); --glow: 0 0 18px rgba(255, 79, 154, .35);
+  --bg: #000000; --surface: #1c1c1e; --surface-2: #2c2c2e; --fill: rgba(118, 118, 128, .24); --fill-2: rgba(118, 118, 128, .32);
+  --label: #ffffff; --label-2: rgba(235, 235, 245, .62); --label-3: rgba(235, 235, 245, .3); --sep: rgba(84, 84, 88, .65);
+  --tint: #ff375f; --tint-soft: rgba(255, 55, 95, .16); --on-tint: #ffffff; --green: #30d158; --green-soft: rgba(48, 209, 88, .16); --orange: #ff9f0a;
+  --bar: rgba(22, 22, 24, .92); --seg-on: #636366; --scrim: rgba(0, 0, 0, .55); --shadow: 0 10px 40px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 var(--font-body); -webkit-tap-highlight-color: transparent; }
-a { color: var(--accent); }
-button, input, select { font: inherit; color: inherit; }
+body { margin: 0; background: var(--bg); color: var(--label); font: 400 17px/1.35 var(--font); letter-spacing: -0.01em;
+       -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums; }
+a { color: var(--tint); text-decoration: none; }
+button, input, select { font: inherit; color: inherit; letter-spacing: inherit; }
 button { cursor: pointer; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 16px; }
-.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-weight: 500; }
-.lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
-.hscroll { display: flex; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
+:focus-visible { outline: 2px solid var(--tint); outline-offset: 2px; border-radius: 6px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 16px; }
+.muted { color: var(--label-2); }
+.hscroll { display: flex; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
 .hscroll::-webkit-scrollbar { display: none; }
 
-/* Product photos: stores shoot bottles on white, so every photo sits on the same light card and is
-   scaled to fit (never cropped). Multiply blends off-white photo backgrounds into the card. */
-.ph { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 1; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
-.ph.empty {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c3c7d0' stroke-width='1.4' stroke-linejoin='round'%3E%3Crect x='9' y='2.5' width='6' height='3' rx='.8'/%3E%3Cpath d='M10.3 5.5v2M13.7 5.5v2'/%3E%3Crect x='6' y='7.5' width='12' height='14' rx='3.5'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: center; background-size: 38%; }
+/* Product photos: stores shoot bottles on white, so every photo sits on the same white card, scaled
+   to fit, never cropped. Multiply blends off-white photo backgrounds into the card. */
+.ph { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 1; border-radius: var(--r-thumb); background: #fff; }
+.ph::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .08); pointer-events: none; }
+.ph.empty { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c7c7cc' stroke-width='1.3' stroke-linejoin='round'%3E%3Crect x='9' y='2.5' width='6' height='3' rx='.8'/%3E%3Cpath d='M10.3 5.5v2M13.7 5.5v2'/%3E%3Crect x='6' y='7.5' width='12' height='14' rx='3.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: center; background-size: 40%; }
 .ph.empty img { display: none; }
 .ph img { width: 100%; height: 100%; object-fit: contain; padding: 9%; display: block; mix-blend-mode: multiply; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ph { background-color: #eceef3; box-shadow: none; } }
-:root[data-theme="dark"] .ph { background-color: #eceef3; box-shadow: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ph { background-color: #f2f2f4; } }
+:root[data-theme="dark"] .ph { background-color: #f2f2f4; }
 
 /* ---------- top bar ---------- */
-.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
-.top .wrap { display: grid; gap: 10px; padding-block: 12px 10px; }
-.brandline { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.logo { font: 800 24px/1 var(--font-display); letter-spacing: -0.02em; margin: 0; }
-.logo a { color: inherit; text-decoration: none; }
-.logo span { color: var(--accent); text-shadow: var(--glow); }
-.updated { font-size: 12.5px; color: var(--muted); text-align: right; }
-.searchrow { display: flex; gap: 8px; }
-.search { flex: 1; min-width: 0; position: relative; }
-.search input {
-  width: 100%; height: 50px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--surface);
-  padding: 0 46px 0 16px; font-size: 16px; -webkit-appearance: none; appearance: none;
-}
-.search input::-webkit-search-cancel-button { display: none; }
-.search input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
-.clear { position: absolute; right: 7px; top: 9px; width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--sunk); font-size: 18px; line-height: 1; }
-.filterbtn { height: 50px; min-width: 50px; padding: 0 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-.filterbtn .count { background: var(--accent); color: var(--accent-ink); border-radius: 999px; font-size: 12px; min-width: 20px; height: 20px; padding: 0 6px; display: inline-grid; place-items: center; }
+.bar { position: sticky; top: 0; z-index: 30; background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+       padding-top: env(safe-area-inset-top, 0px); border-bottom: .5px solid transparent; transition: border-color .2s; }
+.bar.scrolled { border-bottom-color: var(--sep); }
+.barin { position: relative; height: 44px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.barleft { display: flex; align-items: center; min-width: 0; }
+.back { border: 0; background: none; color: var(--tint); font-size: 17px; display: inline-flex; align-items: center; gap: 2px; padding: 6px 4px 6px 0; margin-left: -6px; white-space: nowrap; }
+.back svg { width: 22px; height: 22px; }
+.brandmark { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 4px 0; font-weight: 700; font-size: 17px; color: var(--label); }
+.brandmark img { width: 26px; height: 26px; border-radius: 7px; }
+.bartitle { font-weight: 600; font-size: 17px; opacity: 0; transition: opacity .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52vw; }
+.bar.scrolled .bartitle { opacity: 1; }
+.barright { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.toptabs { display: none; background: var(--fill); border-radius: 9px; padding: 2px; }
+.toptabs button { border: 0; background: none; border-radius: 7px; padding: 5px 14px; font-size: 14px; font-weight: 600; color: var(--label); }
+.toptabs button[aria-selected="true"] { background: var(--seg-on); box-shadow: 0 1px 3px rgba(0, 0, 0, .14); }
+/* Neon Inc account badge (from the hub's neon-cloud.js), restyled to match. */
+.acct .nc-badge { height: 30px; border-radius: 999px; background: var(--fill); color: var(--label); border: 0; font: 600 14px var(--font); letter-spacing: -0.01em; padding: 0 12px 0 10px; }
+.acct .nc-badge:hover { border: 0; background: var(--fill-2); }
+.acct .nc-badge .nc-dot { width: 7px; height: 7px; }
 
-/* tabs under the search */
-.nav { display: flex; gap: 6px; }
-.navbtn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-.navbtn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.ncount { font: 500 12px var(--font-data); opacity: .7; }
-.ndot { width: 8px; height: 8px; border-radius: 50%; background: var(--deal); box-shadow: 0 0 0 2px var(--surface); }
+/* ---------- page titles ---------- */
+.titlebar { padding: 6px 0 10px; }
+.large { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.subtitle { margin: 2px 0 0; font-size: 15px; color: var(--label-2); }
+.searchrow { display: flex; justify-content: flex-end; gap: 10px; align-items: center; padding-bottom: 10px; position: sticky; top: calc(44px + env(safe-area-inset-top, 0px)); z-index: 20; background: var(--bg); padding-top: 4px; margin-top: -4px; }
+.field { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; height: 38px; padding: 0 8px 0 10px; border-radius: 10px; background: var(--fill); color: var(--label-2); }
+.field svg { width: 17px; height: 17px; flex: none; }
+.field input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: 17px; color: var(--label); height: 100%; -webkit-appearance: none; appearance: none; padding: 0; }
+.field input::placeholder { color: var(--label-2); }
+.field input::-webkit-search-cancel-button { display: none; }
+.field .x { width: 20px; height: 20px; border-radius: 50%; border: 0; background: var(--label-3); color: var(--surface); font-size: 13px; line-height: 20px; padding: 0; flex: none; }
+.fakefield { cursor: text; text-align: left; border: 0; font-size: 17px; }
+.iconbtn { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--fill); color: var(--tint); display: grid; place-items: center; flex: none; position: relative; }
+.iconbtn svg { width: 20px; height: 20px; }
+.iconbtn .n { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--tint); color: var(--on-tint); font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 5px; }
+.cancel { border: 0; background: none; color: var(--tint); font-size: 17px; padding: 6px 0; flex: none; }
 
-/* suggestions dropdown */
-.suggest { position: absolute; left: 0; right: 0; top: 56px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; z-index: 30; }
-.suggest button { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; width: 100%; text-align: left; border: 0; background: none; padding: 11px 14px; border-top: 1px solid var(--line); }
-.suggest button:first-child { border-top: 0; }
-.suggest button.hi, .suggest button:hover { background: var(--accent-soft); }
-.suggest .sb { font-size: 12px; color: var(--muted); grid-column: 1; }
-.suggest .sn { font-weight: 600; grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.suggest .sp { grid-column: 2; grid-row: 1 / span 2; text-align: right; font-size: 13px; color: var(--muted); }
-.suggest .sp b { display: block; color: var(--ink); font: 500 15px var(--font-data); }
-.suggest .all { display: block; color: var(--accent); font-weight: 600; font-size: 14px; }
+/* ---------- sections and grouped lists ---------- */
+main { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); min-height: 70vh; }
+.sec { margin-top: 26px; }
+.sechead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 10px; }
+.sechead h2 { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em; margin: 0; }
+.sechead .see { border: 0; background: none; color: var(--tint); font-size: 17px; padding: 0; white-space: nowrap; }
+.sechint { margin: -6px 0 10px; font-size: 15px; color: var(--label-2); }
+.capt { font-size: 13px; color: var(--label-2); margin: 8px 16px 0; line-height: 1.4; }
+.group { background: var(--surface); border-radius: var(--r-card); overflow: hidden; }
+.grouptitle { font-size: 13px; color: var(--label-2); margin: 22px 16px 7px; }
+.row { position: relative; display: grid; grid-template-columns: 58px minmax(0, 1fr) auto 10px; gap: 12px; align-items: center; width: 100%; min-height: 76px;
+       padding: 9px 12px 9px 14px; border: 0; background: none; text-align: left; color: var(--label); }
+.row + .row::before, .lrow + .lrow::before { content: ""; position: absolute; top: 0; right: 0; height: .5px; background: var(--sep); }
+.row + .row::before { left: 84px; }
+.lrow + .lrow::before { left: 16px; }
+.row:active, .lrow:active { background: var(--fill); }
+.row .ph { width: 58px; }
+.row .t { min-width: 0; }
+.row .b { font-size: 13px; color: var(--label-2); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .n { font-size: 17px; font-weight: 600; line-height: 1.25; display: block; overflow-wrap: anywhere; }
+.row .m { font-size: 13px; color: var(--label-2); display: block; margin-top: 1px; }
+.row .m .save { color: var(--green); font-weight: 600; }
+.row .m .like { color: var(--tint); }
+.row .p { text-align: right; display: grid; justify-items: end; }
+.row .p b { font-size: 17px; font-weight: 600; white-space: nowrap; }
+.row .p small { font-size: 13px; color: var(--label-2); white-space: nowrap; }
+.chev { width: 8px; height: 14px; color: var(--label-3); }
+.lrow { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 44px; padding: 11px 16px; border: 0; background: none;
+        text-align: left; font-size: 17px; color: var(--label); }
+.lrow .v { color: var(--label-2); text-align: right; }
+.lrow.link { color: var(--tint); }
+.more { display: block; width: 100%; margin-top: 10px; border: 0; background: var(--surface); border-radius: var(--r-card); color: var(--tint); font-size: 17px; padding: 13px; }
+.empty { text-align: center; padding: 48px 24px; color: var(--label-2); }
+.empty h3 { font-size: 22px; font-weight: 700; color: var(--label); margin: 0 0 6px; letter-spacing: -0.015em; }
+.empty p { margin: 0 auto; max-width: 34ch; font-size: 15px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 15px; color: var(--label-2); }
+.sortsel { border: 0; background: none; color: var(--tint); font-size: 15px; padding: 4px 0; text-align: right; -webkit-appearance: none; appearance: none; }
 
-/* ---------- discover (home) ---------- */
-.home { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding-block: 12px 32px; }
-.picks { gap: 8px; padding-block: 2px 4px; }
-.pick { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 9px 14px; font-size: 14px; font-weight: 600; white-space: nowrap; box-shadow: var(--card); }
-.pick:active { transform: scale(.97); }
-.sec { padding-top: 14px; }
-.sechead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
-.sechead h2 { font: 600 18px/1.2 var(--font-display); margin: 0; }
-.sechead p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
-.arrows { display: none; gap: 6px; }
-.arrows button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 18px; line-height: 1; color: var(--ink); }
-.arrows button:hover { border-color: var(--accent); color: var(--accent); }
-@media (hover: hover) and (min-width: 760px) { .arrows { display: inline-flex; } }
+/* ---------- Discover ---------- */
+.today { display: grid; background: var(--surface); border-radius: 22px; overflow: hidden; box-shadow: 0 6px 24px rgba(0, 0, 0, .07); margin-top: 6px; width: 100%; border: 0; padding: 0; text-align: left; color: var(--label); }
+.today .ph { aspect-ratio: auto; height: 250px; border-radius: 0; }
+.today .ph img { padding: 22px; }
+.today .ph::after { box-shadow: none; }
+.today .tb { padding: 16px 18px 18px; display: grid; gap: 4px; }
+.today .k { font-size: 13px; font-weight: 600; color: var(--tint); }
+.today .h { display: block; font-size: 28px; line-height: 1.12; font-weight: 800; letter-spacing: -0.025em; }
+.today .br { font-size: 15px; color: var(--label-2); }
+.today .line { display: block; font-size: 15px; color: var(--label-2); margin-top: 6px; }
+.today .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.today .foot .pr { font-size: 15px; color: var(--label-2); }
+.today .foot .pr b { color: var(--label); font-size: 17px; font-weight: 600; }
+.pill { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 999px; background: var(--fill); color: var(--tint); font-size: 15px; font-weight: 700;
+        padding: 7px 16px; white-space: nowrap; }
+.pill.solid { background: var(--tint); color: var(--on-tint); }
+.alert { display: grid; gap: 4px; background: var(--surface); border-radius: var(--r-card); padding: 14px 16px; margin-top: 6px; border: 0; width: 100%; text-align: left; color: var(--label); }
+.alert .k { font-size: 13px; font-weight: 600; color: var(--green); }
+.alert .k.tint { color: var(--tint); }
+.alert b { font-weight: 600; }
+.alert .acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.rail { gap: 12px; scroll-snap-type: x mandatory; padding-block: 2px 4px; }
+.tile { flex: none; width: 140px; scroll-snap-align: start; border: 0; background: none; padding: 0; text-align: left; color: var(--label); display: flex; flex-direction: column; gap: 2px; }
+.tile .ph { border-radius: 16px; background-color: var(--surface); margin-bottom: 6px; }
+.tile .tb { font-size: 13px; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .tn { font-size: 15px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tile .tp { font-size: 15px; margin-top: 2px; }
+.tile .tx { font-size: 13px; color: var(--green); font-weight: 600; }
+.tile .tx.tint { color: var(--tint); font-weight: 500; }
+.tile .tm { font-size: 13px; color: var(--label-2); }
+.about details { border-top: .5px solid var(--sep); }
+.about details:first-child { border-top: 0; }
+.about summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; font-size: 17px; }
+.about summary::-webkit-details-marker { display: none; }
+.about summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--label-3); border-bottom: 2px solid var(--label-3); transform: rotate(45deg); margin: -4px 4px 0; transition: transform .2s; }
+.about details[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.about .in { padding: 0 16px 14px; font-size: 15px; color: var(--label-2); }
+.about .in p { margin: 0 0 10px; }
+.about .in b { color: var(--label); font-weight: 600; }
+.storerow { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: .5px solid var(--sep); }
+.storerow:first-child { border-top: 0; }
+.storerow span:first-child { color: var(--label); }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 8px; vertical-align: 1px; }
+.dot.err { background: var(--orange); }
+
+/* ---------- Search: browse categories ---------- */
+.cats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.cat { position: relative; overflow: hidden; height: 92px; border: 0; border-radius: var(--r-card); padding: 12px 14px; text-align: left; color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.015em;
+       display: flex; align-items: flex-start; }
+.cat .e { position: absolute; right: 10px; bottom: 4px; font-size: 40px; line-height: 1; transform: rotate(14deg); }
+
+/* ---------- sheets ---------- */
+.scrim { position: fixed; inset: 0; z-index: 50; background: var(--scrim); opacity: 0; transition: opacity .3s; }
+.scrim.on { opacity: 1; }
+.sheet { position: fixed; z-index: 51; left: 0; right: 0; bottom: 0; max-height: calc(100% - 44px - env(safe-area-inset-top, 0px)); display: flex; flex-direction: column;
+         background: var(--bg); border-radius: var(--r-sheet) var(--r-sheet) 0 0; box-shadow: var(--shadow); transform: translateY(105%); transition: transform .38s cubic-bezier(.32, .72, 0, 1); }
+.sheet.on { transform: none; }
+.sheethead { position: relative; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 6px; min-height: 52px; }
+.sheethead::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; border-radius: 3px; background: var(--label-3); transform: translateX(-50%); }
+.sheethead h2 { font-size: 17px; font-weight: 600; margin: 8px 0 0; }
+.sheethead .done { border: 0; background: none; color: var(--tint); font-size: 17px; font-weight: 600; margin-top: 8px; padding: 4px 0; }
+.sheethead .reset { border: 0; background: none; color: var(--tint); font-size: 17px; margin-top: 8px; padding: 4px 0; }
+.close { width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--fill); color: var(--label-2); display: grid; place-items: center; margin-left: auto; margin-top: 6px; }
+.close svg { width: 12px; height: 12px; }
+.sheetbody { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 0 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 760px) {
-  .hscroll { margin-inline: 0; padding-inline: 0; scroll-padding-inline: 0; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); }
+  .sheet { left: 50%; right: auto; bottom: auto; top: 50%; width: 640px; max-height: 86vh; border-radius: 18px; transform: translate(-50%, -46%) scale(.98); opacity: 0;
+           transition: transform .28s cubic-bezier(.32, .72, 0, 1), opacity .2s; }
+  .sheet.on { transform: translate(-50%, -50%); opacity: 1; }
+  .sheethead::before { display: none; }
 }
-.browse { justify-self: center; margin-top: 18px; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1.5px solid var(--ink); background: none; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .sheet, .scrim, .bar, .bartitle { transition: none; } }
 
-/* Fragrance of the day */
-.fotd { position: relative; display: grid; grid-template-columns: 96px minmax(0, 1fr); grid-template-areas: "ph head" "body body"; gap: 12px 14px; align-items: center; padding: 14px; margin-top: 4px;
-        border-radius: 22px; border: 1px solid var(--line); background: linear-gradient(135deg, var(--accent-soft), var(--surface) 55%); box-shadow: var(--card); overflow: hidden; }
-.fotd .ph { grid-area: ph; border-radius: 16px; }
-.fotd .fhead { grid-area: head; min-width: 0; }
-.fotd .fbody { grid-area: body; min-width: 0; }
-.fotd .slbl { margin-bottom: 4px; }
-.fotd .fb { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
-.fotd h2 { font: 800 21px/1.15 var(--font-display); margin: 1px 0 0; letter-spacing: -0.01em; }
-.fotd .fl { margin: 0 0 8px; font-size: 14.5px; color: var(--muted); }
-.fotd .fp { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
-.fotd .fp .price { font: 500 17px var(--font-data); margin-right: 4px; }
-.fotd .fp .price small { font: 500 12.5px var(--font-body); color: var(--muted); margin-left: 4px; }
-.fotd .go { min-height: 38px; }
-@media (min-width: 760px) {
-  .fotd { grid-template-columns: 210px minmax(0, 1fr); grid-template-areas: "ph head" "ph body"; gap: 6px 26px; align-items: end; padding: 18px 26px 18px 18px; }
-  .fotd .fbody { align-self: start; }
-  .fotd h2 { font-size: 30px; }
-  .fotd .fl { font-size: 16px; }
-}
-.seeall { flex: none; border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 4px 0; }
-.rail { gap: 10px; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; padding-block: 2px 8px; }
-.tile { flex: none; width: 150px; scroll-snap-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px; text-align: left; display: flex; flex-direction: column; gap: 3px; box-shadow: var(--card); }
-.tile:active { transform: scale(.98); }
-.tile .ph { margin-bottom: 7px; }
-.tile .tb { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tile .tn { font: 600 15px/1.2 var(--font-display); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
-.tile .tp { font: 500 16px var(--font-data); margin-top: auto; padding-top: 3px; }
-.tile .tp small { font: 500 12px var(--font-body); color: var(--muted); margin-left: 4px; }
-.tile .tx { font-size: 12px; font-weight: 600; color: var(--deal); line-height: 1.3; }
-.tile .tx.acc { color: var(--accent); }
-.tile .tm { font-size: 12px; color: var(--muted); line-height: 1.3; }
-.banner { background: var(--deal-soft); border: 1px solid var(--deal); border-radius: var(--radius); padding: 12px 14px; display: grid; gap: 6px; margin-top: 4px; }
-.banner h2 { font: 600 16px var(--font-display); margin: 0; color: var(--deal); }
-.banner ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 14px; }
-.banner b { font: 500 14px var(--font-data); }
-.banner button { justify-self: start; border: 0; background: none; color: var(--deal); font-weight: 700; padding: 4px 0; }
+/* fragrance detail */
+.dhero { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: center; margin-bottom: 16px; }
+.dhero .ph { border-radius: 18px; }
+.dhero .b { font-size: 15px; color: var(--label-2); }
+.dhero h2 { font-size: 24px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 6px; }
+.dhero .m { font-size: 15px; color: var(--label-2); }
+.dacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+.dact { border: 0; border-radius: 12px; background: var(--surface); color: var(--tint); padding: 10px 6px 9px; display: grid; justify-items: center; gap: 4px; font-size: 13px; font-weight: 500; text-align: center; }
+.dact svg { width: 22px; height: 22px; }
+.dact.on { color: var(--on-tint); background: var(--tint); }
+.scent { background: var(--surface); border-radius: var(--r-card); padding: 14px 16px; }
+.scent .k { font-size: 13px; font-weight: 600; color: var(--tint); }
+.scent .line { font-size: 20px; line-height: 1.28; font-weight: 600; letter-spacing: -0.015em; margin: 2px 0 0; }
+.scent .sub { font-size: 15px; color: var(--label-2); margin: 6px 0 0; }
+.scent .sub b { color: var(--label); font-weight: 600; }
+.vibes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.vibe { border: 0; border-radius: 999px; background: var(--fill); color: var(--label); font-size: 14px; font-weight: 500; padding: 5px 11px; }
+button.vibe:active { background: var(--fill-2); }
+.notes { font-size: 15px; color: var(--label-2); margin: 12px 0 0; }
+.notes b { color: var(--label); font-weight: 600; }
+.seg { display: flex; gap: 2px; background: var(--fill); border-radius: 9px; padding: 2px; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
+.seg::-webkit-scrollbar { display: none; }
+.seg button { flex: 1 0 auto; min-width: 72px; border: 0; background: none; border-radius: 7px; padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--label); line-height: 1.2; }
+.seg button small { display: block; font-weight: 400; color: var(--label-2); font-size: 12px; }
+.seg button[aria-selected="true"] { background: var(--seg-on); box-shadow: 0 1px 4px rgba(0, 0, 0, .14); }
+.offer { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; padding: 12px 16px; }
+.offer + .offer::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--sep); }
+.offer .s { font-size: 17px; font-weight: 600; }
+.offer .best { font-size: 13px; color: var(--green); font-weight: 600; margin-left: 6px; }
+.offer .d { font-size: 13px; color: var(--label-2); grid-column: 1; }
+.offer .tags { grid-column: 1; font-size: 13px; color: var(--label-2); }
+.offer .tags .g { color: var(--green); font-weight: 600; }
+.offer .tags .w { color: var(--orange); }
+.offer .r { grid-column: 2; grid-row: 1 / span 3; display: grid; justify-items: end; gap: 6px; }
+.offer .r .pp { font-size: 17px; font-weight: 600; white-space: nowrap; }
+.offer .r .pp s { font-size: 13px; color: var(--label-2); font-weight: 400; margin-right: 4px; }
+.offer .get { border-radius: 999px; background: var(--fill); color: var(--tint); font-size: 15px; font-weight: 700; padding: 5px 16px; white-space: nowrap; }
+.offer.top .get { background: var(--tint); color: var(--on-tint); }
+.offer.out { opacity: .55; }
 
-/* ---------- results ---------- */
-.bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 16px 8px; flex-wrap: wrap; }
-.bar h2 { font: 600 18px var(--font-display); margin: 0; }
-.bar .sub { color: var(--muted); font-size: 14px; }
-.back { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 0 0 4px; display: block; }
-select.sort { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
-.list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 2px 28px; align-items: start; }
-.pcol { display: grid; gap: 10px; min-width: 0; }
-/* Wide screens: two columns of fragrances; an opened one spans both, with "smells like" beside the prices. */
-@media (min-width: 900px) {
-  .list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .list > .item.open, .list > .empty, .list > .morebtn, .list > .backup, .list > .banner, .list > .stub { grid-column: 1 / -1; }
-  .list > .morebtn { justify-self: center; }
-  .item.open .ibody { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start; gap: 16px; }
-}
+/* filters */
+.switchrow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 16px; min-height: 52px; position: relative; font-size: 17px; }
+.switchrow + .switchrow::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--sep); }
+.switchrow small { display: block; font-size: 13px; color: var(--label-2); }
+.switch { -webkit-appearance: none; appearance: none; flex: none; width: 51px; height: 31px; border-radius: 999px; background: var(--fill-2); position: relative; cursor: pointer; transition: background .2s; margin: 0; }
+.switch::before { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, .15), 0 1px 1px rgba(0, 0, 0, .1); transition: transform .2s; }
+.switch:checked { background: #34c759; }
+.switch:checked::before { transform: translateX(20px); }
+.check { color: var(--tint); font-weight: 600; }
+.lrow[aria-pressed="false"] .check { visibility: hidden; }
 
-.item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--card); }
-.item.open { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset, var(--glow); }
-.ihead { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 12px 14px; min-height: 76px; }
-.thumb { width: 56px; height: 56px; border-radius: 12px; }
-.thumb img { padding: 6%; }
-.iname { min-width: 0; }
-.iname .b { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
-.iname .b, .iname .n { display: block; }
-.iname .n { font: 600 17px/1.2 var(--font-display); margin: 1px 0 4px; overflow-wrap: anywhere; }
-.chips { display: flex; gap: 4px; flex-wrap: wrap; }
-.pill { font-size: 11.5px; padding: 1px 8px; border-radius: 999px; background: var(--sunk); color: var(--muted); font-weight: 600; white-space: nowrap; }
-.pill.deal { background: var(--deal-soft); color: var(--deal); }
-.pill.warn { background: var(--warn-soft); color: var(--warn); }
-.pill.acc { background: var(--accent-soft); color: var(--accent); }
-.iprice { text-align: right; display: grid; justify-items: end; gap: 1px; }
-.iprice .from { font-size: 11.5px; color: var(--muted); }
-.iprice .v { font: 500 19px/1.1 var(--font-data); font-variant-numeric: tabular-nums; }
-.iprice .w { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.chev { width: 18px; height: 18px; color: var(--muted); transition: transform .2s; margin-top: 2px; }
-.item.open .chev { transform: rotate(180deg); }
-
-.ibody { border-top: 1px solid var(--line); padding: 12px 14px 14px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; background: var(--bg); }
-
-/* "smells like" panel */
-.scent { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 8px; position: relative; overflow: hidden; }
-.scent::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); box-shadow: var(--glow); }
-.slbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--accent); }
-.shead { font: 600 17px/1.3 var(--font-display); margin: -4px 0 0; }
-.ssub { margin: -4px 0 0; font-size: 14px; color: var(--muted); }
-.ssub b { color: var(--ink); font-weight: 600; }
-.vibes { display: flex; gap: 6px; flex-wrap: wrap; }
-.vchip { border: 0; border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 600; background: var(--sunk); color: var(--ink); white-space: nowrap; }
-button.vchip:hover { background: var(--accent-soft); color: var(--accent); }
-.vchip.f { background: none; border: 1px solid var(--line); color: var(--muted); padding: 3px 10px; }
-.snotes { margin: 0; font-size: 13px; color: var(--muted); }
-.snotes span { font-weight: 700; color: var(--ink); margin-right: 4px; }
-.sacts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.sbtn { min-height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); padding: 0 12px; font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--ink); }
-.sbtn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.sbtn b { font: 500 13px var(--font-data); }
-.sbtn.link { border: 0; padding: 0 2px; color: var(--muted); font-weight: 600; }
-
-.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
-.tabs::-webkit-scrollbar { display: none; }
-.tab { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 600; }
-.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.tab small { font-weight: 400; opacity: .75; margin-left: 4px; }
-.offers { display: grid; gap: 8px; }
-.offer { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; }
-.offer.best { border-color: var(--deal); }
-.offer.out { opacity: .6; }
-.offer .st { font-weight: 600; }
-.offer .st .tagbest { color: var(--deal); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-left: 6px; }
-.offer .eta { font-size: 12.5px; color: var(--muted); }
-.offer .pr { text-align: right; }
-.offer .pr .p { font: 500 18px var(--font-data); font-variant-numeric: tabular-nums; }
-.offer .pr s { font-size: 12.5px; color: var(--muted); margin-right: 6px; }
-.offer .tot { font-size: 12.5px; color: var(--muted); }
-.offer .tot b { color: var(--ink); font: 500 13px var(--font-data); }
-.offer .title { grid-column: 1 / -1; font-size: 13px; color: var(--muted); min-width: 0; }
-.offer .foot { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-.go { border: 0; box-shadow: var(--glow); display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; }
-.offer:not(.best) .go { background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
-.moreoffers { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 6px; }
-.note { font-size: 12.5px; color: var(--muted); }
-.also { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; font-size: 14px; }
-.also a { font-weight: 600; text-decoration: none; padding-block: 6px; }
-
-.morebtn { justify-self: center; min-height: 44px; padding: 0 22px; border-radius: 999px; border: 1.5px solid var(--ink); background: none; font-weight: 600; }
-.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); padding: 26px 18px; text-align: center; color: var(--muted); }
-.empty h3 { font: 600 18px var(--font-display); color: var(--ink); margin: 0 0 6px; }
-.stub { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
-.stub .n { font: 600 16px var(--font-display); }
-.stub .m { font-size: 13px; color: var(--muted); }
-
-/* ---------- watchlist backup ---------- */
-.backup { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); margin-top: 6px; }
-.backup summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 14px 16px; font: 600 16px var(--font-display); }
-.backup summary::-webkit-details-marker { display: none; }
-.backup summary .ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 16px; flex: none; }
-.backup summary small { display: block; font: 500 13px var(--font-body); color: var(--muted); }
-.backup summary::after { content: "+"; margin-left: auto; font: 400 22px/1 var(--font-body); color: var(--muted); }
-.backup[open] summary::after { content: "–"; }
-.bk { padding: 0 16px 16px; display: grid; gap: 12px; font-size: 14px; color: var(--muted); }
-.bk h3 { font: 600 15px var(--font-display); color: var(--ink); margin: 6px 0 0; }
+/* backup */
+.bk { display: grid; gap: 10px; padding: 14px 16px; font-size: 15px; color: var(--label-2); }
 .bk p { margin: 0; }
-.bk textarea { width: 100%; min-height: 64px; resize: vertical; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink);
-               padding: 10px 12px; font: 500 12.5px/1.4 var(--font-data); word-break: break-all; }
-.bk textarea::placeholder { font: 500 14px var(--font-body); color: var(--muted); }
-.bk textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.bk textarea { width: 100%; min-height: 70px; resize: vertical; border: 0; border-radius: 10px; background: var(--fill); color: var(--label); padding: 10px 12px; font: 13px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; }
+.bk textarea::placeholder { font: 15px var(--font); color: var(--label-2); }
 .bkrow { display: flex; gap: 8px; flex-wrap: wrap; }
-.bkrow .sbtn { min-height: 40px; }
-.bkrow .sbtn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.bk hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
-.banner.imp { background: var(--accent-soft); border-color: var(--accent); }
-.banner.imp h2 { color: var(--accent); }
-.banner .bkrow button { justify-self: auto; }
-.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; max-width: calc(100% - 32px);
-         background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow); }
 
-/* ---------- filter sheet ---------- */
-.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
-.sheet { position: fixed; z-index: 41; left: 0; right: 0; bottom: 0; max-height: 86vh; overflow-y: auto; background: var(--surface); border-radius: 20px 20px 0 0; padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: var(--shadow); }
-.grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 4px auto 10px; }
-.sheet h2 { font: 600 20px var(--font-display); margin: 0; }
-.sheethead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.fsec { padding-block: 12px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
-.fsec:first-of-type { border-top: 0; }
-.opts { display: flex; gap: 6px; flex-wrap: wrap; }
-.opt { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; min-height: 40px; }
-.opt[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.sw { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; font-size: 15px; }
-.sw small { display: block; color: var(--muted); font-size: 12.5px; }
-.sw input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
-.sheetfoot { position: sticky; bottom: calc(-16px - env(safe-area-inset-bottom, 0px)); background: var(--surface); display: flex; gap: 8px; padding-block: 12px 4px; }
-.btn { flex: 1; min-height: 48px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 600; }
-.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-@media (min-width: 760px) {
-  .sheet { left: 50%; right: auto; bottom: auto; top: 10vh; width: 520px; transform: translateX(-50%); border-radius: 20px; max-height: 80vh; }
-  .grab { display: none; }
+/* ---------- tab bar ---------- */
+.tabbar { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: flex; background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+          border-top: .5px solid var(--sep); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabbar button { flex: 1; border: 0; background: none; height: 50px; display: grid; justify-items: center; align-content: center; gap: 2px; color: var(--label-2); font-size: 10.5px; font-weight: 500; position: relative; }
+.tabbar svg { width: 25px; height: 25px; }
+.tabbar button[aria-selected="true"] { color: var(--tint); }
+.tabbar .badge { position: absolute; top: 3px; left: calc(50% + 6px); min-width: 17px; height: 17px; border-radius: 9px; background: var(--tint); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 5px; }
+.toast { position: fixed; left: 50%; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; max-width: calc(100% - 32px);
+         background: rgba(30, 30, 32, .92); color: #fff; padding: 11px 16px; border-radius: 14px; font-size: 15px; font-weight: 500; box-shadow: var(--shadow); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+footer.foot { color: var(--label-2); font-size: 13px; text-align: center; padding: 26px 16px calc(96px + env(safe-area-inset-bottom, 0px)); line-height: 1.5; }
+
+/* ---------- wide screens ---------- */
+@media (min-width: 900px) {
+  .tabbar { display: none; }
+  .toptabs { display: flex; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  main { padding-bottom: 40px; }
+  footer.foot { padding-bottom: 32px; }
+  .toast { bottom: 24px; }
+  .bartitle { visibility: hidden; }
+  .barin { grid-template-columns: 1fr auto 1fr; }
+  .list2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .list2 > .group { align-self: start; }
+  .today { grid-template-columns: 380px minmax(0, 1fr); }
+  .today .ph { height: 320px; }
+  .today .tb { align-content: center; padding: 28px 32px; }
+  .today .h { font-size: 36px; }
+  .cats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .hscroll { margin-inline: 0; padding-inline: 0; scroll-padding-inline: 0; }
+  .tile { width: 160px; }
 }
-
-/* ---------- info ---------- */
-.info { display: grid; gap: 0; padding-block: 8px 32px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
-.info details { border-bottom: 1px solid var(--line); }
-.info summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 14px 0; font: 600 16px var(--font-display); color: var(--ink); }
-.info summary::-webkit-details-marker { display: none; }
-.info summary::after { content: "+"; font: 400 22px/1 var(--font-body); color: var(--muted); }
-.info details[open] summary::after { content: "–"; }
-.info details > div { padding-bottom: 14px; }
-.info p { margin: 0 0 8px; max-width: 65ch; }
-.tablewrap { overflow-x: auto; }
-.dtable { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-.dtable th, .dtable td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
-.dtable th { font-weight: 600; color: var(--ink); }
-.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--deal); margin-right: 6px; }
-.status-dot.err { background: var(--bad); }
-
-footer.foot { border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; letter-spacing: .02em; }
-footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
-
-@media (prefers-reduced-motion: reduce) { .chev { transition: none; } .tile:active, .pick:active { transform: none; } }
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <div class="brandline">
-      <h1 class="logo"><a href="./" id="home" aria-label="Scent Scout home">Scent<span>Scout</span></a></h1>
-      <div class="updated" id="updated">Loading prices…</div>
+<header class="bar" id="bar">
+  <div class="wrap barin">
+    <div class="barleft">
+      <button type="button" class="back" id="back" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span id="backlabel">Back</span></button>
+      <a class="brandmark" id="home" href="./" aria-label="Scent Scout home"><img src="icons/icon-192.png" alt="">Scent Scout</a>
     </div>
-    <div class="searchrow">
-      <div class="search">
-        <input id="q" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-               placeholder="Search a fragrance…" aria-label="Search fragrances" role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
-        <button class="clear" id="clear" type="button" aria-label="Clear search" hidden>×</button>
-        <div class="suggest" id="suggest" role="listbox" hidden></div>
+    <div class="bartitle" id="bartitle" aria-hidden="true"></div>
+    <div class="barright">
+      <div class="toptabs" role="tablist" aria-label="Sections">
+        <button type="button" role="tab" data-tab="home">Discover</button>
+        <button type="button" role="tab" data-tab="search">Search</button>
+        <button type="button" role="tab" data-tab="watch">Watchlist</button>
       </div>
-      <button class="filterbtn" id="filterbtn" type="button" aria-haspopup="dialog">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
-        <span class="flabel">Filters</span><span class="count" id="fcount" hidden>0</span>
-      </button>
+      <span class="acct brandline" id="acct"></span>
     </div>
-    <nav class="nav" aria-label="Sections">
-      <button type="button" class="navbtn" id="navhome" aria-pressed="true">Discover</button>
-      <button type="button" class="navbtn" id="navwatch" aria-pressed="false">♡ Watchlist <span class="ncount" id="ncount"></span><span class="ndot" id="ndot" hidden></span></button>
-    </nav>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="home" id="homeview" hidden></div>
-  <div class="bar">
-    <div><button type="button" class="back" id="back" hidden>← Back to Discover</button><h2 id="heading">Specials right now</h2><div class="sub" id="sub"></div></div>
-    <select class="sort" id="sort" aria-label="Sort by">
-      <option value="total">Cheapest delivered</option>
-      <option value="price">Cheapest price</option>
-      <option value="ppm">Cheapest per ml</option>
-      <option value="disc">Biggest special</option>
-    </select>
+<main class="wrap" id="main">
+  <div class="titlebar"><h1 class="large" id="large">Discover</h1><p class="subtitle" id="subtitle">Loading prices…</p></div>
+  <div class="searchrow" id="searchrow">
+    <label class="field" id="field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Fragrances, brands, notes" aria-label="Search fragrances">
+      <button type="button" class="x" id="clear" aria-label="Clear search" hidden>×</button>
+    </label>
+    <button type="button" class="iconbtn" id="filterbtn" aria-label="Filters" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      <span class="n" id="fcount" hidden>0</span>
+    </button>
   </div>
-  <div class="list" id="results"></div>
-  <section class="info" id="info"></section>
+  <div id="content"></div>
 </main>
-<footer class="foot">
-  <div class="wrap">SCENT SCOUT · NEON INC™ © 2026 · All rights reserved. Prices belong to the stores shown; always confirm on their site before buying.</div>
-</footer>
+<footer class="foot">Scent Scout · NEON INC™ © 2026 · All rights reserved.<br>Prices belong to the stores shown. Always confirm on their site before buying.</footer>
 
+<nav class="tabbar" id="tabbar" role="tablist" aria-label="Sections">
+  <button type="button" role="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9.3l-4.4 3.9L17 19l-5-3.1L7 19l1.4-5.8L4 9.3l5.8-.7z"/></svg>Discover</button>
+  <button type="button" role="tab" data-tab="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search</button>
+  <button type="button" role="tab" data-tab="watch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Watchlist<span class="badge" id="wbadge" hidden></span></button>
+</nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="detail" role="dialog" aria-modal="true" aria-label="Fragrance details" hidden></section>
+<section class="sheet" id="filters" role="dialog" aria-modal="true" aria-labelledby="ftitle" hidden>
+  <div class="sheethead"><button type="button" class="reset" id="reset">Reset</button><h2 id="ftitle">Filters</h2><button type="button" class="done" id="done">Done</button></div>
+  <div class="sheetbody" id="fbody"></div>
+</section>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <input type="file" id="bkfile" accept=".txt,.json,text/plain,application/json" hidden>
-<div class="scrim" id="scrim" hidden></div>
-<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheettitle" hidden>
-  <div class="grab"></div>
-  <div class="sheethead"><h2 id="sheettitle">Filters</h2><button type="button" class="moreoffers" id="reset">Reset</button></div>
-  <div class="fsec"><div class="lbl">Bottle size</div><div class="opts" id="sizes"></div></div>
-  <div class="fsec">
-    <label class="sw" for="specials"><span>Specials only<small>Only prices that are marked down</small></span><input type="checkbox" id="specials"></label>
-    <label class="sw" for="instock"><span>In stock only</span><input type="checkbox" id="instock" checked></label>
-    <label class="sw" for="dupes"><span>Include “inspired by” alternatives<small>Clones show up when you search the original</small></span><input type="checkbox" id="dupes"></label>
-    <label class="sw" for="noassumed"><span>Hide guessed sizes<small>Leave out listings where the store gives no size</small></span><input type="checkbox" id="noassumed"></label>
-  </div>
-  <div class="fsec"><div class="lbl">Type</div><div class="opts" id="kinds"></div></div>
-  <div class="fsec"><div class="lbl">Stores</div><div class="opts" id="stores"></div></div>
-  <div class="sheetfoot"><button type="button" class="btn primary" id="done">Show results</button></div>
-</div>
 
 <script src="../neon-cloud.js"></script>
 <script>
 (function () {
   "use strict";
   var DEFAULT_WATCH = ["Azzaro The Most Wanted", "Montblanc Explorer", "Afnan Lynked Freedom", "Afnan 9pm Night Out", "Hugo Boss Bottled Absolu"];
-  var SIZES = [["any", "Any size"], ["30", "30 ml"], ["50", "50 ml"], ["100", "90–125 ml"], ["other", "Other sizes"]];
+  var SIZES = [["any", "Any"], ["30", "30 ml"], ["50", "50 ml"], ["100", "100 ml"], ["other", "Other"]];
   var KINDS = [["p", "Perfume"], ["set", "Gift sets"], ["mist", "Body mists"], ["oil", "Oils"]];
+  var SORTS = [["rel", "Best match"], ["total", "Cheapest delivered"], ["price", "Cheapest price"], ["ppm", "Cheapest per ml"], ["disc", "Biggest special"]];
   var CONC_WORDS = { EDP: "edp eau parfum", EDT: "edt eau toilette", EDC: "edc cologne", Parfum: "parfum", Extrait: "extrait parfum" };
   var CONC_LABEL = { EDP: "Eau de Parfum", EDT: "Eau de Toilette", EDC: "Cologne", Parfum: "Parfum", Extrait: "Extrait" };
+  var CONC_SHORT = { EDP: "EDP", EDT: "EDT", EDC: "Cologne", Parfum: "Parfum", Extrait: "Extrait" };
   var STOP = { the: 1, by: 1, for: 1, and: 1, de: 1, la: 1, le: 1, of: 1, a: 1, pour: 1, perfume: 1, fragrance: 1, spray: 1, ml: 1 };
   var CONC_TOK = { eau: 1, parfum: 1, toilette: 1, edp: 1, edt: 1, edc: 1, cologne: 1, extrait: 1, vaporisateur: 1, men: 1, women: 1, man: 1, woman: 1 };
-  var PAGE = 20, OFFERS = 4, RAIL = 12;
+  var PAGE = 30, RAIL = 12;
   // Fragrance of the day: a daily rotation through well-loved fragrances, keeping the ones that suit
   // the current season (from their notes). Not about price.
   var FOTD = ["Dior Sauvage", "Chanel Bleu de Chanel", "Armani Acqua di Gio", "Acqua di Gio Profumo", "Versace Eros", "Versace Dylan Blue",
@@ -438,18 +418,33 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   var WHEN = { d: "Daytime", n: "Evening", b: "Day or night" };
   var FAM = { cit: "Citrusy", fre: "Fresh & airy", grn: "Green vibes", hrb: "Herbal", flo: "Floral", fru: "Fruity", swe: "Sweet",
               spi: "Spicy", woo: "Woody", oud: "Oud", amb: "Warm & ambery", lea: "Leathery & smoky", mus: "Clean & musky", boo: "Boozy" };
-  var FAM_PICKS = [["cit,fre,grn", "🍋 Fresh & citrus"], ["swe,amb", "🍯 Sweet & cosy"], ["woo,oud,lea", "🌲 Woody & smoky"], ["flo,fru", "🌷 Floral & fruity"]];
+  var FAM_PICKS = [["cit,fre,grn", "Fresh & citrus"], ["swe,amb", "Sweet & cosy"], ["woo,oud,lea", "Woody & smoky"], ["flo,fru", "Floral & fruity"]];
   // Southern hemisphere: Sep–Nov is spring.
   var NOW = ["su", "su", "au", "au", "au", "wi", "wi", "wi", "sp", "sp", "sp", "su"][new Date().getMonth()];
+  // Browse tiles on the Search tab: [preset, argument, label, emoji, colour]
+  var CATS = [
+    ["season", NOW, SEASONS[NOW][0] + " picks", SEASONS[NOW][1], "#d6336c"],
+    ["fam", "cit,fre,grn", "Fresh & citrus", "🍋", "#0f8f84"],
+    ["fam", "swe,amb", "Sweet & cosy", "🍯", "#b8621b"],
+    ["fam", "woo,oud,lea", "Woody & smoky", "🌲", "#4b6a35"],
+    ["fam", "flo,fru", "Floral & fruity", "🌷", "#8a4fd6"],
+    ["clones", "", "Designer smell for less", "✨", "#5146d8"],
+    ["price", "500", "Under R500", "💸", "#2a6bd6"],
+    ["specials", "", "All specials", "🏷️", "#d3133f"],
+    ["gender", "m", "For him", "🧔", "#3b4656"],
+    ["gender", "f", "For her", "💄", "#b0407f"],
+    ["drops", "", "Price drops", "📉", "#1f8a46"],
+    ["lows", "", "Lowest we’ve seen", "⭐️", "#9a6b00"]
+  ];
 
   var $ = function (id) { return document.getElementById(id); };
   var defaults = { size: "any", kinds: { p: true }, specials: false, inStock: true, dupes: false, noAssumed: false };
   var state = { q: "", size: "any", kinds: { p: true }, stores: {}, specials: false, inStock: true, dupes: false, noAssumed: false,
-                sort: "total", limit: PAGE, open: null, sizeSel: {}, allOffers: {}, view: "home", preset: null, presetArg: "" };
-  var data = null, stores = {}, listings = [], profiles = {}, concsByKey = {}, hi = -1, fotdCache;
+                sort: "rel", limit: PAGE, tab: "home", preset: null, presetArg: "", open: null, sizeSel: {} };
+  var data = null, stores = {}, listings = [], profiles = {}, concsByKey = {}, fotdCache;
   var idxCache = null, pairCache = null, sessionDrops = {}, dropsSeen = false;
 
-  // ---------- watchlist (kept on this device only) ----------
+  // ---------- watchlist ----------
   // Each entry: { q, gk, b, n, ml, p0 (delivered price when saved), last (price last time you visited), at }
   function loadWatch() {
     try { var v = JSON.parse(localStorage.getItem("scentscout.watch2")); if (Array.isArray(v)) return v; } catch (e) {}
@@ -470,6 +465,14 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   }
   var watch = loadWatch();
   function watchEntry(gk) { for (var i = 0; i < watch.length; i++) if (watch[i].gk === gk) return watch[i]; return null; }
+
+  // Recent searches (this device only).
+  function recent() { try { var v = JSON.parse(localStorage.getItem("scentscout.recent")); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+  function remember(q) {
+    q = (q || "").trim(); if (q.length < 3) return;
+    var r = recent().filter(function (x) { return norm(x) !== norm(q); }); r.unshift(q);
+    try { localStorage.setItem("scentscout.recent", JSON.stringify(r.slice(0, 6))); } catch (e) {}
+  }
 
   // ---------- text matching ----------
   function norm(s) {
@@ -503,6 +506,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   function nice(s) { // "CREED AVENTUS" -> "Creed Aventus"
     return s === s.toUpperCase() ? s.toLowerCase().replace(/(^|[\s(\-–/])([a-z])/g, function (m, a, b) { return a + b.toUpperCase(); }) : s;
   }
+  function plural(n, w) { return n.toLocaleString("en-US") + " " + w + (n === 1 ? "" : "s"); }
 
   // ---------- money ----------
   function R(n) {
@@ -520,7 +524,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       case "price": return li.p;
       case "ppm": return li.ml && li.kd !== "set" ? li.p / li.ml : 1e9 + li.p;
       case "disc": return li.w ? -(li.w - li.p) / li.w : 1;
-      default: return li.p + fee(li);
+      default: return li.p + fee(li); // "rel" and "total"
     }
   }
   function sizeOk(li) {
@@ -563,7 +567,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     var a = state.presetArg;
     switch (state.preset) {
       case "season":
-        return { label: SEASONS[a][1] + " " + SEASONS[a][0] + " picks", desc: "Fragrances whose notes suit " + SEASONS[a][0].toLowerCase() + ".",
+        return { label: SEASONS[a][0] + " picks", desc: "Fragrances whose notes suit " + SEASONS[a][0].toLowerCase() + ".",
                  g: function (g) { var p = prof(g); return !!(p && p.s && p.s.indexOf(a) >= 0); } };
       case "price":
         return { label: "Under R" + a, desc: "Bottles for R" + a + " or less.", li: function (li) { return li.p <= +a; } };
@@ -574,22 +578,22 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
         return { label: named ? named[1] : fs.map(function (f) { return FAM[f]; }).join(" & "), desc: "Based on the notes the stores list.",
                  g: function (g) { var p = prof(g); return !!(p && p.f && p.f.slice(0, 2).some(function (f) { return fs.indexOf(f) >= 0; })); } };
       case "clones":
-        return { label: "Designer smell, for less", desc: "Alternatives inspired by famous fragrances.", g: function (g) { return !!pairs().designerOf[g.gk]; } };
+        return { label: "Designer smell for less", desc: "Alternatives inspired by famous fragrances.", g: function (g) { return !!pairs().designerOf[g.gk]; } };
       case "alts":
         var d = groupIndex()[a];
-        return { label: "Alternatives to " + (d ? d.name : "this fragrance"), desc: "Fragrances that say they’re inspired by it.",
+        return { label: "Like " + (d ? shortName(d) : "this"), desc: "Cheaper fragrances that say they’re inspired by it.",
                  g: function (g) { return (pairs().clonesOf[a] || []).indexOf(g.gk) >= 0; } };
       case "drops":
-        return { label: "Price drops", desc: "Dropped in the last two weeks or marked down.", li: function (li) { return li.pv || li.w; } };
+        return { label: "Price drops", desc: "Dropped in the last two weeks or marked down.", li: function (li) { return li.pv || li.w; }, sort: "disc" };
       case "specials":
-        return { label: "All specials", desc: "Marked down right now.", li: function (li) { return li.w; } };
+        return { label: "All specials", desc: "Marked down right now.", li: function (li) { return li.w; }, sort: "disc" };
       case "lows":
         return { label: "Lowest we’ve seen", desc: "At the lowest price we’ve recorded for at least a week.", li: function (li) { return li.ls; } };
     }
     return null;
   }
 
-  function filtered(q, homeSpecials, spec) {
+  function filtered(q, spec) {
     var qt = toks(q), out = [];
     for (var i = 0; i < listings.length; i++) {
       var li = listings[i];
@@ -598,9 +602,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       if (state.specials && !li.w) continue;
       if (!sizeOk(li)) continue;
       if (spec && spec.li && !spec.li(li)) continue;
-      if (qt.length) {
-        if (!matches(qt, li._t) && !(state.dupes && li._ib.length && matches(qt, li._ib))) continue;
-      } else if (homeSpecials && !li.w) continue;
+      if (qt.length && !matches(qt, li._t) && !(state.dupes && li._ib.length && matches(qt, li._ib))) continue;
       out.push(li);
     }
     return out;
@@ -614,7 +616,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     return li.k + "|" + (known.length === 1 ? known[0] : "");
   }
 
-  function groupUp(rows, homepage, o) {
+  function groupUp(rows, o) {
     o = o || { sort: state.sort, size: state.size };
     var map = {};
     rows.forEach(function (li) { var gk = groupKey(li); (map[gk] = map[gk] || []).push(li); });
@@ -630,11 +632,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       var name = items.map(function (x) { return x.n || x.t; }).sort(function (a, b) { return a.length - b.length; })[0];
       return { gk: gk, items: items, best: best, name: name, brand: best.b || "", conc: conc, img: img, ib: ib, nstores: Object.keys(st).length };
     });
-    if (homepage && o.sort === "total") {
-      groups.sort(function (a, b) { return (b.best.w - b.best.p) / b.best.w - (a.best.w - a.best.p) / a.best.w; });
-    } else {
-      groups.sort(function (a, b) { return metric(a.best, o.sort) - metric(b.best, o.sort); });
-    }
+    groups.sort(function (a, b) { return metric(a.best, o.sort) - metric(b.best, o.sort); });
     return groups;
   }
 
@@ -643,8 +641,13 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     if (idxCache) return idxCache;
     var rows = listings.filter(function (li) { return li.kd === "p" && li.st; });
     idxCache = {};
-    groupUp(rows, false, { sort: "total", size: "any" }).forEach(function (g) { idxCache[g.gk] = g; });
+    groupUp(rows, { sort: "total", size: "any" }).forEach(function (g) { idxCache[g.gk] = g; });
     return idxCache;
+  }
+  // Everything one fragrance has at every store (in stock or not), for its detail sheet.
+  function fullGroup(gk) {
+    var rows = listings.filter(function (li) { return groupKey(li) === gk; });
+    return rows.length ? groupUp(rows, { sort: "total", size: "any" })[0] : null;
   }
 
   // Clone -> the designer fragrance it says it's inspired by, found by brand and name words.
@@ -688,7 +691,6 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     return pairCache;
   }
 
-  // Suggestions: fragrances whose name starts with what was typed come first, then the most widely stocked.
   // Words like "Eau de Parfum" and "the" are ignored, so "Afnan Lynked Freedom" is an exact match
   // for "Lynked Freedom Eau de Parfum" and beats "Lynked Freedom Black".
   function rankFor(q, groups) {
@@ -699,9 +701,10 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     });
     return groups.sort(function (a, b) { return b._score - a._score; });
   }
-  function suggestions(q) {
-    if (toks(q).length === 0) return [];
-    return rankFor(q, groupUp(filtered(q, false), false)).slice(0, 6);
+  // Search results: best name matches first, cheapest first within each.
+  function rankResults(q, groups) {
+    rankFor(q, groups);
+    return groups.sort(function (a, b) { return (Math.floor(b._score) - Math.floor(a._score)) || (tot(a.best) - tot(b.best)); });
   }
 
   // ---------- watchlist prices ----------
@@ -741,16 +744,16 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   }
   function toggleWatch(gk) {
     var e = watchEntry(gk);
-    if (e) { watch.splice(watch.indexOf(e), 1); }
+    if (e) { watch.splice(watch.indexOf(e), 1); toast("Removed from your watchlist."); }
     else {
-      var g = groupIndex()[gk] || lastGroups[gk];
+      var g = groupIndex()[gk] || fullGroup(gk);
       if (!g) return;
       var t = tot(g.best);
       watch.unshift({ q: (g.brand ? g.brand + " " : "") + g.name, gk: gk, b: g.brand, n: g.name, ml: g.best.ml || null, p0: t, last: t, at: new Date().toISOString().slice(0, 10) });
+      toast("Added to your watchlist.");
     }
     saveWatch();
   }
-  var lastGroups = {};
 
   // ---------- watchlist backup: save codes like Neon Arcade's ----------
   // "SS1-<checksum>-<data>": the data is the watchlist as JSON in URL-safe base64, and the checksum
@@ -787,14 +790,11 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     });
     watch.forEach(function (e) { delete e.last; }); // start drop tracking from today's prices
     saveWatch(); resolveWatch(); checkDrops();
-    toast(mode === "replace" ? "Watchlist replaced: " + watch.length + " fragrance" + (watch.length === 1 ? "" : "s") + "."
-      : added ? "Added " + added + " fragrance" + (added === 1 ? "" : "s") + " to your watchlist." : "Those are already on your watchlist.");
+    toast(mode === "replace" ? "Watchlist replaced: " + plural(watch.length, "fragrance") + "."
+      : added ? "Added " + plural(added, "fragrance") + " to your watchlist." : "Those are already on your watchlist.");
     render();
   }
-  function shareUrl(code) {
-    var base = location.protocol.indexOf("http") === 0 ? location.origin + location.pathname : "https://neoninc.github.io/scent-scout/";
-    return base + "?view=watchlist#import=" + code;
-  }
+  function shareBase() { return location.protocol.indexOf("http") === 0 ? location.origin + location.pathname : "https://neoninc.github.io/scent-scout/"; }
   function copyText(text, okMsg) {
     var done = function () { toast(okMsg); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text) ? done() : toast("Select the code and copy it."); });
@@ -805,53 +805,52 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       var ok = document.execCommand("copy"); document.body.removeChild(t); return ok; } catch (e) { return false; }
   }
   var toastTimer;
-  function toast(msg) { var el = $("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 3200); }
+  function toast(msg) { var el = $("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 2800); }
 
   function backupHtml() {
     var n = watch.length;
-    return '<details class="backup"' + (n ? "" : " open") + '><summary><span class="ic">⇅</span><span>Back up or move your watchlist' +
-      "<small>Save a copy, or load it on another phone or computer</small></span></summary><div class=\"bk\">" +
-      "<p>Your watchlist lives in this browser only. Clearing your browser data removes it, so keep a copy.</p>" +
-      (n ? '<h3>Save a copy</h3><textarea readonly id="bkcode" aria-label="Your save code">' + esc(exportCode()) + "</textarea>" +
-        '<div class="bkrow"><button type="button" class="sbtn primary" data-bk="copy">⧉ Copy save code</button>' +
-        '<button type="button" class="sbtn" data-bk="share">↗ Share or bookmark link</button>' +
-        '<button type="button" class="sbtn" data-bk="download">⤓ Download backup file</button></div>' +
-        "<p>Send the link to yourself on WhatsApp or email, or bookmark it. Opening it on any device loads this watchlist.</p><hr>" : "") +
-      '<h3>Load a watchlist</h3><textarea id="bkin" placeholder="Paste a save code (SS1-…) or a Scent Scout link" aria-label="Paste a save code"></textarea>' +
-      '<div class="bkrow"><button type="button" class="sbtn primary" data-bk="add">＋ Add to my watchlist</button>' +
-      (n ? '<button type="button" class="sbtn" data-bk="replace">Replace my watchlist</button>' : "") +
-      '<button type="button" class="sbtn" data-bk="file">Load backup file</button></div>' +
-      "<p>Save codes only contain fragrance names, bottle sizes and prices. Nothing personal.</p></div></details>";
+    return '<div class="grouptitle">Back up or move your watchlist</div><div class="group"><div class="bk">' +
+      (n ? "<p>Your watchlist is saved in this browser" + (window.NeonCloud && window.NeonCloud.enabled ? " and, when you’re signed in, to your Neon Inc account" : "") +
+        ". To move it without signing in, copy a save code or send yourself a link.</p>" +
+        '<textarea readonly id="bkcode" aria-label="Your save code">' + esc(exportCode()) + "</textarea>" +
+        '<div class="bkrow"><button type="button" class="pill solid" data-bk="copy">Copy code</button>' +
+        '<button type="button" class="pill" data-bk="share">Share link</button>' +
+        '<button type="button" class="pill" data-bk="download">Download file</button></div>' : "") +
+      '<textarea id="bkin" placeholder="Paste a save code (SS1-…) or a Scent Scout link" aria-label="Paste a save code"></textarea>' +
+      '<div class="bkrow"><button type="button" class="pill solid" data-bk="add">Add to my watchlist</button>' +
+      (n ? '<button type="button" class="pill" data-bk="replace">Replace mine</button>' : "") +
+      '<button type="button" class="pill" data-bk="file">Load file</button></div></div></div>' +
+      '<p class="capt">Save codes only contain fragrance names, bottle sizes and prices.</p>';
   }
   function pendingHtml() {
     if (!pendingImport) return "";
     var n = pendingImport.list.length;
-    return '<div class="banner imp"><h2>📥 Load a shared watchlist?</h2><p style="margin:0">This link has ' + n + " fragrance" + (n === 1 ? "" : "s") +
-      (pendingImport.date ? ", saved " + esc(pendingImport.date) : "") + ".</p>" +
-      '<div class="bkrow"><button type="button" class="sbtn primary" data-bk="pending-add">＋ Add to mine</button>' +
-      (watch.length ? '<button type="button" class="sbtn" data-bk="pending-replace">Replace mine</button>' : "") +
-      '<button type="button" class="sbtn link" data-bk="pending-no">Not now</button></div></div>';
+    return '<div class="alert"><span class="k tint">Shared watchlist</span><span>This link has ' + plural(n, "fragrance") +
+      (pendingImport.date ? ", saved " + esc(pendingImport.date) : "") + ".</span>" +
+      '<span class="acts"><button type="button" class="pill solid" data-bk="pending-add">Add to mine</button>' +
+      (watch.length ? '<button type="button" class="pill" data-bk="pending-replace">Replace mine</button>' : "") +
+      '<button type="button" class="pill" data-bk="pending-no">Not now</button></span></div>';
   }
   function onBackup(action) {
     var r;
     switch (action) {
-      case "copy": copyText(exportCode(), "Save code copied. Paste it into “Load a watchlist” on your other device."); break;
+      case "copy": copyText(exportCode(), "Code copied. Paste it into your other device’s watchlist."); break;
       case "share":
-        var url = shareUrl(exportCode());
+        var url = shareBase() + "?view=watchlist#import=" + exportCode();
         if (navigator.share) navigator.share({ title: "My Scent Scout watchlist", text: "Open this to load my Scent Scout watchlist.", url: url }).catch(function () {});
         else copyText(url, "Link copied. Bookmark it or send it to yourself.");
         break;
       case "download":
         var day = new Date().toISOString().slice(0, 10);
-        var text = "Scent Scout watchlist backup (" + day + ")\n" + watch.length + " fragrances: " +
+        var text = "Scent Scout watchlist backup (" + day + ")\n" + plural(watch.length, "fragrance") + ": " +
           watch.map(function (e) { return (e.b ? e.b + " " : "") + (e.n || e.q); }).join(", ") +
-          "\n\nTo restore: open Scent Scout, go to Watchlist, then Back up or move your watchlist, then Load backup file.\n\n" + exportCode() + "\n";
+          "\n\nTo restore: open Scent Scout, go to Watchlist and choose Load file.\n\n" + exportCode() + "\n";
         var a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
         a.download = "scent-scout-watchlist-" + day + ".txt";
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-        toast("Backup file saved to your downloads.");
+        toast("Backup saved to your downloads.");
         break;
       case "add": case "replace":
         r = readCode($("bkin").value);
@@ -872,180 +871,76 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     if (!m) return;
     var r = readCode(decodeURIComponent(m[1]));
     try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
-    if (r.ok) { pendingImport = r; state.view = "watch"; }
+    if (r.ok) { pendingImport = r; state.tab = "watch"; }
     else setTimeout(function () { toast(r.reason); }, 300);
   }
 
-  // ---------- rendering ----------
+  // ---------- small pieces ----------
   function concName(c) { return CONC_LABEL[c] || c; }
-
-  function renderNav() {
-    $("navhome").setAttribute("aria-pressed", String(state.view === "home"));
-    $("navwatch").setAttribute("aria-pressed", String(state.view === "watch"));
-    $("ncount").textContent = watch.length || "";
-    $("ndot").hidden = dropsSeen || !Object.keys(sessionDrops).length;
-    $("clear").hidden = !state.q;
-  }
-
-  function opts(el, items, isOn, attr) {
-    $(el).innerHTML = items.map(function (it) {
-      return '<button type="button" class="opt" ' + attr + '="' + it[0] + '" aria-pressed="' + isOn(it[0]) + '">' + esc(it[1]) + "</button>";
-    }).join("");
-  }
-  function renderFilters() {
-    opts("sizes", SIZES, function (v) { return state.size === v; }, "data-size");
-    opts("kinds", KINDS, function (v) { return !!state.kinds[v]; }, "data-kind");
-    opts("stores", data.stores.map(function (s) { return [s.id, s.name]; }), function (v) { return !!state.stores[v]; }, "data-store");
-    $("specials").checked = state.specials; $("instock").checked = state.inStock; $("dupes").checked = state.dupes; $("noassumed").checked = state.noAssumed;
-    var n = (state.size !== "any") + state.specials + !state.inStock + state.dupes + state.noAssumed +
-      (Object.keys(state.kinds).filter(function (k) { return state.kinds[k]; }).join() !== "p") +
-      data.stores.filter(function (s) { return !state.stores[s.id]; }).length;
-    $("fcount").hidden = !n; $("fcount").textContent = n;
-  }
-
-  function badges(li) {
-    var b = [];
-    if (li.w) b.push('<span class="pill deal">−' + Math.round((li.w - li.p) / li.w * 100) + "% special</span>");
-    if (li.pv) b.push('<span class="pill deal">Dropped from ' + R(li.pv) + "</span>");
-    if (li.ls) b.push('<span class="pill deal">Lowest we’ve seen</span>');
-    else if (li.lo && li.lo < li.p - 0.5) b.push('<span class="pill" title="Lowest price recorded on ' + esc(li.lod) + '">Was ' + R(li.lo) + " on " + esc((li.lod || "").slice(5)) + "</span>");
-    if (li.ms === "a") b.push('<span class="pill warn" title="The store doesn’t list the size. It’s the dearer of its listings, so it’s taken to be the 100 ml.">Size guessed</span>');
-    if (li.ms === "m") b.push('<span class="pill" title="The store doesn’t list the size. Another store sells it at exactly this price in this size.">Size matched by price</span>');
-    if (li.kd === "set") b.push('<span class="pill acc">Gift set</span>');
-    if (li.dl) b.push('<span class="pill acc">' + esc(li.dl) + "</span>");
-    if (!li.st) b.push('<span class="pill">Out of stock</span>');
-    if (li.stale) b.push('<span class="pill warn">Price may be old</span>');
-    return b.join("");
-  }
-
-  function offer(li, isBest) {
-    var st = stores[li.s] || {}, d = st.delivery || {}, f = fee(li);
-    var total = f === 0 ? "<b>" + R(li.p) + "</b> · free delivery" : "<b>" + R(li.p + f) + "</b> with " + R(f) + (d.estimated ? "*" : "") + " delivery";
-    return '<div class="offer' + (isBest ? " best" : "") + (li.st ? "" : " out") + '">' +
-      '<div><div class="st">' + esc(st.name || li.s) + (isBest ? '<span class="tagbest">Cheapest</span>' : "") + '</div><div class="eta">' + esc(d.eta || "") + "</div></div>" +
-      '<div class="pr">' + (li.w ? "<s>" + R(li.w) + "</s>" : "") + '<span class="p">' + R(li.p) + '</span><div class="tot">' + total + "</div></div>" +
-      '<div class="title">' + esc(li.t) + (li.ml && li.kd !== "set" ? " · " + R(li.p / li.ml) + "/ml" : "") + "</div>" +
-      '<div class="foot"><div class="chips">' + badges(li) + '</div><a class="go" href="' + esc(li.u) + '" target="_blank" rel="noopener">View at ' + esc(st.name || "store") + "</a></div>" +
-      "</div>";
-  }
-
   function shortName(g) {
     var n = g.name.replace(/\s*\b(eau de parfum|eau de toilette|eau de cologne|extrait de parfum|perfumed spray|edp|edt|edc)\b\s*/ig, " ")
       .replace(/\s+/g, " ").replace(/^[\s\-–,]+|[\s\-–,]+$/g, "");
     return n || g.name;
   }
-  function photo(src, cls) {
-    return '<span class="ph' + (cls ? " " + cls : "") + (src ? "" : " empty") + '">' + (src ? '<img loading="lazy" alt="" src="' + esc(src) + '">' : "") + "</span>";
-  }
-
-  function sizeLabel(k) { return k === "?" ? "Size not listed" : k + " ml"; }
   function searchName(g) {
     return ((g.brand ? g.brand + " " : "") + g.name).replace(/\b(eau de (parfum|toilette|cologne)|edp|edt|extrait de parfum)\b/ig, "").replace(/\s+/g, " ").trim();
   }
-
-  // "Smells like" panel at the top of an opened fragrance.
-  function scentHtml(g) {
-    var p = prof(g), P = pairs(), idx = groupIndex();
-    var designer = P.designerOf[g.gk] ? idx[P.designerOf[g.gk]] : null;
-    var clones = (P.clonesOf[g.gk] || []).map(function (k) { return idx[k]; }).filter(Boolean);
-    var head = "", subs = [];
-    if (g.ib) {
-      head = nice(g.ib);
-      subs.push("An alternative inspired by it." + (p && p.l ? " Think " + esc(p.l) + "." : ""));
-    } else if (p && p.l) {
-      head = cap(p.l) + ".";
-    }
-    if (p && p.like) subs.push("Often compared to <b>" + esc(p.like) + "</b>.");
-    var chips = "";
-    if (p && p.s) {
-      chips += p.s.map(function (s) { return '<button type="button" class="vchip" data-preset="season" data-arg="' + s + '" title="More ' + SEASONS[s][0].toLowerCase() + ' picks">' + SEASONS[s][1] + " " + SEASONS[s][0] + "</button>"; }).join("");
-      if (p.d) chips += '<span class="vchip">' + WHEN[p.d] + "</span>";
-      chips += (p.f || []).slice(0, 2).map(function (f) { return '<button type="button" class="vchip f" data-preset="fam" data-arg="' + f + '">' + FAM[f] + "</button>"; }).join("");
-    }
-    var watched = !!watchEntry(g.gk);
-    var acts = '<button type="button" class="sbtn' + (watched ? " on" : "") + '" data-watch="' + esc(g.gk) + '" aria-pressed="' + watched + '">' + (watched ? "♥ On your watchlist" : "♡ Add to watchlist") + "</button>";
-    if (designer) acts += '<button type="button" class="sbtn" data-open="' + esc(designer.gk) + '">The original from <b>' + R(tot(designer.best)) + "</b></button>";
-    if (clones.length) {
-      var low = Math.min.apply(null, clones.map(function (c) { return tot(c.best); }));
-      acts += '<button type="button" class="sbtn" data-preset="alts" data-arg="' + esc(g.gk) + '">' + clones.length + " cheaper alternative" + (clones.length > 1 ? "s" : "") + " from <b>" + R(low) + "</b></button>";
-    }
-    acts += '<a class="sbtn link" href="https://www.google.com/search?q=' + encodeURIComponent("site:fragrantica.com " + searchName(g)) + '" target="_blank" rel="noopener">Reviews on Fragrantica ↗</a>';
-    if (!head) return '<div class="sacts">' + acts + "</div>";
-    return '<div class="scent"><div class="slbl">Smells like</div><p class="shead">' + esc(head) + "</p>" +
-      subs.map(function (s) { return '<p class="ssub">' + s + "</p>"; }).join("") +
-      (chips ? '<div class="vibes">' + chips + "</div>" : "") +
-      (p && p.n && p.n.length ? '<p class="snotes"><span>Key notes</span>' + p.n.map(esc).join(" · ") + "</p>" : "") +
-      '<div class="sacts">' + acts + "</div></div>";
+  function photo(src, cls) {
+    return '<span class="ph' + (cls ? " " + cls : "") + (src ? "" : " empty") + '">' + (src ? '<img loading="lazy" alt="" src="' + esc(src) + '">' : "") + "</span>";
   }
+  var CHEV = '<svg class="chev" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg>';
+  var ICON = {
+    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+    heartOn: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+    share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9.3l-4.4 3.9L17 19l-5-3.1L7 19l1.4-5.8L4 9.3l5.8-.7z"/></svg>',
+    close: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8"/></svg>'
+  };
 
-  function bodyHtml(g) {
-    var bySize = {};
-    g.items.forEach(function (li) { var k = li.ml ? String(li.ml) : "?"; (bySize[k] = bySize[k] || []).push(li); });
-    var head = g.best.ml ? String(g.best.ml) : "?";
-    var keys = Object.keys(bySize).sort(function (a, c) {
-      if (a === head) return -1; if (c === head) return 1;
-      return (c === "?" ? -1 : +c) - (a === "?" ? -1 : +a);
-    });
-    var sel = state.sizeSel[g.gk];
-    if (!bySize[sel]) sel = keys[0];
-    var rows = bySize[sel], showAll = state.allOffers[g.gk];
-    var shown = showAll ? rows : rows.slice(0, OFFERS);
-    var tabs = keys.length > 1 ? '<div class="tabs" role="tablist">' + keys.map(function (k) {
-      return '<button type="button" class="tab" role="tab" data-gk="' + esc(g.gk) + '" data-sz="' + k + '" aria-selected="' + (k === sel) + '">' +
-        sizeLabel(k) + "<small>" + R(bySize[k][0].p + (state.sort === "total" ? fee(bySize[k][0]) : 0)) + "</small></button>";
-    }).join("") + "</div>" : '<div class="lbl">' + sizeLabel(sel) + "</div>";
-    var anyEst = rows.some(function (li) { return fee(li) && (stores[li.s].delivery || {}).estimated; });
-    return '<div class="ibody">' + scentHtml(g) + '<div class="pcol">' + tabs + '<div class="offers">' +
-      shown.map(function (li, i) { return offer(li, i === 0 && rows.length > 1); }).join("") + "</div>" +
-      (rows.length > OFFERS ? '<button type="button" class="moreoffers" data-all="' + esc(g.gk) + '">' + (showAll ? "Show fewer stores" : "Show all " + rows.length + " stores") + "</button>" : "") +
-      (anyEst ? '<div class="note">* Delivery fee is an estimate. The store doesn’t publish it.</div>' : "") +
-      '<div class="also"><span class="note">Also check:</span>' + ALSO_CHECK.map(function (a) {
-        return '<a href="' + a[1] + encodeURIComponent(searchName(g)) + '" target="_blank" rel="noopener">' + a[0] + " ↗</a>";
-      }).join("") + "</div></div></div>";
+  // One row in a grouped list. extra = a short note for the meta line (e.g. a watchlist price change).
+  function row(g, extra) {
+    var b = g.best, meta = [];
+    if (extra) meta.push(extra);
+    else if (b.w) meta.push('<span class="save">' + Math.round((b.w - b.p) / b.w * 100) + "% off</span>");
+    else if (g.ib) meta.push('<span class="like">Like ' + esc(nice(g.ib)) + "</span>");
+    if (g.conc) meta.push(esc(CONC_SHORT[g.conc] || g.conc));
+    meta.push(g.nstores > 1 ? g.nstores + " stores" : esc((stores[b.s] || {}).name || ""));
+    var value = state.sort === "ppm" && b.ml ? R(b.p / b.ml) + "/ml" : state.sort === "price" ? R(b.p) : R(tot(b));
+    return '<button type="button" class="row" data-open="' + esc(g.gk) + '">' + photo(g.img) +
+      '<span class="t"><span class="b">' + esc(g.brand || "Unbranded") + '</span><span class="n">' + esc(shortName(g)) + '</span><span class="m">' + meta.join(" · ") + "</span></span>" +
+      '<span class="p"><b>' + value + "</b><small>" + (b.ml ? b.ml + " ml" : "&nbsp;") + "</small></span>" + CHEV + "</button>";
   }
-
-  function item(g, extra) {
-    var b = g.best, open = state.open === g.gk;
-    lastGroups[g.gk] = g;
-    var label = { total: "from", price: "from", ppm: "per ml from", disc: "now" }[state.sort] + (g.nstores > 1 ? " · " + g.nstores + " stores" : "");
-    var value = state.sort === "ppm" && b.ml ? R(b.p / b.ml) : state.sort === "total" ? R(b.p + fee(b)) : R(b.p);
-    var sub = esc((stores[b.s] || {}).name || "") + (b.ml ? " · " + b.ml + " ml" : "");
-    return '<article class="item' + (open ? " open" : "") + '" id="g-' + esc(g.gk) + '">' +
-      '<button type="button" class="ihead" data-toggle="' + esc(g.gk) + '" aria-expanded="' + open + '">' +
-      photo(g.img, "thumb") +
-      '<span class="iname"><span class="b">' + esc(g.brand || "Unbranded") + '</span><span class="n">' + esc(shortName(g)) + "</span>" +
-      '<span class="chips">' + (extra || "") + (g.conc ? '<span class="pill">' + esc(concName(g.conc)) + "</span>" : "") +
-      (b.w ? '<span class="pill deal">−' + Math.round((b.w - b.p) / b.w * 100) + "%</span>" : "") +
-      (g.ib ? '<span class="pill acc">Like ' + esc(nice(g.ib)) + "</span>" : "") +
-      (watchEntry(g.gk) && state.view !== "watch" ? '<span class="pill acc">♥</span>' : "") + "</span></span>" +
-      '<span class="iprice"><span class="from">' + label + '</span><span class="v">' + value + '</span><span class="w">' + sub + "</span>" +
-      '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>' +
-      "</button>" + (open ? bodyHtml(g) : "") + "</article>";
-  }
-
+  // Rows split into a few rounded groups, so wide screens can show two columns.
   function listHtml(groups) {
-    var html = groups.slice(0, state.limit).map(function (g) { return item(g); }).join("");
-    if (groups.length > state.limit) html += '<button type="button" class="morebtn" id="more">Show more (' + (groups.length - state.limit) + ")</button>";
+    var shown = groups.slice(0, state.limit), chunks = [], size = Math.max(5, Math.ceil(shown.length / 2));
+    for (var i = 0; i < shown.length; i += size) chunks.push(shown.slice(i, i + size));
+    var html = '<div class="list2">' + chunks.map(function (c) { return '<div class="group">' + c.map(function (g) { return row(g); }).join("") + "</div>"; }).join("") + "</div>";
+    if (groups.length > state.limit) html += '<button type="button" class="more" id="more">Show ' + Math.min(PAGE, groups.length - state.limit) + " more</button>";
     return html;
   }
+  function toolbar(count) {
+    var opts = SORTS.filter(function (s) { return s[0] !== "rel" || state.q; }).map(function (s) {
+      return '<option value="' + s[0] + '"' + (effSort() === s[0] ? " selected" : "") + ">" + s[1] + "</option>";
+    }).join("");
+    return '<div class="toolbar"><span>' + count + '</span><select class="sortsel" id="sort" aria-label="Sort by">' + opts + "</select></div>";
+  }
+  function effSort() { return state.sort === "rel" && !state.q ? "total" : state.sort; }
 
   // ---------- Discover ----------
   function tile(g, li, extra, muted) {
     li = li || g.best;
-    return '<button type="button" class="tile" data-open="' + esc(g.gk) + '">' +
-      photo(g.img) +
+    return '<button type="button" class="tile" data-open="' + esc(g.gk) + '">' + photo(g.img) +
       '<span class="tb">' + esc(g.brand || "Unbranded") + '</span><span class="tn">' + esc(shortName(g)) + "</span>" +
-      '<span class="tp">' + R(tot(li)) + (li.ml ? "<small>" + li.ml + " ml</small>" : "") + "</span>" +
-      (extra ? '<span class="tx' + (extra.acc ? " acc" : "") + '">' + extra.html + "</span>" : "") +
+      '<span class="tp">' + R(tot(li)) + "</span>" +
+      (extra ? '<span class="tx' + (extra.tint ? " tint" : "") + '">' + extra.html + "</span>" : "") +
       (muted ? '<span class="tm">' + muted + "</span>" : "") + "</button>";
   }
-  function rail(id, arg, title, desc, tiles) {
+  function rail(id, arg, title, hint, tiles) {
     if (tiles.length < 3) return "";
-    return '<section class="sec"><div class="sechead"><div><h2>' + title + "</h2>" + (desc ? "<p>" + desc + "</p>" : "") + "</div>" +
-      '<span style="display:inline-flex;gap:12px;align-items:center">' +
-      (id ? '<button type="button" class="seeall" data-preset="' + id + '" data-arg="' + esc(arg) + '">See all</button>' : "") +
-      '<span class="arrows"><button type="button" data-scroll="-1" aria-label="Scroll left">‹</button><button type="button" data-scroll="1" aria-label="Scroll right">›</button></span></span>' +
-      '</div><div class="rail hscroll">' + tiles.slice(0, RAIL).join("") + "</div></section>";
+    return '<section class="sec"><div class="sechead"><h2>' + title + "</h2>" +
+      (id ? '<button type="button" class="see" data-preset="' + id + '" data-arg="' + esc(arg) + '">See all</button>' : "") + "</div>" +
+      (hint ? '<p class="sechint">' + hint + "</p>" : "") +
+      '<div class="rail hscroll">' + tiles.slice(0, RAIL).join("") + "</div></section>";
   }
   function bestDrop(g) {
     var top = null, pct = 0;
@@ -1073,7 +968,6 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     });
     return top;
   }
-
   function fotd() {
     if (fotdCache !== undefined) return fotdCache;
     var idx = groupIndex(), all = Object.keys(idx).map(function (k) { return idx[k]; }), seen = {}, inSeason = [], other = [];
@@ -1094,57 +988,35 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     fotdCache = pool.length ? pool[(day * 37) % pool.length] : null; // step through the list so consecutive days differ
     return fotdCache;
   }
-  function fotdHtml() {
+  function todayHtml() {
     var g = fotd();
     if (!g) return "";
-    var p = prof(g), b = g.best, watched = !!watchEntry(g.gk);
-    var chips = p && p.s ? p.s.map(function (s) { return '<button type="button" class="vchip" data-preset="season" data-arg="' + s + '">' + SEASONS[s][1] + " " + SEASONS[s][0] + "</button>"; }).join("") +
-      (p.f || []).slice(0, 2).map(function (f) { return '<button type="button" class="vchip f" data-preset="fam" data-arg="' + f + '">' + FAM[f] + "</button>"; }).join("") : "";
-    return '<section class="fotd" aria-label="Fragrance of the day">' + photo(g.img) +
-      '<div class="fhead"><div class="slbl">✦ Fragrance of the day</div><div class="fb">' + esc(g.brand) + "</div><h2>" + esc(shortName(g)) + "</h2></div>" +
-      '<div class="fbody">' +
-      (p && p.l ? '<p class="fl">Smells like ' + esc(p.l) + ".</p>" : "") +
-      (chips ? '<div class="vibes">' + chips + "</div>" : "") +
-      '<div class="fp"><span class="price">' + R(tot(b)) + "<small>" + esc(stores[b.s].name) + (b.ml ? " · " + b.ml + " ml" : "") + "</small></span>" +
-      '<button type="button" class="go" data-open="' + esc(g.gk) + '">See prices</button>' +
-      '<button type="button" class="sbtn' + (watched ? " on" : "") + '" data-watch="' + esc(g.gk) + '" aria-label="' + (watched ? "Remove from" : "Add to") + ' watchlist">' + (watched ? "♥" : "♡") + "</button></div>" +
-      "</div></section>";
+    var p = prof(g), b = g.best;
+    return '<button type="button" class="today" data-open="' + esc(g.gk) + '" aria-label="Fragrance of the day: ' + esc(g.brand + " " + shortName(g)) + '">' + photo(g.img) +
+      '<span class="tb"><span class="k">Fragrance of the day</span><span class="h">' + esc(shortName(g)) + '</span><span class="br">' + esc(g.brand) + (g.conc ? " · " + esc(concName(g.conc)) : "") + "</span>" +
+      (p && p.l ? '<span class="line">Smells like ' + esc(p.l) + ".</span>" : "") +
+      '<span class="foot"><span class="pr">From <b>' + R(tot(b)) + "</b> at " + esc(stores[b.s].name) + '</span><span class="pill solid">View</span></span></span></button>';
   }
-
   function homeHtml() {
-    var all = groupUp(filtered("", false), false, { sort: "total", size: "any" });
+    var all = groupUp(filtered(""), { sort: "total", size: "any" });
     var idx = groupIndex(), P = pairs(), out = "";
-    // price drops on the watchlist since the last visit
     var drops = dropsSeen ? [] : watch.filter(function (e) { return sessionDrops[e.gk]; });
     if (drops.length) {
-      out += '<div class="banner"><h2>↓ Price drop' + (drops.length > 1 ? "s" : "") + " on your watchlist</h2><ul>" + drops.slice(0, 3).map(function (e) {
-        var d = sessionDrops[e.gk];
-        return "<li>" + esc((e.b ? e.b + " " : "") + e.n) + " · <b>" + R(d.to) + "</b> <s>" + R(d.from) + "</s></li>";
-      }).join("") + '</ul><button type="button" data-nav="watch">Open your watchlist →</button></div>';
+      out += '<button type="button" class="alert" data-tab="watch"><span class="k">Price drop' + (drops.length > 1 ? "s" : "") + " on your watchlist</span>" +
+        drops.slice(0, 3).map(function (e) { var d = sessionDrops[e.gk]; return "<span>" + esc((e.b ? e.b + " " : "") + e.n) + " is now <b>" + R(d.to) + "</b>, was " + R(d.from) + "</span>"; }).join("") + "</button>";
     }
-    out += fotdHtml();
-    // quick picks
-    var picks = [["season", NOW, SEASONS[NOW][1] + " " + SEASONS[NOW][0] + " picks"]].concat(
-      FAM_PICKS.map(function (f) { return ["fam", f[0], f[1]]; }),
-      [["price", "500", "Under R500"], ["gender", "m", "For him"], ["gender", "f", "For her"], ["clones", "", "✨ Designer smell, for less"]]);
-    out += '<div class="picks hscroll" aria-label="Quick picks">' + picks.map(function (p) {
-      return '<button type="button" class="pick" data-preset="' + p[0] + '" data-arg="' + p[1] + '">' + esc(p[2]) + "</button>";
-    }).join("") + "</div>";
-
-    // biggest drops
+    out += pendingHtml() + todayHtml();
     var dr = all.map(function (g) { var d = bestDrop(g); return d && { g: g, d: d }; }).filter(Boolean)
       .sort(function (a, b) { return (b.d.li.pv ? 0.15 : 0) + b.d.pct - (a.d.li.pv ? 0.15 : 0) - a.d.pct; });
-    out += rail("drops", "", "Biggest price drops", "", dr.slice(0, RAIL).map(function (x) {
-      return tile(x.g, x.d.li, { html: "−" + Math.round(x.d.pct * 100) + "% · was " + R(x.d.from + fee(x.d.li)) });
+    out += rail("drops", "", "Price drops", "", dr.slice(0, RAIL).map(function (x) {
+      return tile(x.g, x.d.li, { html: Math.round(x.d.pct * 100) + "% off" }, "Was " + R(x.d.from + fee(x.d.li)));
     }));
-    // in season now
     var se = all.filter(function (g) { var p = prof(g); return p && p.s && p.s.indexOf(NOW) >= 0 && g.nstores >= 2; })
       .sort(function (a, b) { return (!!b.best.w - !!a.best.w) || (b.nstores - a.nstores) || (tot(a.best) - tot(b.best)); });
-    out += rail("season", NOW, SEASONS[NOW][1] + " In season: " + SEASONS[NOW][0], "Chosen from their notes.", se.slice(0, RAIL).map(function (g) {
+    out += rail("season", NOW, "Made for " + SEASONS[NOW][0].toLowerCase(), "Chosen from their notes.", se.slice(0, RAIL).map(function (g) {
       var p = prof(g);
-      return tile(g, null, { html: esc((p.f || []).slice(0, 2).map(function (f) { return FAM[f]; }).join(" · ")), acc: true });
+      return tile(g, null, { html: esc((p.f || []).slice(0, 2).map(function (f) { return FAM[f]; }).join(", ")), tint: true });
     }));
-    // designer vs clone: the cheapest alternative for each popular original
     var seen = {}, cl = [];
     all.forEach(function (g) {
       var dk = P.designerOf[g.gk], d = dk && idx[dk];
@@ -1155,223 +1027,344 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
       cl.push({ c: c, d: d });
     });
     cl.sort(function (a, b) { return (b.d.nstores - a.d.nstores) || (tot(b.d.best) - tot(a.d.best)); });
-    out += rail("clones", "", "Designer smell, for less", "", cl.slice(0, RAIL).map(function (x) {
-      return tile(x.c, null, { html: "Like " + esc(x.d.name), acc: true }, "Original from " + R(tot(x.d.best)));
+    out += rail("clones", "", "Designer smell for less", "", cl.slice(0, RAIL).map(function (x) {
+      return tile(x.c, null, { html: "Like " + esc(shortName(x.d)), tint: true }, "Original " + R(tot(x.d.best)));
     }));
-    // same bottle, very different price
-    var gp = all.map(function (g) { var x = priceGap(g); return x && { g: g, x: x }; }).filter(Boolean)
-      .sort(function (a, b) { return b.x.gap - a.x.gap; });
-    out += rail("", "", "Shop around and save", "Same bottle, cheaper at another store.", gp.slice(0, RAIL).map(function (y) {
-      return tile(y.g, y.x.li, { html: "Save " + R(y.x.gap) + " at " + esc(stores[y.x.li.s].name) }, "Others up to " + R(y.x.hi));
+    var gp = all.map(function (g) { var x = priceGap(g); return x && { g: g, x: x }; }).filter(Boolean).sort(function (a, b) { return b.x.gap - a.x.gap; });
+    out += rail("", "", "Cheaper at another store", "Same bottle, big difference between stores.", gp.slice(0, RAIL).map(function (y) {
+      return tile(y.g, y.x.li, { html: "Save " + R(y.x.gap) }, "at " + esc(stores[y.x.li.s].name));
     }));
-    // lowest we've seen
     var lw = all.filter(function (g) { return g.items.some(function (li) { return li.ls && li.st; }); })
       .sort(function (a, b) { return (b.nstores - a.nstores) || (tot(a.best) - tot(b.best)); });
-    out += rail("lows", "", "Lowest prices we’ve seen", "", lw.slice(0, RAIL).map(function (g) {
-      var li = g.items.filter(function (x) { return x.ls && x.st; })[0];
-      return tile(g, li, { html: "Lowest we’ve seen" });
-    }));
-    var nSpecials = groupUp(filtered("", true), false).length;
-    out += '<button type="button" class="browse" data-preset="specials" data-arg="">Browse all ' + nSpecials.toLocaleString("en-US") + " specials →</button>";
+    out += rail("lows", "", "Lowest we’ve seen", "", lw.slice(0, RAIL).map(function (g) { return tile(g, g.items.filter(function (x) { return x.ls && x.st; })[0]); }));
+    var nSpecials = groupUp(filtered("", { li: function (li) { return li.w; } })).length;
+    out += '<div class="sec"><div class="group"><button type="button" class="lrow" data-preset="specials" data-arg=""><span>Browse all specials</span><span class="v">' +
+      nSpecials.toLocaleString("en-US") + " " + CHEV + "</span></button>" +
+      '<button type="button" class="lrow" data-tab="search"><span>Browse by scent, price or season</span><span class="v">' + CHEV + "</span></button></div></div>";
+    out += aboutHtml();
     return out;
+  }
+  function aboutHtml() {
+    var srows = data.stores.map(function (s) {
+      var d = s.delivery || {}, bad = s.status !== "ok";
+      return '<div class="storerow"><span><span class="dot' + (bad ? " err" : "") + '" title="' + (bad ? "Last update failed, showing older prices" : "Updated") + '"></span>' +
+        '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.name) + "</a></span><span>" + R(d.fee) + (d.estimated ? "*" : "") + ", free over " + R(d.free_over) + "</span></div>";
+    }).join("");
+    return '<div class="grouptitle">About</div><div class="group about">' +
+      "<details><summary>Stores and delivery</summary><div class=\"in\">" + srows +
+      "<p style=\"margin-top:10px\">Only authorised retailers and specialist perfume shops, no marketplaces. Delivered prices assume one item. * = the store doesn’t publish its fee, so it’s an estimate.</p></div></details>" +
+      "<details><summary>How it works</summary><div class=\"in\">" +
+      "<p>Every store’s catalogue is read twice a day, early morning and early evening. The same fragrance from different stores is put together and split by bottle size.</p>" +
+      "<p><b>Smells like</b> is worked out from the notes the stores list (bergamot, vanilla, oud…). It’s a guide, not a review. For ratings, use the Fragrantica link on each fragrance.</p>" +
+      "<p><b>Missing sizes:</b> when a store gives no size, the description is checked, then another store selling it at exactly the same price. Otherwise the dearer listing is taken to be the 100 ml, and marked “size guessed”.</p>" +
+      "<p>Prices last checked " + esc(new Date(data.generated).toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short" })) + ". Always confirm on the store’s site before you buy.</p></div></details></div>";
+  }
+
+  // ---------- Search ----------
+  function searchHtml() {
+    var q = state.q.trim();
+    if (!q) {
+      var rec = recent();
+      return (rec.length ? '<div class="sechead" style="margin-top:6px"><h2>Recent</h2><button type="button" class="see" data-recent-clear="1">Clear</button></div><div class="group">' +
+          rec.map(function (r) { return '<button type="button" class="lrow" data-q="' + esc(r) + '"><span>' + esc(r) + '</span><span class="v">' + CHEV + "</span></button>"; }).join("") + "</div>" : "") +
+        '<div class="sec"' + (rec.length ? "" : ' style="margin-top:6px"') + '><div class="sechead"><h2>Browse</h2></div><div class="cats">' + CATS.map(function (c) {
+          return '<button type="button" class="cat" style="background:' + c[4] + '" data-preset="' + c[0] + '" data-arg="' + esc(c[1]) + '">' + esc(c[2]) + '<span class="e" aria-hidden="true">' + c[3] + "</span></button>";
+        }).join("") + "</div></div>";
+    }
+    var groups = groupUp(filtered(q));
+    if (effSort() === "rel") rankResults(q, groups);
+    if (!groups.length) {
+      var hint = state.inStock || state.specials || state.size !== "any" ? "Try fewer words, or open Filters and switch off “In stock only”, specials or the size." :
+        "Try fewer words or another spelling, or include “inspired by” alternatives in Filters.";
+      return '<div class="empty"><h3>No results for “' + esc(q) + '”</h3><p>' + hint + "</p></div>";
+    }
+    return toolbar(plural(groups.length, "fragrance")) + listHtml(groups);
+  }
+  function presetHtml(spec) {
+    var groups = groupUp(filtered("", spec));
+    if (spec.g) groups = groups.filter(spec.g);
+    if (!groups.length) return '<div class="empty"><h3>Nothing here right now</h3><p>Open Filters and switch off “In stock only” or the size filter.</p></div>';
+    return toolbar(plural(groups.length, "fragrance")) + listHtml(groups);
   }
 
   // ---------- Watchlist ----------
   function watchHtml() {
     var idx = groupIndex();
-    if (!watch.length) return pendingHtml() + '<div class="empty"><h3>Nothing saved yet</h3><p>Open any fragrance and tap “♡ Add to watchlist”. We’ll show you here when its price drops. Moving from another device? Load your watchlist below.</p></div>' + backupHtml();
+    if (!watch.length) {
+      return pendingHtml() + '<div class="empty"><h3>No fragrances yet</h3><p>Tap the heart on any fragrance to watch its price. Drops show up here when you come back.</p></div>' + backupHtml();
+    }
     var rows = watch.map(function (e, i) { return { e: e, g: e.gk && idx[e.gk], i: i }; });
     rows.sort(function (a, b) { return (!!sessionDrops[b.e.gk] - !!sessionDrops[a.e.gk]) || a.i - b.i; });
-    return pendingHtml() + rows.map(function (r) {
+    var html = rows.map(function (r) {
       var e = r.e, g = r.g;
       if (!g) {
-        return '<div class="stub"><div><div class="n">' + esc(e.n ? (e.b ? e.b + " " : "") + e.n : e.q) + '</div><div class="m">' +
-          (e.gk ? "Not in stock at any store right now." : "Not found in the stores we check.") + '</div></div><button type="button" class="sbtn" data-unwatch="' + r.i + '">Remove</button></div>';
+        return '<div class="lrow"><span>' + esc(e.n ? (e.b ? e.b + " " : "") + e.n : e.q) + '<br><small class="muted">' +
+          (e.gk ? "Out of stock everywhere right now" : "Not found in the stores we check") + '</small></span><button type="button" class="pill" data-unwatch="' + r.i + '">Remove</button></div>';
       }
-      var wp = watchPrice(e, g), extra = "", d = sessionDrops[e.gk];
-      if (d) extra += '<span class="pill deal">↓ Dropped from ' + R(d.from) + "</span>";
-      else if (e.p0 != null && wp.sameSize && wp.total < e.p0 - 0.5) extra += '<span class="pill deal">↓ ' + R(e.p0 - wp.total) + " since you saved it</span>";
-      else if (e.p0 != null && wp.sameSize && wp.total > e.p0 + 0.5) extra += '<span class="pill">↑ ' + R(wp.total - e.p0) + " since you saved it</span>";
-      return item(g, extra);
-    }).join("") + backupHtml();
-  }
-
-  function render() {
-    renderNav();
-    var q = state.q.trim(), spec = state.preset ? presetSpec() : null;
-    var home = state.view === "home" && !q && !spec;
-    $("homeview").hidden = !home;
-    document.querySelector(".bar").hidden = home;
-    $("results").hidden = home;
-    $("back").hidden = !(spec || state.view === "watch") || !!q;
-    $("sort").hidden = state.view === "watch" && !q;
-    if (state.view === "watch" && !q) {
-      $("heading").textContent = "Your watchlist";
-      $("sub").textContent = "Saved on this device. Price drops show up here when you come back.";
-      $("results").innerHTML = watchHtml();
-      dropsSeen = true; renderNav();
-      return;
-    }
-    if (home) { $("homeview").innerHTML = homeHtml(); return; }
-    var groups = groupUp(filtered(q, home, spec), home);
-    if (spec && spec.g) groups = groups.filter(spec.g);
-    if (!home && !spec && groups.length === 1) state.open = groups[0].gk; // one match: open it straight away
-    var prices = groups.reduce(function (n, g) { return n + g.items.length; }, 0);
-    if (home) {
-      $("heading").textContent = "All specials";
-      $("sub").textContent = groups.length.toLocaleString("en-US") + " fragrances are marked down right now.";
-    } else if (spec && !q) {
-      $("heading").textContent = spec.label;
-      $("sub").textContent = groups.length.toLocaleString("en-US") + " fragrance" + (groups.length === 1 ? "" : "s") + " · " + spec.desc;
-    } else {
-      $("heading").textContent = groups.length + " fragrance" + (groups.length === 1 ? "" : "s");
-      $("sub").textContent = prices + " price" + (prices === 1 ? "" : "s") + " · tap a fragrance to compare stores";
-    }
-    if (!groups.length) {
-      var hint = state.inStock || state.specials || state.size !== "any" ? "Open Filters and turn off “In stock only”, “Specials only” or the size filter." :
-        state.dupes ? "Try fewer words or a different spelling." : "Try fewer words, or include “inspired by” alternatives in Filters.";
-      $("results").innerHTML = '<div class="empty"><h3>' + (q ? "Nothing matches “" + esc(q) + "”" : "Nothing here right now") + "</h3><p>" + hint + "</p></div>";
-      return;
-    }
-    $("results").innerHTML = listHtml(groups);
-  }
-
-  function renderSuggest() {
-    var q = $("q").value;
-    var list = document.activeElement === $("q") ? suggestions(q) : [];
-    hi = -1;
-    if (!list.length) { $("suggest").hidden = true; $("q").setAttribute("aria-expanded", "false"); return; }
-    $("suggest").innerHTML = list.map(function (g, i) {
-      var b = g.best;
-      return '<button type="button" role="option" data-pick="' + esc(g.gk) + '" data-i="' + i + '"><span class="sb">' + esc(g.brand) + (g.conc ? " · " + esc(concName(g.conc)) : "") +
-        '</span><span class="sn">' + esc(g.name) + '</span><span class="sp"><b>' + R(b.p + fee(b)) + "</b>" + g.nstores + " store" + (g.nstores > 1 ? "s" : "") + "</span></button>";
-    }).join("") + '<button type="button" data-showall="1"><span class="all">See all results for “' + esc(q.trim()) + '”</span></button>';
-    $("suggest").hidden = false; $("q").setAttribute("aria-expanded", "true");
-    suggestCache = list;
-  }
-  var suggestCache = [];
-  function closeSuggest() { $("suggest").hidden = true; $("q").setAttribute("aria-expanded", "false"); }
-
-  function renderInfo() {
-    var rowsH = data.stores.map(function (s) {
-      var d = s.delivery || {}, bad = s.status !== "ok";
-      return "<tr><td><span class=\"status-dot" + (bad ? " err" : "") + "\" title=\"" + (bad ? "Last update failed, showing older prices" : "Updated") + "\"></span>" +
-        "<a href=\"" + esc(s.url) + "\" target=\"_blank\" rel=\"noopener\">" + esc(s.name) + "</a></td><td class=\"num\">" + R(d.fee) + (d.estimated ? "*" : "") +
-        "</td><td class=\"num\">" + R(d.free_over) + "</td><td>" + esc(d.eta || "") + "</td></tr>";
+      var wp = watchPrice(e, g), d = sessionDrops[e.gk], note = "";
+      if (d) note = '<span class="save">Dropped from ' + R(d.from) + "</span>";
+      else if (e.p0 != null && wp.sameSize && wp.total < e.p0 - 0.5) note = '<span class="save">' + R(e.p0 - wp.total) + " cheaper than when saved</span>";
+      else if (e.p0 != null && wp.sameSize && wp.total > e.p0 + 0.5) note = R(wp.total - e.p0) + " more than when saved";
+      return row(g, note);
     }).join("");
-    $("info").innerHTML =
-      "<details><summary>Stores and delivery</summary><div><div class=\"tablewrap\"><table class=\"dtable\"><thead><tr><th>Store</th><th>Delivery</th><th>Free from</th><th>Takes</th></tr></thead><tbody>" + rowsH +
-      "</tbody></table></div><p style=\"margin-top:8px\">Only authorised retailers and specialist perfume shops are included, no marketplaces. Delivered prices assume you buy one item; buying more from the same store can get you free delivery. * = estimate.</p></div></details>" +
-      "<details><summary>How it works</summary><div>" +
-      "<p>Every store’s catalogue is read twice a day, at about 05:15 and 17:15. The same fragrance from different stores is put together and split by bottle size.</p>" +
-      "<p><b>Smells like:</b> worked out from the notes the stores list (for example bergamot, vanilla or oud). The notes decide the scent family, the seasons it suits and the short description. It’s a guide, not a review; for ratings, use the Fragrantica link.</p>" +
-      "<p><b>Watchlist:</b> saved on this device only. When you come back, any saved fragrance that got cheaper (same bottle size) is flagged.</p>" +
-      "<p><b>Missing sizes:</b> when a store gives no size, the description is checked first. Then, if another store sells the same fragrance at exactly the same price, that size is used (“Size matched by price”). Otherwise the dearer of the store’s listings is taken to be the 100 ml (“Size guessed”).</p>" +
-      "<p>Prices last checked " + esc(new Date(data.generated).toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short" })) + ". Always confirm the price on the store’s site before you buy.</p></div></details>";
+    return pendingHtml() + '<div class="group" style="margin-top:6px">' + html + "</div>" + backupHtml();
   }
 
-  // ---------- actions ----------
-  function syncUrl() {
-    try {
-      if (location.protocol.indexOf("http") !== 0) return;
-      var u = new URL(location.href);
-      if (state.q) u.searchParams.set("q", state.q); else u.searchParams.delete("q");
-      if (state.view === "watch" && !state.q) u.searchParams.set("view", "watchlist"); else u.searchParams.delete("view");
-      history.replaceState(null, "", u);
-    } catch (e) {}
+  // ---------- fragrance detail sheet ----------
+  function scentHtml(g) {
+    var p = prof(g), P = pairs(), idx = groupIndex();
+    var designer = P.designerOf[g.gk] ? idx[P.designerOf[g.gk]] : null;
+    var clones = (P.clonesOf[g.gk] || []).map(function (k) { return idx[k]; }).filter(Boolean);
+    var head = "", subs = [];
+    if (g.ib) { head = "Smells like " + nice(g.ib); subs.push("An alternative inspired by it." + (p && p.l ? " Think " + esc(p.l) + "." : "")); }
+    else if (p && p.l) head = cap(p.l) + ".";
+    if (p && p.like) subs.push("Often compared to <b>" + esc(p.like) + "</b>.");
+    var links = "";
+    if (designer) links += '<button type="button" class="lrow" data-open="' + esc(designer.gk) + '"><span>The original: ' + esc(shortName(designer)) + '</span><span class="v">' + R(tot(designer.best)) + " " + CHEV + "</span></button>";
+    if (clones.length) {
+      var low = Math.min.apply(null, clones.map(function (c) { return tot(c.best); }));
+      links += '<button type="button" class="lrow" data-preset="alts" data-arg="' + esc(g.gk) + '"><span>' + plural(clones.length, "cheaper alternative") + '</span><span class="v">from ' + R(low) + " " + CHEV + "</span></button>";
+    }
+    var out = "";
+    if (head) {
+      var chips = "";
+      if (p && p.s) {
+        chips += p.s.map(function (s) { return '<button type="button" class="vibe" data-preset="season" data-arg="' + s + '">' + SEASONS[s][1] + " " + SEASONS[s][0] + "</button>"; }).join("");
+        if (p.d) chips += '<span class="vibe">' + WHEN[p.d] + "</span>";
+        chips += (p.f || []).slice(0, 2).map(function (f) { return '<button type="button" class="vibe" data-preset="fam" data-arg="' + f + '">' + FAM[f] + "</button>"; }).join("");
+      }
+      out += '<div class="scent"><div class="k">' + (g.ib ? "Inspired by" : "Smells like") + '</div><p class="line">' + esc(g.ib ? nice(g.ib) : head) + "</p>" +
+        subs.map(function (s) { return '<p class="sub">' + s + "</p>"; }).join("") +
+        (chips ? '<div class="vibes">' + chips + "</div>" : "") +
+        (p && p.n && p.n.length ? '<p class="notes"><b>Key notes</b> ' + p.n.map(esc).join(", ") + "</p>" : "") + "</div>";
+    }
+    if (links) out += '<div class="group" style="margin-top:10px">' + links + "</div>";
+    return out;
   }
-  function setQuery(v, openGk) {
-    state.q = v; state.limit = PAGE; state.open = openGk || null; state.allOffers = {};
-    if (v) { state.view = "home"; state.preset = null; }
-    if ($("q").value !== v) $("q").value = v;
+  function tagsFor(li) {
+    var t = [];
+    if (li.w) t.push('<span class="g">' + Math.round((li.w - li.p) / li.w * 100) + "% off</span>");
+    if (li.pv) t.push('<span class="g">Dropped from ' + R(li.pv) + "</span>");
+    if (li.ls) t.push('<span class="g">Lowest we’ve seen</span>');
+    else if (li.lo && li.lo < li.p - 0.5) t.push("Was " + R(li.lo) + " on " + esc((li.lod || "").slice(5).replace("-", "/")));
+    if (li.ms === "a") t.push('<span class="w">Size guessed</span>');
+    if (li.ms === "m") t.push("Size matched by price");
+    if (li.kd === "set") t.push("Gift set");
+    if (li.dl) t.push(esc(li.dl));
+    if (!li.st) t.push("Out of stock");
+    if (li.stale) t.push('<span class="w">Price may be old</span>');
+    return t.join(" · ");
+  }
+  function offerHtml(li, top) {
+    var st = stores[li.s] || {}, d = st.delivery || {}, f = fee(li), tags = tagsFor(li);
+    return '<div class="offer' + (top ? " top" : "") + (li.st ? "" : " out") + '">' +
+      '<span class="s">' + esc(st.name || li.s) + (top ? '<span class="best">Best price</span>' : "") + "</span>" +
+      '<span class="d">' + (f ? R(f) + (d.estimated ? "*" : "") + " delivery" : "Free delivery") + (d.eta ? " · " + esc(d.eta) : "") + "</span>" +
+      (tags ? '<span class="tags">' + tags + "</span>" : "") +
+      '<span class="r"><span class="pp">' + (li.w ? "<s>" + R(li.w) + "</s>" : "") + R(li.p) + '</span><a class="get" href="' + esc(li.u) + '" target="_blank" rel="noopener" aria-label="View at ' + esc(st.name || "store") + '">View</a></span></div>';
+  }
+  function detailHtml(g) {
+    var bySize = {};
+    g.items.forEach(function (li) { var k = li.ml ? String(li.ml) : "?"; (bySize[k] = bySize[k] || []).push(li); });
+    var head = g.best.ml ? String(g.best.ml) : "?";
+    var keys = Object.keys(bySize).sort(function (a, c) {
+      if (a === head) return -1; if (c === head) return 1;
+      return (c === "?" ? -1 : +c) - (a === "?" ? -1 : +a);
+    });
+    var sel = state.sizeSel[g.gk];
+    if (!bySize[sel]) sel = keys[0];
+    var rows = bySize[sel];
+    var watched = !!watchEntry(g.gk), b = g.best;
+    var seg = keys.length > 1 ? '<div class="seg" role="tablist" aria-label="Bottle size">' + keys.map(function (k) {
+      return '<button type="button" role="tab" data-sz="' + k + '" aria-selected="' + (k === sel) + '">' + (k === "?" ? "No size" : k + " ml") + "<small>" + R(tot(bySize[k][0])) + "</small></button>";
+    }).join("") + "</div>" : "";
+    var anyEst = rows.some(function (li) { return fee(li) && (stores[li.s].delivery || {}).estimated; });
+    return '<div class="sheethead"><button type="button" class="close" data-close="1" aria-label="Close">' + ICON.close + "</button></div>" +
+      '<div class="sheetbody">' +
+      '<div class="dhero">' + photo(g.img) + '<div><div class="b">' + esc(g.brand || "Unbranded") + "</div><h2>" + esc(shortName(g)) + "</h2>" +
+        '<div class="m">' + [g.conc ? esc(concName(g.conc)) : "", "from " + R(tot(b)) + " delivered", plural(g.nstores, "store")].filter(Boolean).join(" · ") + "</div></div></div>" +
+      '<div class="dacts">' +
+        '<button type="button" class="dact' + (watched ? " on" : "") + '" data-watch="' + esc(g.gk) + '" aria-pressed="' + watched + '">' + (watched ? ICON.heartOn : ICON.heart) + (watched ? "Watching" : "Watch") + "</button>" +
+        '<button type="button" class="dact" data-share="' + esc(g.gk) + '">' + ICON.share + "Share</button>" +
+        '<a class="dact" href="https://www.google.com/search?q=' + encodeURIComponent("site:fragrantica.com " + searchName(g)) + '" target="_blank" rel="noopener">' + ICON.star + "Reviews</a></div>" +
+      scentHtml(g) +
+      '<div class="grouptitle">Prices</div>' + seg +
+      '<div class="group">' + rows.map(function (li, i) { return offerHtml(li, i === 0 && rows.length > 1 && li.st); }).join("") + "</div>" +
+      '<p class="capt">Sorted by price with delivery, for one bottle.' + (anyEst ? " * The store doesn’t publish its fee, so it’s an estimate." : "") + "</p>" +
+      '<div class="grouptitle">Also check</div><div class="group">' + ALSO_CHECK.map(function (a) {
+        return '<a class="lrow link" href="' + a[1] + encodeURIComponent(searchName(g)) + '" target="_blank" rel="noopener"><span>' + a[0] + '</span><span class="v">' + CHEV + "</span></a>";
+      }).join("") + "</div>" +
+      '<p class="capt">These stores block automatic price checks, so this opens their own search.</p></div>';
+  }
+
+  var lastFocus = null, sheetStack = [];
+  function showSheet(el) {
+    if (sheetStack.indexOf(el) < 0) sheetStack.push(el);
+    if (sheetStack.length === 1) lastFocus = document.activeElement;
+    $("scrim").hidden = false; el.hidden = false;
+    document.documentElement.style.overflow = "hidden";
+    requestAnimationFrame(function () { requestAnimationFrame(function () { $("scrim").classList.add("on"); el.classList.add("on"); }); });
+  }
+  function hideSheet(el) {
+    sheetStack = sheetStack.filter(function (x) { return x !== el; });
+    el.classList.remove("on");
+    if (!sheetStack.length) $("scrim").classList.remove("on");
+    setTimeout(function () {
+      if (!el.classList.contains("on")) el.hidden = true;
+      if (!sheetStack.length) { $("scrim").hidden = true; document.documentElement.style.overflow = ""; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+    }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 340);
+  }
+  function renderDetail() {
+    var g = state.open && fullGroup(state.open);
+    if (!g) return false;
+    var body = $("detail").querySelector(".sheetbody"), top = body ? body.scrollTop : 0;
+    $("detail").innerHTML = detailHtml(g);
+    $("detail").querySelector(".sheetbody").scrollTop = top;
+    return true;
+  }
+  function openDetail(gk, fromHistory) {
+    state.open = gk;
+    if (!renderDetail()) { state.open = null; return; }
+    $("detail").querySelector(".sheetbody").scrollTop = 0;
+    showSheet($("detail"));
+    $("detail").querySelector(".close").focus({ preventScroll: true });
+    if (!fromHistory) try { history.pushState({ d: gk }, "", urlFor({ f: gk })); } catch (e) {}
+  }
+  function closeDetail(fromHistory) {
+    if (!state.open) return;
+    state.open = null;
+    hideSheet($("detail"));
+    if (!fromHistory && history.state && history.state.d) { history.back(); return; }
     syncUrl();
-    render();
-    if (openGk) scrollToItem(openGk);
+  }
+  window.addEventListener("popstate", function (e) {
+    var gk = e.state && e.state.d;
+    if (gk && gk !== state.open) openDetail(gk, true);
+    else if (!gk && state.open) closeDetail(true);
+  });
+
+  // ---------- page rendering ----------
+  var TITLES = { home: "Discover", search: "Search", watch: "Watchlist" };
+  function render() {
+    var spec = state.preset ? presetSpec() : null;
+    var title = spec ? spec.label : TITLES[state.tab];
+    $("large").textContent = title;
+    $("bartitle").textContent = title;
+    document.title = (state.tab === "home" && !spec ? "" : title + " · ") + "Scent Scout";
+    $("back").hidden = !spec; $("home").hidden = !!spec;
+    $("backlabel").textContent = TITLES[state.tab];
+    [].forEach.call(document.querySelectorAll("[data-tab][role=tab]"), function (b) { b.setAttribute("aria-selected", String(b.dataset.tab === state.tab)); });
+    var n = watch.length, drop = !dropsSeen && Object.keys(sessionDrops).length;
+    $("wbadge").hidden = !drop; $("wbadge").textContent = drop || "";
+    var sub = "";
+    if (spec) sub = spec.desc;
+    else if (state.tab === "home") sub = data ? "Prices from " + data.stores.length + " trusted stores, updated " + ago(data.generated) + "." : "Loading prices…";
+    else if (state.tab === "watch") sub = n ? plural(n, "fragrance") + ". We’ll flag price drops when you come back." : "";
+    $("subtitle").textContent = sub; $("subtitle").hidden = !sub;
+    var showSearch = state.tab === "search" && !spec;
+    $("searchrow").hidden = !(showSearch || spec);
+    $("field").hidden = !showSearch;
+    $("clear").hidden = !state.q;
+    if (!data) return;
+    var html;
+    if (spec) html = presetHtml(spec);
+    else if (state.tab === "home") html = homeHtml();
+    else if (state.tab === "search") html = searchHtml();
+    else { html = watchHtml(); dropsSeen = true; $("wbadge").hidden = true; }
+    $("content").innerHTML = html;
+  }
+  function renderFilters() {
+    function rowsFor(items, isOn, attr) {
+      return items.map(function (it) { return '<button type="button" class="lrow" ' + attr + '="' + it[0] + '" aria-pressed="' + isOn(it[0]) + '"><span>' + esc(it[1]) + '</span><span class="check">✓</span></button>'; }).join("");
+    }
+    function sw(id, label, hint, on) {
+      return '<label class="switchrow" for="' + id + '"><span>' + label + (hint ? "<small>" + hint + "</small>" : "") + '</span><input type="checkbox" class="switch" id="' + id + '"' + (on ? " checked" : "") + "></label>";
+    }
+    $("fbody").innerHTML =
+      '<div class="grouptitle">Bottle size</div><div class="seg">' + SIZES.map(function (s) { return '<button type="button" data-size="' + s[0] + '" aria-selected="' + (state.size === s[0]) + '">' + s[1] + "</button>"; }).join("") + "</div>" +
+      '<div class="group">' + sw("instock", "In stock only", "", state.inStock) + sw("specials", "Specials only", "Only prices that are marked down", state.specials) +
+        sw("dupes", "Include “inspired by” alternatives", "Clones show up when you search the original", state.dupes) +
+        sw("noassumed", "Hide guessed sizes", "Leave out listings where the store gives no size", state.noAssumed) + "</div>" +
+      '<div class="grouptitle">Type</div><div class="group">' + rowsFor(KINDS, function (v) { return !!state.kinds[v]; }, "data-kind") + "</div>" +
+      '<div class="grouptitle">Stores</div><div class="group">' + rowsFor(data.stores.map(function (s) { return [s.id, s.name]; }), function (v) { return !!state.stores[v]; }, "data-store") + "</div>";
+    var n = (state.size !== "any") + state.specials + !state.inStock + state.dupes + state.noAssumed +
+      (Object.keys(state.kinds).filter(function (k) { return state.kinds[k]; }).join() !== "p") +
+      data.stores.filter(function (s) { return !state.stores[s.id]; }).length;
+    $("fcount").hidden = !n; $("fcount").textContent = n;
+  }
+
+  // ---------- navigation ----------
+  function urlFor(extra) {
+    try {
+      var u = new URL(location.href);
+      ["q", "view", "f", "list", "arg"].forEach(function (k) { u.searchParams.delete(k); });
+      if (state.tab === "search" && state.q) u.searchParams.set("q", state.q);
+      if (state.tab === "watch") u.searchParams.set("view", "watchlist");
+      if (state.tab === "search" && !state.q) u.searchParams.set("view", "search");
+      if (state.preset) { u.searchParams.set("list", state.preset); if (state.presetArg) u.searchParams.set("arg", state.presetArg); }
+      if (extra && extra.f) u.searchParams.set("f", extra.f);
+      return u.pathname + u.search;
+    } catch (e) { return location.pathname; }
+  }
+  function syncUrl() { try { if (location.protocol.indexOf("http") === 0) history.replaceState(history.state && history.state.d ? null : history.state, "", urlFor()); } catch (e) {} }
+  function scrollTop() { window.scrollTo(0, 0); }
+  function setTab(tab) {
+    if (state.tab === tab && !state.preset) { scrollTop(); if (tab === "search") $("q").focus(); return; }
+    state.tab = tab; state.preset = null; state.limit = PAGE;
+    if (tab !== "search") { state.q = ""; $("q").value = ""; }
+    render(); syncUrl(); scrollTop();
+    if (tab === "search" && !matchMedia("(hover: none)").matches) $("q").focus();
   }
   function setPreset(id, arg) {
-    state.preset = id; state.presetArg = arg || ""; state.view = "home"; state.q = ""; $("q").value = "";
-    state.limit = PAGE; state.open = null;
-    syncUrl(); render(); scrollTop();
+    if (state.open) { state.open = null; hideSheet($("detail")); } // the URL update below replaces the sheet's history entry
+    state.preset = id; state.presetArg = arg || ""; state.limit = PAGE;
+    var spec = presetSpec();
+    state.sort = spec && spec.sort ? spec.sort : (state.sort === "disc" ? "rel" : state.sort);
+    render(); syncUrl(); scrollTop();
   }
-  function setView(v) {
-    state.view = v; state.preset = null; state.q = ""; $("q").value = ""; state.open = null; state.limit = PAGE;
-    closeSuggest(); syncUrl(); render(); scrollTop();
+  function setQuery(v) {
+    state.q = v; state.limit = PAGE;
+    if (!v && state.sort !== "rel" && state.sort !== "disc") { /* keep chosen sort */ }
+    render(); syncUrl();
   }
-  function goHome() { if (!$("sheet").hidden) closeSheet(); setView("home"); }
-  function scrollTop() { window.scrollTo({ top: 0, behavior: "auto" }); }
-  function scrollToItem(gk) {
-    var el = document.getElementById("g-" + gk);
-    if (!el) return;
-    var top = el.getBoundingClientRect().top + window.scrollY - document.querySelector(".top").offsetHeight - 8;
-    window.scrollTo({ top: Math.max(0, top), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-  }
-  function openGroup(gk) {
-    var g = groupIndex()[gk] || lastGroups[gk];
-    if (g) setQuery(searchName(g), gk);
-  }
-  function pick(gk) {
-    var g = suggestCache.filter(function (x) { return x.gk === gk; })[0];
-    closeSuggest(); $("q").blur();
-    if (g) setQuery((g.brand ? g.brand + " " : "") + g.name, gk);
+  function shareFragrance(gk) {
+    var g = fullGroup(gk); if (!g) return;
+    var url = shareBase() + "?f=" + encodeURIComponent(gk);
+    var text = (g.brand ? g.brand + " " : "") + shortName(g) + " from " + R(tot(g.best)) + " on Scent Scout";
+    if (navigator.share) navigator.share({ title: text, url: url }).catch(function () {});
+    else copyText(url, "Link copied.");
   }
 
+  // ---------- events ----------
   var t;
-  $("q").addEventListener("input", function () {
-    clearTimeout(t);
-    t = setTimeout(function () { renderSuggest(); setQuery($("q").value); }, 160);
-  });
-  $("q").addEventListener("focus", renderSuggest);
-  $("q").addEventListener("keydown", function (e) {
-    var btns = [].slice.call($("suggest").querySelectorAll("button"));
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      if ($("suggest").hidden || !btns.length) return;
-      e.preventDefault();
-      hi = (hi + (e.key === "ArrowDown" ? 1 : -1) + btns.length) % btns.length;
-      btns.forEach(function (b, i) { b.classList.toggle("hi", i === hi); });
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (hi >= 0 && btns[hi] && btns[hi].dataset.pick) { pick(btns[hi].dataset.pick); return; }
-      clearTimeout(t); setQuery($("q").value); closeSuggest(); $("q").blur();
-    } else if (e.key === "Escape") { closeSuggest(); }
-  });
-  $("suggest").addEventListener("mousedown", function (e) { e.preventDefault(); }); // keep focus while tapping
-  $("suggest").addEventListener("click", function (e) {
-    var b = e.target.closest("button"); if (!b) return;
-    if (b.dataset.pick) pick(b.dataset.pick);
-    else { closeSuggest(); $("q").blur(); }
-  });
-  document.addEventListener("click", function (e) { if (!e.target.closest(".search")) closeSuggest(); });
-  $("clear").addEventListener("click", function () { setQuery(""); $("q").focus(); });
-  $("home").addEventListener("click", function (e) { e.preventDefault(); goHome(); });
-  $("navhome").addEventListener("click", function () { setView("home"); });
-  $("navwatch").addEventListener("click", function () { setView("watch"); });
-  $("back").addEventListener("click", function () { setView("home"); });
+  $("q").addEventListener("input", function () { clearTimeout(t); $("clear").hidden = !$("q").value; t = setTimeout(function () { setQuery($("q").value); }, 180); });
+  $("q").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); clearTimeout(t); remember($("q").value); setQuery($("q").value); $("q").blur(); } });
+  $("q").addEventListener("change", function () { remember($("q").value); });
+  $("clear").addEventListener("click", function (e) { e.preventDefault(); $("q").value = ""; setQuery(""); $("q").focus(); });
+  $("home").addEventListener("click", function (e) { e.preventDefault(); if (state.open) closeDetail(); setTab("home"); });
+  $("back").addEventListener("click", function () { state.preset = null; state.limit = PAGE; render(); syncUrl(); scrollTop(); });
+  [].forEach.call(document.querySelectorAll("[data-tab][role=tab]"), function (b) { b.addEventListener("click", function () { setTab(b.dataset.tab); }); });
 
-  // Taps anywhere in the page: tiles, picks, "See all", chips in the scent panel, watch buttons.
+  // Taps anywhere in the page or the detail sheet.
   function onAction(e) {
-    var b = e.target.closest("button"); if (!b) return false;
-    if (b.dataset.scroll) {
-      var r = b.closest(".sec").querySelector(".rail");
-      r.scrollBy({ left: +b.dataset.scroll * r.clientWidth * 0.85, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-      return true;
-    }
-    if (b.dataset.open) { openGroup(b.dataset.open); return true; }
-    if (b.dataset.preset) { setPreset(b.dataset.preset, b.dataset.arg); return true; }
-    if (b.dataset.nav) { setView(b.dataset.nav); return true; }
-    if (b.dataset.watch) { toggleWatch(b.dataset.watch); render(); return true; }
-    if (b.dataset.bk) { onBackup(b.dataset.bk); return true; }
-    if (b.dataset.unwatch != null) { watch.splice(+b.dataset.unwatch, 1); saveWatch(); render(); return true; }
-    return false;
+    var el = e.target.closest("button, a"); if (!el) return;
+    var d = el.dataset;
+    if (d.open) { e.preventDefault(); if (state.open) { state.sizeSel = {}; state.open = d.open; renderDetail(); try { history.replaceState({ d: d.open }, "", urlFor({ f: d.open })); } catch (x) {} $("detail").querySelector(".sheetbody").scrollTop = 0; } else openDetail(d.open); return; }
+    if (d.preset) { setPreset(d.preset, d.arg); return; }
+    if (d.tab && !el.getAttribute("role")) { setTab(d.tab); return; }
+    if (d.close) { closeDetail(); return; }
+    if (d.watch) { toggleWatch(d.watch); renderDetail(); render(); return; }
+    if (d.share) { shareFragrance(d.share); return; }
+    if (d.sz) { state.sizeSel[state.open] = d.sz; renderDetail(); return; }
+    if (d.bk) { onBackup(d.bk); return; }
+    if (d.unwatch != null) { watch.splice(+d.unwatch, 1); saveWatch(); render(); return; }
+    if (d.q) { $("q").value = d.q; remember(d.q); setQuery(d.q); return; }
+    if (d.recentClear) { try { localStorage.removeItem("scentscout.recent"); } catch (x) {} render(); return; }
+    if (el.id === "more") { state.limit += PAGE; render(); }
   }
-  $("homeview").addEventListener("click", onAction);
-  $("results").addEventListener("click", function (e) {
-    if (onAction(e)) return;
-    var b = e.target.closest("button"); if (!b) return;
-    if (b.id === "more") { state.limit += PAGE; render(); return; }
-    if (b.dataset.toggle) { var gk = b.dataset.toggle; state.open = state.open === gk ? null : gk; render(); if (state.open) scrollToItem(gk); return; }
-    if (b.dataset.sz) { state.sizeSel[b.dataset.gk] = b.dataset.sz; state.allOffers[b.dataset.gk] = false; render(); return; }
-    if (b.dataset.all) { state.allOffers[b.dataset.all] = !state.allOffers[b.dataset.all]; render(); }
-  });
+  $("content").addEventListener("click", onAction);
+  $("detail").addEventListener("click", onAction);
+  $("content").addEventListener("change", function (e) { if (e.target.id === "sort") { state.sort = e.target.value; state.limit = PAGE; render(); } });
   $("bkfile").addEventListener("change", function () {
     var f = this.files && this.files[0];
     if (!f) return;
@@ -1380,25 +1373,27 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     rd.onerror = function () { toast("Couldn’t open that file."); };
     rd.readAsText(f);
   });
-  $("sort").addEventListener("change", function (e) { state.sort = e.target.value; render(); });
 
-  // filter sheet
-  var lastFocus = null;
-  function openSheet() { lastFocus = document.activeElement; $("scrim").hidden = false; $("sheet").hidden = false; document.body.style.overflow = "hidden"; $("done").focus(); }
-  function closeSheet() { $("scrim").hidden = true; $("sheet").hidden = true; document.body.style.overflow = ""; if (lastFocus) lastFocus.focus(); }
-  $("filterbtn").addEventListener("click", openSheet);
-  $("scrim").addEventListener("click", closeSheet);
-  $("done").addEventListener("click", closeSheet);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
-  $("sheet").addEventListener("click", function (e) {
-    var b = e.target.closest("button.opt"); if (!b) return;
+  // filters sheet
+  $("filterbtn").addEventListener("click", function () { renderFilters(); showSheet($("filters")); $("done").focus({ preventScroll: true }); });
+  $("done").addEventListener("click", function () { hideSheet($("filters")); });
+  $("scrim").addEventListener("click", function () { var top = sheetStack[sheetStack.length - 1]; if (top === $("detail")) closeDetail(); else if (top) hideSheet(top); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    var top = sheetStack[sheetStack.length - 1];
+    if (top === $("detail")) closeDetail(); else if (top) hideSheet(top);
+  });
+  $("fbody").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.size) state.size = b.dataset.size;
     if (b.dataset.kind) { state.kinds[b.dataset.kind] = !state.kinds[b.dataset.kind]; if (!Object.keys(state.kinds).some(function (k) { return state.kinds[k]; })) state.kinds.p = true; }
-    if (b.dataset.store) state.stores[b.dataset.store] = !state.stores[b.dataset.store];
+    if (b.dataset.store) { state.stores[b.dataset.store] = !state.stores[b.dataset.store]; if (!data.stores.some(function (s) { return state.stores[s.id]; })) state.stores[b.dataset.store] = true; }
     state.limit = PAGE; renderFilters(); render();
   });
-  [["specials", "specials"], ["instock", "inStock"], ["dupes", "dupes"], ["noassumed", "noAssumed"]].forEach(function (p) {
-    $(p[0]).addEventListener("change", function (e) { state[p[1]] = e.target.checked; state.limit = PAGE; renderFilters(); render(); });
+  $("fbody").addEventListener("change", function (e) {
+    var map = { instock: "inStock", specials: "specials", dupes: "dupes", noassumed: "noAssumed" };
+    if (!map[e.target.id]) return;
+    state[map[e.target.id]] = e.target.checked; state.limit = PAGE; renderFilters(); render();
   });
   $("reset").addEventListener("click", function () {
     Object.keys(defaults).forEach(function (k) { state[k] = JSON.parse(JSON.stringify(defaults[k])); });
@@ -1408,19 +1403,26 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
   // A photo that fails to load shows a neat bottle outline instead of a broken-image icon.
   document.addEventListener("error", function (e) {
     var im = e.target;
-    if (im && im.tagName === "IMG" && im.parentNode && im.parentNode.classList) im.parentNode.classList.add("empty");
+    if (im && im.tagName === "IMG" && im.parentNode && im.parentNode.classList && im.parentNode.classList.contains("ph")) im.parentNode.classList.add("empty");
   }, true);
+  // Large title shrinks into the top bar once it scrolls away.
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (en) { $("bar").classList.toggle("scrolled", !en[0].isIntersecting); }, { rootMargin: "-44px 0px 0px 0px" }).observe($("large"));
+  }
 
   function start(d) {
-    prepare(d); renderFilters(); renderInfo();
+    prepare(d);
     resolveWatch(); checkDrops();
-    var bad = d.stores.filter(function (s) { return s.status !== "ok"; }).length;
-    $("updated").textContent = d.stores.length + " stores · updated " + ago(d.generated) + (bad ? " · " + bad + " store" + (bad > 1 ? "s" : "") + " behind" : "");
-    var q0 = "", v0 = "";
-    try { var sp = new URLSearchParams(location.search); q0 = sp.get("q") || ""; v0 = sp.get("view") || ""; } catch (e) {}
-    if (v0 === "watchlist" && !q0) state.view = "watch";
+    var sp = null;
+    try { sp = new URLSearchParams(location.search); } catch (e) {}
+    var q0 = sp && sp.get("q") || "", v0 = sp && sp.get("view") || "", f0 = sp && sp.get("f") || "", l0 = sp && sp.get("list") || "";
+    if (q0) { state.tab = "search"; state.q = q0; $("q").value = q0; }
+    else if (v0 === "watchlist") state.tab = "watch";
+    else if (v0 === "search") state.tab = "search";
+    if (l0) { state.preset = l0; state.presetArg = sp.get("arg") || ""; if (!presetSpec()) state.preset = null; }
     readHashImport();
-    setQuery(q0);
+    render();
+    if (f0) { try { history.replaceState(null, "", urlFor()); } catch (e) {} openDetail(f0); }
   }
   // Cloud saves: a newer watchlist from the person's account arrives as a 'storage' event.
   window.addEventListener("storage", function (e) {
@@ -1428,18 +1430,21 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     watch = loadWatch();
     if (data) { resolveWatch(); checkDrops(); }
     render();
+    if (state.open) renderDetail();
   });
   if (window.NeonCloud && window.NeonCloud.enabled) {
-    window.NeonCloud.badge(document.querySelector(".brandline"), { className: "nc-compact nc-light" });
+    window.NeonCloud.badge($("acct"), { className: "nc-compact" });
     window.NeonCloud.onUser(function (u) { if (u) window.NeonCloud.sync("scent").catch(function () {}); });
   }
+  render();
   var seed = document.getElementById("seed-data");
   if (seed) start(JSON.parse(seed.textContent));
   else fetch("data/prices.json", { cache: "no-cache" }).then(function (r) {
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
   }).then(start).catch(function (e) {
-    $("updated").textContent = "Couldn’t load prices (" + e.message + "). Refresh to try again.";
+    $("subtitle").hidden = false;
+    $("subtitle").textContent = "Couldn’t load prices (" + e.message + "). Refresh to try again.";
   });
 })();
 </script>

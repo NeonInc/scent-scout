@@ -10,7 +10,7 @@ Finds the cheapest price for a fragrance across South African stores, with deliv
    - Shopify feeds (`/products.json`): Panda, Rio and Edgars
    - The WooCommerce store API: Dubai Perfume Café
    - The VTEX catalogue API: Bash
-   - ARC's Dynamicweb product feed: the JSON its own category pages load. It lists each product once, at its default size.
+   - ARC: its category feed (the JSON its own pages load) to find products, then each perfume's product page for its live price per bottle size (schema.org data, the same ARC gives Google). Pages are read within a 12-minute budget per run, oldest first, and remembered in `data/product_pages.json`, so every ARC price is refreshed at least every day or two.
 2. It writes every fragrance listing to `docs/data/prices.json`. Each listing has a brand, name, size, concentration, price, "was" price, stock and link.
 3. GitHub Actions runs this on a schedule (`.github/workflows/update-prices.yml`) and commits the new prices.
 4. `docs/index.html` is the website. It's a single page that loads `prices.json` and does the search and comparison in the browser.
