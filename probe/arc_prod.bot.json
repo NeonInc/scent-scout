@@ -1,0 +1,16 @@
+{
+ "url": "https://www.arcstore.co.za/products/brand/yves-saint-laurent/libre-santal-couture-eau-de-parfum",
+ "ua": "bot",
+ "status": 200,
+ "final_url": "https://www.arcstore.co.za/products/brand/yves-saint-laurent/libre-santal-couture-eau-de-parfum",
+ "bytes": 205908,
+ "content_type": "text/html; charset=utf-8",
+ "server": null,
+ "hints": {
+  "json_ld_blocks": 2,
+  "next_data": false,
+  "initial_state": false,
+  "price_mentions": 4,
+  "api_paths": []
+ }
+}

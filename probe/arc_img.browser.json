@@ -1,0 +1,16 @@
+{
+ "url": "https://www.arcstore.co.za/Admin/Public/GetImage.ashx?width=300&height=300&crop=5&Compression=75&FillCanvas=true&DoNotUpscale=true&Format=webp&image=/Files/Images/Ecom/Brands/ABC/Coach/201710_A.jpg",
+ "ua": "browser",
+ "status": 200,
+ "final_url": "https://www.arcstore.co.za/Admin/Public/GetImage.ashx?width=300&height=300&crop=5&Compression=75&FillCanvas=true&DoNotUpscale=true&Format=webp&image=/Files/Images/Ecom/Brands/ABC/Coach/201710_A.jpg",
+ "bytes": 12635,
+ "content_type": "image/jpeg",
+ "server": null,
+ "hints": {
+  "json_ld_blocks": 0,
+  "next_data": false,
+  "initial_state": false,
+  "price_mentions": 0,
+  "api_paths": []
+ }
+}

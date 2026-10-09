@@ -1,0 +1,16 @@
+{
+ "url": "https://www.arcstore.co.za/Default.aspx?ID=7865&feed=true&DoNotShowVariantsAsSingleProducts=True&pagesize=12&pagenum=1",
+ "ua": "bot",
+ "status": 200,
+ "final_url": "https://www.arcstore.co.za/fragrance?feed=true&DoNotShowVariantsAsSingleProducts=True&pagesize=12&pagenum=1",
+ "bytes": 87733,
+ "content_type": "application/json; charset=utf-8",
+ "server": null,
+ "hints": {
+  "json_ld_blocks": 0,
+  "next_data": false,
+  "initial_state": false,
+  "price_mentions": 12,
+  "api_paths": []
+ }
+}
