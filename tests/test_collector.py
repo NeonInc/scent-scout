@@ -13,7 +13,7 @@ from collections import Counter  # noqa: E402
 FIX = json.loads((ROOT / "tests" / "fixtures" / "stores.json").read_text())
 
 
-def fake_get(url, params=None, as_json=True):
+def fake_get(url, params=None, as_json=True, delay=None):
     params = params or {}
     if "pandaperfumes" in url:
         return FIX["panda"] if params.get("page", 1) == 1 else {"products": []}
@@ -29,6 +29,8 @@ def fake_get(url, params=None, as_json=True):
         return FIX["dpc"] if params.get("page", 1) == 1 else []
     if "arcstore" in url:
         if not as_json:
+            if "/products/" in url:
+                return FIX["arc_product_page"] if "libre-santal" in url else "<html><body>No structured data</body></html>"
             return FIX["arc_html"] if url.endswith("/fragrance/men") else FIX["arc_html"].replace("14236", "7865")
         return FIX["arc_feed"] if params.get("ID") == "14236" else [{"totalPages": "1", "ProductsContainer": []}]
     if "bash.com" in url:
@@ -160,13 +162,17 @@ def test_collect(tmp):
     check(all("since" not in li for li in data["listings"]), "compact history fields")
     check(L["rio-11"]["u"].startswith("/products/"), "store URLs stored relative")
     libre = sorted((li for li in data["listings"] if li["s"] == "arc" and "Libre" in li["t"]), key=lambda x: x["ml"])
-    check([(li["ml"], li["p"]) for li in libre] == [(50, 3000), (100, 4150)], "ARC: each bottle size is its own listing with its own price")
+    check([(li["ml"], li["p"], li["st"]) for li in libre] == [(50, 2550, 1), (100, 3550, 0)],
+          "ARC: every size and live price/stock from the product page's structured data")
+    check(libre[0].get("w") == 3000 and not libre[1].get("w"), "ARC: page price below the feed's regular price shows as a special")
+    check(libre[0]["id"] == "arc-202176-VOLVOL50ML", "ARC: listing ids stay the same as before, so price history carries on")
+    check(C.ld_variants("<script type='application/ld+json'>not json</script>") == [], "ARC: broken structured data is ignored")
     check(libre[0]["b"] == "Yves Saint Laurent" and libre[0]["c"] == "EDP" and libre[0]["g"] == "m", "ARC: brand, concentration, gender from category")
-    check(libre[0]["u"].startswith("/products/brand/") and "GetImage.ashx" in libre[0]["i"], "ARC: relative link and resized image")
+    check(libre[0]["u"] == "/products/libre-santal-couture-eau-de-parfum/50ml" and "GetImage.ashx" in libre[0]["i"], "ARC: link opens the right bottle size; resized image")
     check(C.dw_image({"url": "https://www.arcstore.co.za"}, "%2fFiles%2fImages%2fEcom%2fBrands%2fVWXYZ%2fYves+Saint+Laurent%2f202176_A.jpg").endswith(
           "image=/Files/Images/Ecom/Brands/VWXYZ/Yves%20Saint%20Laurent/202176_A.jpg"), "ARC: image path decoded once ('+' is a space)")
     mb = L["arc-300100-VOLVOL100ML"]
-    check(mb["p"] == 1499 and mb["w"] == 1999 and mb["k"] == "montblanc|explorer", "ARC: sale price with RRP, groups with other stores' Explorer")
+    check(mb["p"] == 1499 and mb["w"] == 1999 and mb["k"] == "montblanc|explorer", "ARC: no structured data -> feed price; special's original price from 'discount'")
     check(L["arc-300200-VOLVOL10ML"]["st"] == 0, "ARC: out of stock")
     check(not any("Candle" in li["t"] for li in data["listings"]), "ARC: candles excluded")
     check(all("_sx" not in li for li in data["listings"]), "private note data not written")

@@ -39,12 +39,12 @@ def log(*a):
     print(*a, flush=True)
 
 
-def get(url, params=None, as_json=True):
+def get(url, params=None, as_json=True, delay=None):
     last = None
     for attempt in range(3):
         try:
             r = session.get(url, params=params, timeout=40)
-            time.sleep(DELAY)
+            time.sleep(DELAY if delay is None else delay)
             if r.status_code in (200, 206):
                 return r.json() if as_json else r.text
             last = f"HTTP {r.status_code}"
@@ -297,9 +297,17 @@ def collect_vtex(store):
 
 
 # ---------- Dynamicweb Rapido (ARC) ----------
-# Each category page has a "Show more" button whose data-feed-url points at the JSON feed the page
-# itself uses for its product grid. The feed lists each product once, at its default bottle size and
-# price; other sizes of the same product aren't in the feed, so they're not collected.
+# 1. Each category page has a "Show more" button whose data-feed-url points at the JSON feed the page
+#    uses for its product grid. The feed lists every product once, at one size, and its price can be
+#    out of date during promotions.
+# 2. So for perfumes the collector then opens each product page and reads its structured data
+#    (schema.org ProductGroup -> one Product per bottle size, each with its live price and stock),
+#    the same data ARC publishes for Google. Gift sets and mists keep the feed price.
+#    If a product page can't be read, the feed price is used.
+
+PAGE_DELAY = 0.8        # seconds between ARC product pages
+MAX_PRODUCT_PAGES = 1300
+
 
 def rand(text):
     """'R3 000,00' -> 3000.0"""
@@ -319,8 +327,36 @@ def dw_image(store, path):
             f"&FillCanvas=true&DoNotUpscale=true&Format=webp&image={requests.utils.quote(path, safe='/')}")
 
 
-def collect_dynamicweb(store):
-    out, seen = [], set()
+def ld_variants(html):
+    """Every schema.org Product with an offer on a product page: size, price, stock, url, sku, barcode."""
+    out = []
+    for block in re.findall(r'<script[^>]*application/ld\+json[^>]*>(.*?)</script>', html or "", re.S):
+        try:
+            stack = [json.loads(block)]
+        except ValueError:
+            continue
+        while stack:
+            o = stack.pop()
+            if isinstance(o, list):
+                stack.extend(o)
+                continue
+            if not isinstance(o, dict):
+                continue
+            if o.get("@type") == "Product" and o.get("offers"):
+                off = o["offers"][0] if isinstance(o["offers"], list) else o["offers"]
+                avail = str(off.get("availability", ""))
+                price = money(off.get("price"))
+                if price:
+                    out.append({"size": str(o.get("size") or ""), "price": price, "url": off.get("url") or o.get("url") or "",
+                                "stock": not re.search(r"OutOfStock|SoldOut|Discontinued", avail), "sku": o.get("sku") or "",
+                                "gtin": o.get("gtin13") or o.get("gtin") or ""})
+            stack.extend(v for v in o.values() if isinstance(v, (dict, list)))
+    return out
+
+
+def dw_feed_products(store):
+    """All products in the category feeds, keyed by product id, with the first gender category seen."""
+    products = {}
     for entry in store["paths"]:
         html = get(store["url"] + entry["path"], as_json=False)
         m = re.search(r'data-feed-url="/Default\.aspx\?ID=(\d+)', html)
@@ -334,29 +370,54 @@ def collect_dynamicweb(store):
             pages = int(block.get("totalPages") or 1)
             items = [p for c in block.get("ProductsContainer", []) for p in c.get("Product", [])]
             for p in items:
-                key = (p.get("productId"), p.get("variantid"))
-                if key in seen:
-                    continue
-                seen.add(key)
-                title = N.strip_html(p.get("name", ""))
-                price = money(p.get("priceDouble")) or rand(p.get("price"))
-                if not price or N.is_excluded(title):
+                pid = p.get("productId")
+                if not pid or pid in products:
                     continue
                 try:
                     brand = json.loads(p.get("googleImpression") or "{}").get("brand", "")
                 except ValueError:
                     brand = ""
-                was = rand(p.get("priceRRP"))
-                size = p.get("variantName") or ""
-                out.append(make_listing(
-                    store, pid=f"{p.get('productId')}-{p.get('variantid') or 'x'}", title=title, brand_raw=brand or p.get("brand", ""),
-                    price=price, was=was, stock="out" not in (p.get("stockState") or "") and "out of stock" not in (p.get("stockText") or "").lower(),
-                    url=store["url"] + (p.get("link") or ""), img=dw_image(store, p.get("image")),
-                    variant_text=size.replace("ML", " ml"), desc_text=N.strip_html(p.get("description") or ""),
-                    tags_text={"m": "men", "f": "women", "u": "unisex"}.get(entry.get("g"), ""),
-                ))
+                price = money(p.get("priceDouble")) or rand(p.get("price"))
+                # On a special, the feed's "discount" field holds the original price.
+                was = rand(p.get("discount")) if p.get("onSale", "u-hidden") != "u-hidden" else None  # "" = on sale
+                products[pid] = {"pid": pid, "title": N.strip_html(p.get("name", "")), "brand": brand or p.get("brand", ""),
+                                 "price": price, "was": was or rand(p.get("priceRRP")), "size": p.get("variantName") or "",
+                                 "variant": p.get("variantid") or "", "link": p.get("link") or "", "image": p.get("image"),
+                                 "stock": "out" not in (p.get("stockState") or "") and "out of stock" not in (p.get("stockText") or "").lower(),
+                                 "tags": {"m": "men", "f": "women", "u": "unisex"}.get(entry.get("g"), "")}
             log(f"  {store['id']} {entry['path']} page {page}/{pages}: {len(items)} products")
             page += 1
+    return products
+
+
+def collect_dynamicweb(store):
+    out, pages_read, pages_failed = [], 0, 0
+    for p in dw_feed_products(store).values():
+        if not p["price"] or N.is_excluded(p["title"]):
+            continue
+        common = dict(title=p["title"], brand_raw=p["brand"], img=dw_image(store, p["image"]), tags_text=p["tags"])
+        variants = []
+        if N.kind_of(p["title"]) == "p" and p["link"] and pages_read < MAX_PRODUCT_PAGES:
+            try:
+                variants = ld_variants(get(store["url"] + p["link"], as_json=False, delay=PAGE_DELAY))
+                pages_read += 1
+            except RuntimeError as e:
+                pages_failed += 1
+                log(f"  {store['id']} product page failed, using feed price: {e}")
+        if variants:
+            for v in variants:
+                size = v["size"].upper().replace(" ", "")
+                # The feed's price is ARC's regular price for its listed size; a lower page price is a promotion.
+                same = size == p["size"].upper().replace(" ", "")
+                was = p["was"] if same and p["was"] else (p["price"] if same and v["price"] < p["price"] - 0.5 else None)
+                out.append(make_listing(
+                    store, pid=f"{p['pid']}-VOLVOL{size}" if size else f"{p['pid']}-{v['sku'] or 'x'}", price=v["price"], was=was,
+                    stock=v["stock"], url=v["url"] or store["url"] + p["link"], variant_text=size.replace("ML", " ml"), **common))
+        else:
+            out.append(make_listing(
+                store, pid=f"{p['pid']}-{p['variant'] or 'x'}", price=p["price"], was=p["was"], stock=p["stock"],
+                url=store["url"] + p["link"], variant_text=p["size"].replace("ML", " ml"), **common))
+    log(f"  {store['id']}: read {pages_read} product pages ({pages_failed} failed)")
     return out
 
 

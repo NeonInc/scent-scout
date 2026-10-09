@@ -510,13 +510,15 @@
        "variantName": "100ML",
        "price": "R1 499,00",
        "priceDouble": 1499.0,
-       "priceRRP": "R1 999,00",
+       "priceRRP": "",
        "stockState": "stock-icon--in",
        "stockText": "In stock",
        "link": "/products/brand/x/y",
        "image": "%2fFiles%2fImages%2fEcom%2fBrands%2fX%2f300100_A.jpg",
        "googleImpression": "{\"name\": \"Explorer Eau de Parfum\", \"id\": \"300100\", \"price\": 1499, \"brand\": \"MONTBLANC\"}",
-       "description": ""
+       "description": "",
+       "discount": "R1 999,00",
+       "onSale": ""
       }
      ]
     },
@@ -574,5 +576,6 @@
     }
    ]
   }
- ]
+ ],
+ "arc_product_page": "<html><head><script type=\"application/ld+json\">{\"@type\":\"Organization\",\"name\":\"ARC\"}</script><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"ProductGroup\", \"name\": \"Libre Santal Couture Eau de Parfum\", \"productGroupID\": \"202176\", \"hasVariant\": [{\"@type\": \"Product\", \"name\": \"Libre Santal Couture Eau de Parfum - 50ML\", \"sku\": \"202176_50ML\", \"size\": \"50ML\", \"url\": \"https://www.arcstore.co.za/products/libre-santal-couture-eau-de-parfum/50ml\", \"offers\": {\"@type\": \"Offer\", \"priceCurrency\": \"ZAR\", \"price\": \"2550.00\", \"availability\": \"https://schema.org/InStock\", \"url\": \"https://www.arcstore.co.za/products/libre-santal-couture-eau-de-parfum/50ml\"}}, {\"@type\": \"Product\", \"name\": \"Libre Santal Couture Eau de Parfum - 100ML\", \"sku\": \"202176_100ML\", \"size\": \"100ML\", \"url\": \"https://www.arcstore.co.za/products/libre-santal-couture-eau-de-parfum/100ml\", \"offers\": {\"@type\": \"Offer\", \"priceCurrency\": \"ZAR\", \"price\": \"3550.00\", \"availability\": \"https://schema.org/OutOfStock\", \"url\": \"https://www.arcstore.co.za/products/libre-santal-couture-eau-de-parfum/100ml\"}}]}</script></head><body>...</body></html>"
 }
