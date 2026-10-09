@@ -12,3 +12,7 @@ folder) and is one tile on the Neon Inc hub (https://neoninc.github.io/, repo
   watchlist". Don't rename that key. If its shape changes, update `STATS.scent` in the
   hub's `index.html` too.
 - Don't change the hub or other apps from here. They live in their own repos.
+
+- Cloud saves: the watchlist syncs through the shared `/neon-cloud.js` (hub repo) for signed-in
+  people. Use `saveWatch()` for changes the person makes (it syncs) and `saveWatch(true)` for
+  automatic tidy-ups like price bookkeeping (stays on the device).

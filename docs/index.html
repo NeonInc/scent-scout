@@ -1430,7 +1430,7 @@ footer.foot .wrap { padding-block: 18px calc(24px + env(safe-area-inset-bottom, 
     render();
   });
   if (window.NeonCloud && window.NeonCloud.enabled) {
-    window.NeonCloud.badge(document.querySelector(".brandline"), { className: "nc-compact" });
+    window.NeonCloud.badge(document.querySelector(".brandline"), { className: "nc-compact nc-light" });
     window.NeonCloud.onUser(function (u) { if (u) window.NeonCloud.sync("scent").catch(function () {}); });
   }
   var seed = document.getElementById("seed-data");
